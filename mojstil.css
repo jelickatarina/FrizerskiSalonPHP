@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap');
+
 /* ── Navbar ───────────────────────────────────────── */
 .kn-nav {
     position: fixed;
@@ -35,7 +37,7 @@ body.kontakt-page { padding-top: 0; }
 }
 
 .kn-brand-word {
-    font-family: Cambria, Cochin, Georgia, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 1rem;
     font-weight: 400;
     color: rgba(255,255,255,0.9);
@@ -61,7 +63,7 @@ body.kontakt-page { padding-top: 0; }
 .kn-links li a {
     display: block;
     padding: 0.5rem 1rem;
-    font-family: Cambria, Cochin, Georgia, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 0.72rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -159,7 +161,7 @@ body.kontakt-page { padding-top: 0; }
 body {
     background-color: #0f0f14;
     color: #f0f4ff;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Jost', sans-serif;
     min-height: 100vh;
     margin: 0;
 }
@@ -204,7 +206,7 @@ body.index-page {
 .hero-title {
     font-size: clamp(2.8rem, 7vw, 5rem);
     font-weight: 700;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     color: #ffffff;
     letter-spacing: 0.05em;
     margin-bottom: 0.75rem;
@@ -223,7 +225,7 @@ body.index-page {
     padding: 0.75rem 2.5rem;
     background-color: #f0f4ff;
     color: #0f0f14;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-weight: bold;
     font-size: 1rem;
     border-radius: 30px;
@@ -251,7 +253,7 @@ body.index-page {
     padding: 0.75rem 2.5rem;
     background-color: transparent;
     color: #f0f4ff;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-weight: bold;
     font-size: 1rem;
     border-radius: 30px;
@@ -303,7 +305,7 @@ body.index-page {
 }
 
 .info-card h3 {
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 0.7rem;
     font-weight: 600;
     color: #6677aa;
@@ -386,11 +388,11 @@ body.kontakt-page {
 }
 
 .kp-title {
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 700;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 600;
     color: #fff;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
     margin: 0;
     text-align: center;
@@ -436,11 +438,11 @@ body.kontakt-page {
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: rgba(255,255,255,0.35);
-    font-family: Cambria, Cochin, Georgia, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
 }
 
 .kp-info-val {
-    font-family: Cambria, Cochin, Georgia, Times, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 1.15rem;
     font-weight: 700;
     color: #ffffff;
@@ -449,7 +451,7 @@ body.kontakt-page {
 .kp-info-sub {
     font-size: 0.72rem;
     color: rgba(255,255,255,0.35);
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Jost', sans-serif;
 }
 
 @media (max-width: 640px) {
@@ -485,7 +487,7 @@ body.kontakt-page {
     padding: 0.8rem 3rem;
     border: 1px solid rgba(168,184,204,0.6);
     color: #a8b8cc;
-    font-family: Cambria, Cochin, Georgia, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 0.8rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -522,7 +524,7 @@ body.kontakt-page {
 
 h1 {
     font-weight: bold;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     text-align: center;
     font-size: 1.8rem;
     color: #f0f4ff;
@@ -530,7 +532,7 @@ h1 {
 }
 
 p, td {
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Jost', sans-serif;
     text-align: center;
     color: #c8d4e8;
     padding: 6px;
@@ -556,7 +558,7 @@ th, td {
 th {
     background-color: #22223a;
     color: #f0f4ff;
-    font-family: Cambria, Cochin, Georgia, serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
 }
 
 tr:hover td {
@@ -571,7 +573,7 @@ select, input[type="date"], input[type="text"], input[type="password"] {
     border: 1px solid #3a3a58;
     border-radius: 5px;
     padding: 6px 8px;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Jost', sans-serif;
     font-size: 0.95rem;
 }
 
@@ -583,7 +585,7 @@ select:focus, input:focus {
 /* ── Dugmad ───────────────────────────────────────── */
 .button {
     cursor: pointer;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-weight: bold;
     padding: 8px;
     background-color: #f0f4ff;
