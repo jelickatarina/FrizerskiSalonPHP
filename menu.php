@@ -26,7 +26,7 @@
     <?php endif; ?>
     <?php if($nivo=='0'): ?>
     <li><a href="prijava.php">Prijavi se</a></li>
-    <li><a href="registracija.php" class="kn-cta">Registruj se</a></li>
+    <li><a href="registracija.php">Registruj se</a></li>
     <?php else: ?>
     <li><a href="odjava.php">Odjava</a></li>
     <?php endif; ?>
