@@ -84,64 +84,67 @@ body.index-page {
     box-shadow: 0 0 20px rgba(240, 244, 255, 0.25);
 }
 
-/* Info kartice */
+/* Info traka */
 .info-section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.5rem;
-    padding: 3rem 1.5rem;
-    background-color: #0f0f14;
+    background-color: #0a0a10;
+    border-top: 1px solid rgba(255,255,255,0.06);
 }
 
 .info-card {
-    background-color: #18181f;
-    border: 1px solid #2a2a38;
-    border-radius: 12px;
-    padding: 2rem 2.5rem;
-    min-width: 220px;
-    max-width: 280px;
     flex: 1;
+    min-width: 200px;
+    max-width: 340px;
+    padding: 2.5rem 2rem;
     text-align: center;
-    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
 }
 
-.info-card:hover {
-    transform: translateY(-4px);
-    border-color: #4a4a7a;
+.info-card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background: rgba(255,255,255,0.08);
 }
 
 .info-icon {
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+    opacity: 0.7;
 }
 
 .info-card h3 {
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #f0f4ff;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.03em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6677aa;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 0.6rem;
 }
 
 .info-card p {
     color: #8a9ab8;
-    font-size: 0.95rem;
-    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    margin: 0.15rem 0;
     padding: 0;
 }
 
 .info-highlight {
-    color: #d0dcf4 !important;
-    font-weight: bold;
-    font-size: 1.05rem !important;
+    color: #c8d4e8 !important;
+    font-weight: 600;
+    font-size: 1rem !important;
 }
 
 .info-closed {
-    color: #666 !important;
-    font-size: 0.8rem !important;
-    margin-top: 0.4rem !important;
+    color: #444 !important;
+    font-size: 0.78rem !important;
+    margin-top: 0.3rem !important;
 }
 
 /* ── Forme (prijava, registracija, zakazivanje...) ── */
