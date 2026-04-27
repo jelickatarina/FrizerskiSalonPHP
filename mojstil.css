@@ -19,13 +19,13 @@
     background: rgba(6, 6, 12, 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom-color: rgba(196, 137, 154, 0.12);
+    border-bottom-color: rgba(168, 184, 204, 0.12);
 }
 
 /* Offset za sadržaj ispod fixed navbara */
 body { padding-top: 68px; }
 body.index-page { padding-top: 0; }
-body.index-page .hero-section { margin-top: -68px; padding-top: 68px; }
+body.kontakt-page { padding-top: 0; }
 
 .kn-brand {
     text-decoration: none;
@@ -44,7 +44,7 @@ body.index-page .hero-section { margin-top: -68px; padding-top: 68px; }
 }
 
 .kn-brand-dot {
-    color: #c4899a;
+    color: #a8b8cc;
     font-size: 1.2rem;
     line-height: 1;
 }
@@ -78,7 +78,7 @@ body.index-page .hero-section { margin-top: -68px; padding-top: 68px; }
     left: 1rem;
     right: 1rem;
     height: 1px;
-    background: #c4899a;
+    background: #a8b8cc;
     transform: scaleX(0);
     transition: transform 0.25s;
 }
@@ -94,7 +94,7 @@ body.index-page .hero-section { margin-top: -68px; padding-top: 68px; }
 .kn-cta {
     margin-left: 0.75rem;
     padding: 0.45rem 1.25rem !important;
-    background: #c4899a !important;
+    background: #a8b8cc !important;
     color: #0a0a12 !important;
     font-weight: 700 !important;
     border-radius: 2px;
@@ -105,7 +105,7 @@ body.index-page .hero-section { margin-top: -68px; padding-top: 68px; }
 .kn-cta::after { display: none !important; }
 
 .kn-cta:hover {
-    background: #d4a0b0 !important;
+    background: #bccadc !important;
     color: #0a0a12 !important;
 }
 
@@ -144,7 +144,7 @@ body.index-page .hero-section { margin-top: -68px; padding-top: 68px; }
         backdrop-filter: blur(16px);
         padding: 1.5rem 2rem;
         gap: 0.25rem;
-        border-bottom: 1px solid rgba(196,137,154,0.12);
+        border-bottom: 1px solid rgba(168,184,204,0.12);
     }
 
     .kn-open .kn-links { display: flex; }
@@ -171,7 +171,7 @@ body.index-page {
 
 .hero-section {
     position: relative;
-    min-height: calc(100vh - 56px);
+    min-height: 100vh;
     background-image: url("salon4.jpg");
     background-size: cover;
     background-position: center;
@@ -310,7 +310,7 @@ body.kontakt-page {
 
 .kp-bg {
     position: relative;
-    min-height: calc(100vh - 56px);
+    min-height: 100vh;
     background-image: url("salon1.jpg");
     background-size: cover;
     background-position: center;
@@ -350,11 +350,11 @@ body.kontakt-page {
     flex: 1;
     max-width: 120px;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(196,137,154,0.5));
+    background: linear-gradient(to right, transparent, rgba(168,184,204,0.5));
 }
 
 .kp-header-line:last-child {
-    background: linear-gradient(to left, transparent, rgba(196,137,154,0.5));
+    background: linear-gradient(to left, transparent, rgba(168,184,204,0.5));
 }
 
 .kp-title {
@@ -374,8 +374,8 @@ body.kontakt-page {
     flex-wrap: wrap;
     gap: 1.5px;
     width: 100%;
-    background: rgba(196,137,154,0.15);
-    border: 1px solid rgba(196,137,154,0.15);
+    background: rgba(168,184,204,0.15);
+    border: 1px solid rgba(168,184,204,0.15);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -401,22 +401,22 @@ body.kontakt-page {
 }
 
 .kp-card--mid {
-    border-left: 1px solid rgba(196,137,154,0.15);
-    border-right: 1px solid rgba(196,137,154,0.15);
+    border-left: 1px solid rgba(168,184,204,0.15);
+    border-right: 1px solid rgba(168,184,204,0.15);
 }
 
 .kp-card-num {
     font-family: Cambria, Cochin, Georgia, serif;
     font-size: 0.65rem;
     letter-spacing: 0.2em;
-    color: rgba(196,137,154,0.4);
+    color: rgba(168,184,204,0.4);
     margin-bottom: 0.8rem;
 }
 
 .kp-card-icon {
     width: 32px;
     height: 32px;
-    color: #c4899a;
+    color: #a8b8cc;
     opacity: 0.8;
     margin-bottom: 1rem;
 }
@@ -459,8 +459,8 @@ body.kontakt-page {
 .kp-btn {
     display: inline-block;
     padding: 0.8rem 3rem;
-    border: 1px solid rgba(196,137,154,0.6);
-    color: #c4899a;
+    border: 1px solid rgba(168,184,204,0.6);
+    color: #a8b8cc;
     font-family: Cambria, Cochin, Georgia, serif;
     font-size: 0.8rem;
     letter-spacing: 0.2em;
@@ -471,7 +471,7 @@ body.kontakt-page {
 }
 
 .kp-btn:hover {
-    background: #c4899a;
+    background: #a8b8cc;
     color: #080810;
 }
 
@@ -479,8 +479,8 @@ body.kontakt-page {
     .kp-card--mid {
         border-left: none;
         border-right: none;
-        border-top: 1px solid rgba(196,137,154,0.15);
-        border-bottom: 1px solid rgba(196,137,154,0.15);
+        border-top: 1px solid rgba(168,184,204,0.15);
+        border-bottom: 1px solid rgba(168,184,204,0.15);
     }
 }
 
