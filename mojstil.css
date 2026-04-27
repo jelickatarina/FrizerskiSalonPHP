@@ -396,75 +396,66 @@ body.kontakt-page {
     text-align: center;
 }
 
-/* Kartice */
-.kp-grid {
+
+/* Info red (bez kartica) */
+.kp-info-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5px;
-    width: 100%;
-    background: rgba(168,184,204,0.15);
-    border: 1px solid rgba(168,184,204,0.15);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.kp-card {
-    flex: 1;
-    min-width: 200px;
-    background: rgba(10, 10, 18, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 1.4rem 1.6rem;
-    display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 1.2rem;
-    transition: background 0.3s;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
 }
 
-.kp-card:hover {
-    background: rgba(18, 18, 30, 0.85);
-}
-
-.kp-card--mid {
-    border-left: 1px solid rgba(168,184,204,0.1);
-    border-right: 1px solid rgba(168,184,204,0.1);
-}
-
-.kp-card-icon {
-    width: 26px;
-    height: 26px;
-    flex-shrink: 0;
-    color: #a8b8cc;
-    opacity: 0.7;
-}
-
-.kp-card-body {
+.kp-info {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    align-items: center;
+    text-align: center;
+    padding: 0 2.5rem;
+    gap: 0.3rem;
 }
 
-.kp-card-label {
+.kp-info-sep {
+    width: 1px;
+    height: 60px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+}
+
+.kp-ico {
+    width: 22px;
+    height: 22px;
+    color: #a8b8cc;
+    opacity: 0.6;
+    margin-bottom: 0.4rem;
+}
+
+.kp-info-label {
     font-size: 0.55rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #555570;
+    color: rgba(255,255,255,0.35);
     font-family: Cambria, Cochin, Georgia, serif;
 }
 
-.kp-card-big {
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-size: 1.05rem;
+.kp-info-val {
+    font-family: Cambria, Cochin, Georgia, Times, serif;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: #eef2ff;
-    line-height: 1.3;
+    color: #ffffff;
 }
 
-.kp-card-note {
+.kp-info-sub {
     font-size: 0.72rem;
-    color: #44445a;
+    color: rgba(255,255,255,0.35);
     font-family: 'Times New Roman', Times, serif;
+}
+
+@media (max-width: 640px) {
+    .kp-info-sep { width: 60px; height: 1px; }
+    .kp-info-row { flex-direction: column; gap: 1.5rem; }
+    .kp-info-sep { display: none; }
 }
 
 /* Footer CTA */
