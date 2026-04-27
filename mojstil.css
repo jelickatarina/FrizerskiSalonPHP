@@ -334,182 +334,226 @@ body.index-page {
 }
 
 /* ── Kontakt stranica ─────────────────────────────── */
-body.kontakt-page {
-    background: #080810;
-}
+body.kontakt-page { background: #16161c; }
 
-.kp-bg {
-    position: relative;
-    min-height: 100vh;
-    background-color: #1e1e24;
-    background-image: none;
-    background-size: cover;
-    background-position: center;
+.kp-wrap {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1.5rem;
+    min-height: calc(100vh - 68px);
 }
 
-.kp-overlay {
-    position: absolute;
-    inset: 0;
-    background: none;
-}
-
-.kp-content {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 960px;
+/* Leva kolona */
+.kp-left {
+    flex: 0 0 420px;
+    background: #16161c;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    padding: 4rem 3rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 3rem;
-}
-
-/* Header */
-.kp-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    width: 100%;
+    gap: 2.5rem;
     justify-content: center;
 }
 
-.kp-header-line {
-    flex: 1;
-    max-width: 120px;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(168,184,204,0.5));
-}
+/* Naslov */
+.kp-heading { display: flex; flex-direction: column; gap: 0.5rem; }
 
-.kp-header-line:last-child {
-    background: linear-gradient(to left, transparent, rgba(168,184,204,0.5));
+.kp-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #d4a828;
 }
 
 .kp-title {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 600;
     color: #fff;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     margin: 0;
-    text-align: center;
+    line-height: 1;
 }
 
-
-/* Info red (bez kartica) */
-.kp-info-row {
+.kp-title-orn {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 0;
-    width: 100%;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
 }
 
-.kp-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 0 2.5rem;
-    gap: 0.3rem;
+.kp-orn-line {
+    display: block;
+    width: 36px;
+    height: 1px;
+    background: rgba(212,168,40,0.4);
 }
 
-.kp-info-sep {
-    width: 1px;
-    height: 60px;
-    background: rgba(255,255,255,0.15);
+.kp-title-orn svg {
+    width: 6px;
+    height: 6px;
+    color: #d4a828;
+    opacity: 0.6;
     flex-shrink: 0;
 }
 
-.kp-ico {
-    width: 22px;
-    height: 22px;
-    color: #a8b8cc;
-    opacity: 0.6;
-    margin-bottom: 0.4rem;
-}
+/* Kartice */
+.kp-cards { display: flex; flex-direction: column; gap: 0; }
 
-.kp-info-label {
-    font-size: 0.55rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    font-family: 'Cormorant Garamond', Georgia, serif;
-}
-
-.kp-info-val {
-    font-family: 'Jost', sans-serif;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: #ffffff;
-    letter-spacing: 0.03em;
-}
-
-.kp-info-sub {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.35);
-    font-family: 'Jost', sans-serif;
-}
-
-@media (max-width: 640px) {
-    .kp-info-sep { width: 60px; height: 1px; }
-    .kp-info-row { flex-direction: column; gap: 1.5rem; }
-    .kp-info-sep { display: none; }
-}
-
-/* Footer CTA */
-.kp-footer {
+.kp-card {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    background: rgba(255,255,255,0.02);
+    transition: border-color 0.25s, background 0.25s;
+    cursor: default;
 }
 
-.kp-map {
-    width: 100%;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+.kp-card:hover {
+    border-color: rgba(212,168,40,0.3);
+    background: rgba(212,168,40,0.03);
 }
 
-.kp-map iframe {
-    width: 100%;
-    height: 280px;
-    border: none;
-    display: block;
-    filter: grayscale(0.3) brightness(0.9);
-}
-
-.kp-btn {
-    display: inline-block;
-    padding: 0.8rem 3rem;
-    border: 1px solid rgba(168,184,204,0.6);
+.kp-card-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
     color: #a8b8cc;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 0.8rem;
+    opacity: 0.55;
+}
+
+.kp-card-icon svg { width: 100%; height: 100%; }
+
+.kp-card-body { display: flex; flex-direction: column; gap: 0.15rem; }
+
+.kp-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.kp-card-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+}
+
+.kp-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.kp-status--open  { color: #5dba7d; }
+.kp-status--closed { color: #bb5555; }
+
+.kp-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #5dba7d;
+    display: inline-block;
+    animation: blink 2s infinite;
+}
+
+.kp-dot--red { background: #bb5555; animation: none; }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.kp-card-val {
+    font-family: 'Jost', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #eef2ff;
+    letter-spacing: 0.02em;
+}
+
+.kp-card-sub {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.28);
+}
+
+/* CTA dugme */
+.kp-actions { display: flex; }
+
+.kp-btn-gold {
+    flex: 1;
+    display: block;
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid rgba(212,168,40,0.5);
+    color: #d4a828;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     text-decoration: none;
-    border-radius: 2px;
+    border-radius: 4px;
     transition: background 0.25s, color 0.25s;
 }
 
-.kp-btn:hover {
-    background: #a8b8cc;
-    color: #080810;
+.kp-btn-gold:hover {
+    background: #d4a828;
+    color: #16161c;
 }
 
-@media (max-width: 640px) {
-    .kp-card--mid {
-        border-left: none;
-        border-right: none;
-        border-top: 1px solid rgba(168,184,204,0.15);
-        border-bottom: 1px solid rgba(168,184,204,0.15);
-    }
+/* Social */
+.kp-social {
+    display: flex;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.kp-social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgba(255,255,255,0.25);
+    text-decoration: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+}
+
+.kp-social-link svg { width: 15px; height: 15px; }
+.kp-social-link:hover { color: rgba(255,255,255,0.75); }
+
+/* Desna kolona — mapa */
+.kp-right {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.kp-right iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    filter: grayscale(1) brightness(0.6) contrast(1.1);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .kp-wrap { flex-direction: column; }
+    .kp-left { flex: none; width: 100%; padding: 3rem 2rem; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .kp-right { min-height: 320px; position: relative; }
+    .kp-right iframe { position: absolute; }
 }
 
 /* ── Forme (prijava, registracija, zakazivanje...) ── */
