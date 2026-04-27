@@ -343,13 +343,13 @@ body.kontakt-page { background: #16161c; }
 
 /* Leva kolona */
 .kp-left {
-    flex: 0 0 420px;
+    flex: 0 0 400px;
     background: #16161c;
     border-right: 1px solid rgba(255,255,255,0.06);
     padding: 4rem 3rem;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 2rem;
     justify-content: center;
 }
 
@@ -534,26 +534,36 @@ body.kontakt-page { background: #16161c; }
 /* Desna kolona — mapa */
 .kp-right {
     flex: 1;
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 3rem 3rem 2rem;
+    background: #13131a;
 }
 
-.kp-right iframe {
-    position: absolute;
-    inset: 0;
+.kp-map-box {
     width: 100%;
-    height: 100%;
+    max-width: 560px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.kp-map-box iframe {
+    width: 100%;
+    height: 340px;
     border: none;
     display: block;
-    filter: grayscale(1) brightness(0.6) contrast(1.1);
 }
 
 /* Responsive */
 @media (max-width: 900px) {
     .kp-wrap { flex-direction: column; }
     .kp-left { flex: none; width: 100%; padding: 3rem 2rem; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .kp-right { min-height: 320px; position: relative; }
-    .kp-right iframe { position: absolute; }
+    .kp-right { padding: 2rem; }
+    .kp-map-box { max-width: 100%; }
+    .kp-map-box iframe { height: 260px; }
 }
 
 /* ── Forme (prijava, registracija, zakazivanje...) ── */
