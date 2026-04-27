@@ -341,7 +341,8 @@ body.kontakt-page {
 .kp-bg {
     position: relative;
     min-height: 100vh;
-    background-image: url("pozadina-kontakt.svg");
+    background-color: #1e1e24;
+    background-image: none;
     background-size: cover;
     background-position: center;
     display: flex;
@@ -353,7 +354,7 @@ body.kontakt-page {
 .kp-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(6, 6, 12, 0.2);
+    background: none;
 }
 
 .kp-content {
