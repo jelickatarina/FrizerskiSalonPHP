@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="rg1" cx="25%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1a1428"/>
+      <stop offset="100%" stop-color="#06060e"/>
+    </radialGradient>
+    <radialGradient id="rg2" cx="80%" cy="70%" r="50%">
+      <stop offset="0%" stop-color="#12101e"/>
+      <stop offset="100%" stop-color="#06060e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rg3" cx="60%" cy="10%" r="40%">
+      <stop offset="0%" stop-color="#0e1420"/>
+      <stop offset="100%" stop-color="#06060e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur1"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="blur2"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="blur3"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <!-- Osnovna pozadina -->
+  <rect width="1440" height="900" fill="url(#rg1)"/>
+  <rect width="1440" height="900" fill="url(#rg2)"/>
+  <rect width="1440" height="900" fill="url(#rg3)"/>
+
+  <!-- Glow tacke -->
+  <ellipse cx="320" cy="260" rx="280" ry="180" fill="#2a1f4a" opacity="0.35" filter="url(#blur1)"/>
+  <ellipse cx="1100" cy="620" rx="320" ry="200" fill="#1a1836" opacity="0.3" filter="url(#blur1)"/>
+  <ellipse cx="780" cy="120" rx="200" ry="120" fill="#1e1630" opacity="0.25" filter="url(#blur1)"/>
+
+  <!-- Zlatni glow -->
+  <ellipse cx="200" cy="700" rx="160" ry="100" fill="#3a2800" opacity="0.4" filter="url(#blur1)"/>
+  <ellipse cx="1300" cy="200" rx="180" ry="110" fill="#2e2000" opacity="0.35" filter="url(#blur1)"/>
+
+  <!-- Apstraktne krive linije — "kosa" -->
+  <g opacity="0.07" filter="url(#blur3)" stroke="#c8d4f0" fill="none" stroke-linecap="round">
+    <path d="M-40,180 C200,120 400,320 600,260 S900,80 1100,200 S1350,380 1480,300" stroke-width="1.2"/>
+    <path d="M-40,220 C180,160 380,360 580,300 S880,120 1080,240 S1330,420 1480,340" stroke-width="0.8"/>
+    <path d="M-40,260 C160,200 360,400 560,340 S860,160 1060,280 S1310,460 1480,380" stroke-width="0.6"/>
+
+    <path d="M-40,520 C220,440 460,620 680,560 S1000,380 1200,480 S1400,580 1480,540" stroke-width="1.2"/>
+    <path d="M-40,560 C200,480 440,660 660,600 S980,420 1180,520 S1380,620 1480,580" stroke-width="0.8"/>
+
+    <path d="M100,900 C300,760 500,680 700,720 S1000,860 1200,740 S1380,640 1480,700" stroke-width="1"/>
+    <path d="M60,900 C260,780 460,700 660,740 S960,880 1160,760 S1360,660 1480,720" stroke-width="0.7"/>
+  </g>
+
+  <!-- Tanje linije -->
+  <g opacity="0.05" stroke="#a8b8cc" fill="none" stroke-linecap="round">
+    <path d="M0,400 Q360,320 720,440 T1440,380" stroke-width="1"/>
+    <path d="M0,420 Q360,340 720,460 T1440,400" stroke-width="0.6"/>
+    <path d="M0,440 Q360,360 720,480 T1440,420" stroke-width="0.4"/>
+  </g>
+
+  <!-- Zlatne tanke decorativne linije -->
+  <g opacity="0.06" stroke="#d4a828" fill="none" stroke-linecap="round">
+    <path d="M0,680 C300,640 600,720 900,660 S1200,580 1440,640" stroke-width="0.8"/>
+    <path d="M0,700 C300,660 600,740 900,680 S1200,600 1440,660" stroke-width="0.5"/>
+  </g>
+
+  <!-- Suptilna geometrija — dijagonalne linije -->
+  <g opacity="0.03" stroke="#ffffff" fill="none">
+    <line x1="0" y1="0" x2="400" y2="900" stroke-width="1"/>
+    <line x1="200" y1="0" x2="600" y2="900" stroke-width="0.6"/>
+    <line x1="1040" y1="0" x2="1440" y2="600" stroke-width="0.6"/>
+    <line x1="1200" y1="0" x2="1440" y2="360" stroke-width="0.4"/>
+  </g>
+
+  <!-- Mali svetlucavi tacke -->
+  <g opacity="0.4" fill="#ffffff">
+    <circle cx="142" cy="88" r="0.8"/>
+    <circle cx="389" cy="47" r="0.6"/>
+    <circle cx="612" cy="132" r="0.9"/>
+    <circle cx="834" cy="58" r="0.5"/>
+    <circle cx="1056" cy="97" r="0.7"/>
+    <circle cx="1278" cy="43" r="0.8"/>
+    <circle cx="1390" cy="155" r="0.6"/>
+    <circle cx="67" cy="312" r="0.5"/>
+    <circle cx="298" cy="278" r="0.7"/>
+    <circle cx="987" cy="234" r="0.6"/>
+    <circle cx="1189" cy="189" r="0.8"/>
+    <circle cx="1421" cy="267" r="0.5"/>
+    <circle cx="512" cy="812" r="0.7"/>
+    <circle cx="734" cy="856" r="0.5"/>
+    <circle cx="956" cy="798" r="0.8"/>
+    <circle cx="1178" cy="843" r="0.6"/>
+  </g>
+
+  <!-- Svetlucavi zlatni tacke -->
+  <g opacity="0.5" fill="#d4a828">
+    <circle cx="234" cy="167" r="0.7"/>
+    <circle cx="876" cy="345" r="0.6"/>
+    <circle cx="1123" cy="512" r="0.8"/>
+    <circle cx="445" cy="678" r="0.5"/>
+    <circle cx="1356" cy="734" r="0.7"/>
+  </g>
+
+  <!-- Gornji i donji vinjeti -->
+  <rect width="1440" height="200" fill="url(#vt)" opacity="1"/>
+  <defs>
+    <linearGradient id="vt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06060e" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#06060e" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="vb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06060e" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#06060e" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+  <rect y="700" width="1440" height="200" fill="url(#vb)" opacity="1"/>
+</svg>
