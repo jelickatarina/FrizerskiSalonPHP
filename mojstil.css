@@ -336,25 +336,24 @@ body.index-page {
 /* ── Kontakt stranica ─────────────────────────────── */
 body.kontakt-page { background: #16161c; }
 
-.kp-wrap {
-    display: flex;
+.kp-page {
     min-height: calc(100vh - 68px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4rem 1.5rem 3rem;
 }
 
-/* Leva kolona */
-.kp-left {
-    flex: 0 0 400px;
-    background: #16161c;
-    border-right: 1px solid rgba(255,255,255,0.06);
-    padding: 4rem 3rem;
+.kp-container {
+    width: 100%;
+    max-width: 860px;
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    justify-content: center;
 }
 
 /* Naslov */
-.kp-heading { display: flex; flex-direction: column; gap: 0.5rem; }
+.kp-heading { display: flex; flex-direction: column; gap: 0.5rem; align-items: center; text-align: center; }
 
 .kp-eyebrow {
     font-family: 'Jost', sans-serif;
@@ -398,16 +397,16 @@ body.kontakt-page { background: #16161c; }
 }
 
 /* Kartice */
-.kp-cards { display: flex; flex-direction: column; gap: 0; }
+.kp-cards { display: flex; flex-direction: row; gap: 1rem; }
 
 .kp-card {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    padding: 1.2rem 1.4rem;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem;
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 6px;
-    margin-bottom: 0.75rem;
     background: rgba(255,255,255,0.02);
     transition: border-color 0.25s, background 0.25s;
     cursor: default;
@@ -483,14 +482,38 @@ body.kontakt-page { background: #16161c; }
     color: rgba(255,255,255,0.28);
 }
 
+/* Mapa */
+.kp-map-box {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.kp-map-box iframe {
+    width: 100%;
+    height: 260px;
+    border: none;
+    display: block;
+}
+
+/* Footer: CTA + social */
+.kp-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
 /* CTA dugme */
 .kp-actions { display: flex; }
 
 .kp-btn-gold {
-    flex: 1;
-    display: block;
-    text-align: center;
-    padding: 0.75rem 1.5rem;
+    display: inline-block;
+    padding: 0.65rem 1.75rem;
     border: 1px solid rgba(212,168,40,0.5);
     color: #d4a828;
     font-family: 'Jost', sans-serif;
@@ -500,6 +523,7 @@ body.kontakt-page { background: #16161c; }
     text-transform: uppercase;
     text-decoration: none;
     border-radius: 4px;
+    white-space: nowrap;
     transition: background 0.25s, color 0.25s;
 }
 
@@ -512,8 +536,6 @@ body.kontakt-page { background: #16161c; }
 .kp-social {
     display: flex;
     gap: 1.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(255,255,255,0.06);
 }
 
 .kp-social-link {
@@ -531,39 +553,11 @@ body.kontakt-page { background: #16161c; }
 .kp-social-link svg { width: 15px; height: 15px; }
 .kp-social-link:hover { color: rgba(255,255,255,0.75); }
 
-/* Desna kolona — mapa */
-.kp-right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 3rem 3rem 2rem;
-    background: #13131a;
-}
-
-.kp-map-box {
-    width: 100%;
-    max-width: 560px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-
-.kp-map-box iframe {
-    width: 100%;
-    height: 340px;
-    border: none;
-    display: block;
-}
-
 /* Responsive */
-@media (max-width: 900px) {
-    .kp-wrap { flex-direction: column; }
-    .kp-left { flex: none; width: 100%; padding: 3rem 2rem; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-    .kp-right { padding: 2rem; }
-    .kp-map-box { max-width: 100%; }
-    .kp-map-box iframe { height: 260px; }
+@media (max-width: 700px) {
+    .kp-page { padding: 3rem 1rem 2.5rem; }
+    .kp-cards { flex-direction: column; }
+    .kp-footer { flex-direction: column; align-items: flex-start; }
 }
 
 /* ── Forme (prijava, registracija, zakazivanje...) ── */
