@@ -70,6 +70,15 @@
         </div>
         <?php endif; ?>
 
+        <div class="kp-map">
+            <iframe
+                src="https://maps.google.com/maps?q=Bulevar+oslobodjenja+45,+Beograd,+Srbija&output=embed&z=15"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+
     </div>
 </div>
 
