@@ -35,6 +35,8 @@
     <!-- Desna strana -->
     <div class="k-right">
 
+        <p class="k-right-eyebrow">Informacije</p>
+
         <div class="k-info-item">
             <div class="k-info-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -44,7 +46,8 @@
             </div>
             <div class="k-info-body">
                 <span class="k-info-label">Radno vreme</span>
-                <span class="k-info-value">Pon – Sub &nbsp;/&nbsp; 09:00 – 17:00</span>
+                <span class="k-info-value">Pon – Sub</span>
+                <span class="k-info-time">09:00 – 17:00</span>
                 <span class="k-info-sub">Nedeljom zatvoreno</span>
             </div>
         </div>
@@ -59,7 +62,8 @@
             <div class="k-info-body">
                 <span class="k-info-label">Adresa</span>
                 <span class="k-info-value">Bulevar oslobodjenja 45</span>
-                <span class="k-info-sub">11000 Beograd, Srbija</span>
+                <span class="k-info-time">11000 Beograd</span>
+                <span class="k-info-sub">Srbija</span>
             </div>
         </div>
 
@@ -75,6 +79,8 @@
                 <span class="k-info-sub">Pozovite nas</span>
             </div>
         </div>
+
+        <div class="k-right-deco">Frizerski<br>salon</div>
 
     </div>
 </div>
