@@ -115,7 +115,8 @@ body.index-page {
 .info-icon {
     font-size: 1.6rem;
     margin-bottom: 0.6rem;
-    opacity: 0.7;
+    opacity: 0.6;
+    filter: grayscale(1) brightness(1.8);
 }
 
 .info-card h3 {
