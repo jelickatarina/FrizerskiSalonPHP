@@ -11,14 +11,17 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
-<?php if($nivo=='0') { ?> 
+        <li class="nav-item">
+          <a class="nav-link" href="kontakt.php">Kontakt</a>
+        </li>
+<?php if($nivo=='0') { ?>
         <li class="nav-item">
           <a class="nav-link" href="prijava.php">Prijavi se</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="registracija.php">Registruj se</a>
         </li>
-<?php } ?> 
+<?php } ?>
 <?php if($nivo>='1') { ?> 
         <li class="nav-item">
           <a class="nav-link" href="termini.php">Termini</a>

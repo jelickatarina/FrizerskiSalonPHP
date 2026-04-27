@@ -148,6 +148,121 @@ body.index-page {
     margin-top: 0.3rem !important;
 }
 
+/* ── Kontakt stranica ─────────────────────────────── */
+.kontakt-hero {
+    position: relative;
+    height: 280px;
+    background-image: url("salon1.jpg");
+    background-size: cover;
+    background-position: center 30%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.kontakt-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,18,0.5) 0%, rgba(10,10,18,0.85) 100%);
+}
+
+.kontakt-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.kontakt-hero-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #6677aa;
+    margin-bottom: 0.5rem;
+}
+
+.kontakt-hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.kontakt-body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+.kontakt-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #13131a;
+}
+
+.kontakt-item {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 2.5rem 2rem;
+}
+
+.kontakt-divider {
+    width: 1px;
+    align-self: stretch;
+    background: rgba(255,255,255,0.07);
+}
+
+.kontakt-icon {
+    font-size: 1.8rem;
+    filter: grayscale(1) brightness(1.6);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+.kontakt-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-align: left;
+}
+
+.kontakt-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #5566aa;
+    font-family: Cambria, Cochin, Georgia, serif;
+}
+
+.kontakt-value {
+    font-size: 1rem;
+    color: #d0dcf4;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 600;
+}
+
+.kontakt-note {
+    font-size: 0.8rem;
+    color: #444;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.kontakt-cta {
+    text-align: center;
+    margin-top: 3rem;
+}
+
 /* ── Forme (prijava, registracija, zakazivanje...) ── */
 .forma {
     border-radius: 8px;

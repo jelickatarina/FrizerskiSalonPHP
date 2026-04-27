@@ -30,28 +30,6 @@
     </div>
 </div>
 
-<!-- Info kartice -->
-<div class="info-section">
-    <div class="info-card">
-        <div class="info-icon">&#128337;</div>
-        <h3>Radno vreme</h3>
-        <p>Ponedeljak – Subota</p>
-        <p class="info-highlight">09:00 – 17:00</p>
-        <p class="info-closed">Nedeljom ne radimo</p>
-    </div>
-    <div class="info-card">
-        <div class="info-icon">&#128205;</div>
-        <h3>Lokacija</h3>
-        <p>Bulevar oslobodjenja 45</p>
-        <p class="info-highlight">11000 Beograd</p>
-    </div>
-    <div class="info-card">
-        <div class="info-icon">&#128222;</div>
-        <h3>Kontakt</h3>
-        <p>Pozovite nas</p>
-        <p class="info-highlight">065-676-5532</p>
-    </div>
-</div>
 
 <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 </body>
