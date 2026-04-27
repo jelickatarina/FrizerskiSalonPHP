@@ -25,7 +25,10 @@
         ?>
         <a href="ternovi.php" class="btn btn-hero">Zakaži termin</a>
         <?php else: ?>
-        <a href="registracija.php" class="btn btn-hero">Registruj se</a>
+        <div class="hero-btns">
+            <a href="registracija.php" class="btn btn-hero">Registruj se</a>
+            <a href="prijava.php" class="btn btn-hero-outline">Prijavi se</a>
+        </div>
         <?php endif; ?>
     </div>
 </div>

@@ -239,6 +239,34 @@ body.index-page {
     box-shadow: 0 0 20px rgba(240, 244, 255, 0.25);
 }
 
+.hero-btns {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-hero-outline {
+    display: inline-block;
+    padding: 0.75rem 2.5rem;
+    background-color: transparent;
+    color: #f0f4ff;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 30px;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border: 2px solid rgba(240, 244, 255, 0.5);
+    transition: background-color 0.25s, border-color 0.25s;
+}
+
+.btn-hero-outline:hover {
+    background-color: rgba(240, 244, 255, 0.1);
+    border-color: #f0f4ff;
+    color: #f0f4ff;
+}
+
 /* Info traka */
 .info-section {
     display: flex;

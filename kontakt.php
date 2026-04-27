@@ -62,16 +62,13 @@
 
         </div>
 
+        <?php
+          if(session_status() === PHP_SESSION_NONE) session_start();
+          if(isset($_SESSION['korisnik'])): ?>
         <div class="kp-footer">
-            <?php
-              if(session_status() === PHP_SESSION_NONE) session_start();
-              if(isset($_SESSION['korisnik'])):
-            ?>
             <a href="ternovi.php" class="kp-btn">Zakaži termin</a>
-            <?php else: ?>
-            <a href="prijava.php" class="kp-btn">Prijavi se</a>
-            <?php endif; ?>
         </div>
+        <?php endif; ?>
 
     </div>
 </div>
