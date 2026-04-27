@@ -1,74 +1,240 @@
-select {
-    width: 100%;
+/* ── Reset / Base ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    background-color: #0f0f14;
+    color: #f0f4ff;
+    font-family: 'Times New Roman', Times, serif;
+    min-height: 100vh;
+    margin: 0;
 }
-input[type="date"] {
-    width: 100%;
+
+/* ── Index hero page ──────────────────────────────── */
+body.index-page {
+    background: none;
 }
-table {
-    width: 80%;
-    border-collapse: collapse;
-    margin: 20px auto;
-    background-color: rgb(24, 24, 33);
-}
-th, td {
-    border: 1px solid #000;
-    padding: 8px;
-    text-align: center;
-}
-th {
-    background-color: #f2f2f2;
-}
-body
-{
+
+.hero-section {
+    position: relative;
+    min-height: calc(100vh - 56px);
     background-image: url("salon4.jpg");
     background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    height: 600px;
+    text-align: center;
 }
-.card,.forma
-{
-    border-radius: 5px;
-    background-color: rgb(24, 24, 33);
-    color: white;
-    width: 300px;
-    padding: 6px;
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,18,0.55) 0%, rgba(10,10,18,0.8) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 2rem 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #b0bcd4;
+    margin-bottom: 0.5rem;
+}
+
+.hero-title {
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 700;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+}
+
+.hero-tagline {
+    font-size: 1.15rem;
+    color: #c8d4e8;
+    font-style: italic;
+    margin-bottom: 2rem;
+}
+
+.btn-hero {
+    display: inline-block;
+    padding: 0.75rem 2.5rem;
+    background-color: #f0f4ff;
+    color: #0f0f14;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 30px;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    transition: background-color 0.25s, color 0.25s, box-shadow 0.25s;
+    border: 2px solid #f0f4ff;
+}
+
+.btn-hero:hover {
+    background-color: transparent;
+    color: #f0f4ff;
+    box-shadow: 0 0 20px rgba(240, 244, 255, 0.25);
+}
+
+/* Info kartice */
+.info-section {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin: auto;
-    margin-top: 45px;
-    background-blend-mode: lighten;
-    width: 350px;
+    gap: 1.5rem;
+    padding: 3rem 1.5rem;
+    background-color: #0f0f14;
 }
- h1
-{
+
+.info-card {
+    background-color: #18181f;
+    border: 1px solid #2a2a38;
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    min-width: 220px;
+    max-width: 280px;
+    flex: 1;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.info-card:hover {
+    transform: translateY(-4px);
+    border-color: #4a4a7a;
+}
+
+.info-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.info-card h3 {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f0f4ff;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
+}
+
+.info-card p {
+    color: #8a9ab8;
+    font-size: 0.95rem;
+    margin: 0.2rem 0;
+    padding: 0;
+}
+
+.info-highlight {
+    color: #d0dcf4 !important;
+    font-weight: bold;
+    font-size: 1.05rem !important;
+}
+
+.info-closed {
+    color: #666 !important;
+    font-size: 0.8rem !important;
+    margin-top: 0.4rem !important;
+}
+
+/* ── Forme (prijava, registracija, zakazivanje...) ── */
+.forma {
+    border-radius: 8px;
+    background-color: #18181f;
+    border: 1px solid #2a2a38;
+    color: #f0f4ff;
+    padding: 1.5rem;
+    width: 380px;
+    max-width: 95vw;
+    margin: 40px auto;
+}
+
+h1 {
     font-weight: bold;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     text-align: center;
-    font-size: 30px;
+    font-size: 1.8rem;
+    color: #f0f4ff;
+    margin-bottom: 1rem;
 }
- p,td
-{
+
+p, td {
     font-family: 'Times New Roman', Times, serif;
     text-align: center;
-    color: aliceblue;
-    padding: 8px;
-    font-size: 17px;
+    color: #c8d4e8;
+    padding: 6px;
+    font-size: 1rem;
 }
-.button
-{
-   cursor: pointer;
-   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-   font-weight: bold;
-   padding: 5px;
-   background-color: aliceblue;
-   border-radius: 5px;
-   margin: 20px;
-   display:block;
-   width: 90%;
+
+/* ── Tabele ───────────────────────────────────────── */
+table {
+    width: 90%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    background-color: #18181f;
+    border-radius: 8px;
+    overflow: hidden;
 }
-.button:hover
-{
-    background-color: rgb(24, 24, 33);
-    color: aliceblue;
-    border-color: aliceblue;
+
+th, td {
+    border: 1px solid #2a2a38;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #22223a;
+    color: #f0f4ff;
+    font-family: Cambria, Cochin, Georgia, serif;
+}
+
+tr:hover td {
+    background-color: #1e1e2e;
+}
+
+/* ── Inputs ───────────────────────────────────────── */
+select, input[type="date"], input[type="text"], input[type="password"] {
+    width: 100%;
+    background-color: #22223a;
+    color: #f0f4ff;
+    border: 1px solid #3a3a58;
     border-radius: 5px;
+    padding: 6px 8px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 0.95rem;
+}
+
+select:focus, input:focus {
+    outline: none;
+    border-color: #6666aa;
+}
+
+/* ── Dugmad ───────────────────────────────────────── */
+.button {
+    cursor: pointer;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: bold;
+    padding: 8px;
+    background-color: #f0f4ff;
+    color: #0f0f14;
+    border: 2px solid #f0f4ff;
+    border-radius: 6px;
+    margin: 16px auto 8px;
+    display: block;
+    width: 90%;
+    font-size: 1rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.button:hover {
+    background-color: transparent;
+    color: #f0f4ff;
+    border-color: #f0f4ff;
 }
