@@ -77,5 +77,12 @@
 </div>
 
 <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const nav = document.querySelector('.kn-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 10);
+  });
+  nav.classList.add('scrolled');
+</script>
 </body>
 </html>
