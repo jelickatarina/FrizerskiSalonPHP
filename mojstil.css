@@ -410,71 +410,60 @@ body.kontakt-page {
 
 .kp-card {
     flex: 1;
-    min-width: 220px;
-    background: rgba(10, 10, 18, 0.75);
+    min-width: 200px;
+    background: rgba(10, 10, 18, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: 2.5rem 2rem;
+    padding: 1.4rem 1.6rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    text-align: center;
-    gap: 0.4rem;
-    position: relative;
+    gap: 1.2rem;
     transition: background 0.3s;
 }
 
 .kp-card:hover {
-    background: rgba(18, 18, 30, 0.9);
+    background: rgba(18, 18, 30, 0.85);
 }
 
 .kp-card--mid {
-    border-left: 1px solid rgba(168,184,204,0.15);
-    border-right: 1px solid rgba(168,184,204,0.15);
-}
-
-.kp-card-num {
-    font-family: Cambria, Cochin, Georgia, serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: rgba(168,184,204,0.4);
-    margin-bottom: 0.8rem;
+    border-left: 1px solid rgba(168,184,204,0.1);
+    border-right: 1px solid rgba(168,184,204,0.1);
 }
 
 .kp-card-icon {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
     color: #a8b8cc;
-    opacity: 0.8;
-    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.kp-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
 }
 
 .kp-card-label {
-    font-size: 0.58rem;
-    letter-spacing: 0.25em;
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: #555570;
     font-family: Cambria, Cochin, Georgia, serif;
 }
 
-.kp-card-value {
-    font-size: 0.95rem;
-    color: #8899bb;
-    font-family: 'Times New Roman', Times, serif;
-}
-
 .kp-card-big {
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+    font-size: 1.05rem;
     font-weight: 700;
     color: #eef2ff;
-    line-height: 1.2;
-    margin: 0.3rem 0;
+    line-height: 1.3;
 }
 
 .kp-card-note {
-    font-size: 0.75rem;
-    color: #333348;
+    font-size: 0.72rem;
+    color: #44445a;
     font-family: 'Times New Roman', Times, serif;
 }
 
