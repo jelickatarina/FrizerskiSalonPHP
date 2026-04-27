@@ -266,13 +266,13 @@ body.kontakt-page {
 
 .k-right-deco {
     position: absolute;
-    bottom: -1rem;
-    right: -1rem;
+    bottom: 2rem;
+    right: 2rem;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-size: clamp(4rem, 8vw, 7rem);
+    font-size: clamp(2.5rem, 4vw, 4rem);
     font-weight: 700;
-    color: rgba(255,255,255,0.025);
-    line-height: 1;
+    color: rgba(255,255,255,0.04);
+    line-height: 1.15;
     text-align: right;
     pointer-events: none;
     user-select: none;
