@@ -30,7 +30,7 @@
       $stmt->close();
 
       if ($data['c'] > 0) {
-        $poruka = "Korisnik „{$korisnik}" je već registrovan.";
+        $poruka = "Korisnik '{$korisnik}' je već registrovan.";
       } else {
         $stmt = $conn->prepare(
           "INSERT INTO korisnik (KorisnikId, Lozinka, Ime, Prezime, DatumRodjenja, Telefon, Email, Nivo)
