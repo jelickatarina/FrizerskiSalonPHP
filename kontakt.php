@@ -20,6 +20,36 @@
   $hour   = (int)date('H');
   $day    = (int)date('w');
   $isOpen = ($day >= 1 && $day <= 6 && $hour >= 9 && $hour < 17);
+
+  $formStatus = '';
+  $formErrors = [];
+
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['kontakt_submit'])) {
+    $ime     = trim($_POST['ime'] ?? '');
+    $email   = trim($_POST['email'] ?? '');
+    $telefon = trim($_POST['telefon'] ?? '');
+    $sadrzaj = trim($_POST['sadrzaj'] ?? '');
+
+    if ($ime === '')     $formErrors[] = 'Ime je obavezno.';
+    if ($email === '')   $formErrors[] = 'Email je obavezan.';
+    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $formErrors[] = 'Email adresa nije ispravna.';
+    if ($sadrzaj === '') $formErrors[] = 'Poruka ne može biti prazna.';
+
+    if (empty($formErrors)) {
+      include_once 'konekcija.php';
+      $stmt = $conn->prepare(
+        "INSERT INTO poruka (Ime, Email, Telefon, Sadrzaj) VALUES (?, ?, ?, ?)"
+      );
+      $telefonVal = $telefon !== '' ? $telefon : null;
+      $stmt->bind_param('ssss', $ime, $email, $telefonVal, $sadrzaj);
+      if ($stmt->execute()) {
+        $formStatus = 'ok';
+      } else {
+        $formErrors[] = 'Greška pri čuvanju poruke. Pokušajte ponovo.';
+      }
+      $stmt->close();
+    }
+  }
 ?>
 
 <div class="ct-page">
@@ -91,6 +121,66 @@
         allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
       </iframe>
     </div>
+
+    <section class="ct-form-section">
+      <div class="ct-form-header">
+        <span class="ct-eyebrow">Pošaljite nam poruku</span>
+        <h2 class="ct-form-title">Kontaktirajte nas</h2>
+      </div>
+
+      <?php if ($formStatus === 'ok'): ?>
+      <div class="ct-alert ct-alert--ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Poruka je uspešno poslata. Javićemo vam se uskoro!
+      </div>
+      <?php endif; ?>
+
+      <?php if (!empty($formErrors)): ?>
+      <div class="ct-alert ct-alert--err">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+        </svg>
+        <ul>
+          <?php foreach ($formErrors as $e): ?>
+          <li><?= htmlspecialchars($e) ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+      <?php endif; ?>
+
+      <?php if ($formStatus !== 'ok'): ?>
+      <form class="ct-form" method="POST" action="kontakt.php#poruka" novalidate>
+        <div class="ct-form-row2">
+          <div class="ct-field">
+            <label for="cf-ime">Ime i prezime <span class="ct-req">*</span></label>
+            <input type="text" id="cf-ime" name="ime"
+                   value="<?= htmlspecialchars($_POST['ime'] ?? '') ?>"
+                   placeholder="Npr. Marija Petrović" autocomplete="name">
+          </div>
+          <div class="ct-field">
+            <label for="cf-email">Email adresa <span class="ct-req">*</span></label>
+            <input type="email" id="cf-email" name="email"
+                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                   placeholder="vas@email.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="ct-field">
+          <label for="cf-tel">Telefon <span class="ct-opt">(opciono)</span></label>
+          <input type="text" id="cf-tel" name="telefon"
+                 value="<?= htmlspecialchars($_POST['telefon'] ?? '') ?>"
+                 placeholder="06x-xxx-xxxx" autocomplete="tel">
+        </div>
+        <div class="ct-field">
+          <label for="cf-msg">Poruka <span class="ct-req">*</span></label>
+          <textarea id="cf-msg" name="sadrzaj" rows="4"
+                    placeholder="Napišite nam…"><?= htmlspecialchars($_POST['sadrzaj'] ?? '') ?></textarea>
+        </div>
+        <button type="submit" name="kontakt_submit" class="ct-submit">Pošalji poruku</button>
+      </form>
+      <?php endif; ?>
+    </section>
 
     <footer class="ct-footer">
       <a href="<?= isset($_SESSION['korisnik']) ? 'ternovi.php' : 'prijava.php' ?>" class="ct-btn">Zakaži termin</a>

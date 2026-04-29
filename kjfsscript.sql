@@ -41,3 +41,14 @@ CREATE TABLE `termin` (
   FOREIGN KEY (KorisnikFrizerId) REFERENCES korisnik(KorisnikId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `poruka` (
+  `PorukaId` int(11) NOT NULL AUTO_INCREMENT,
+  `Ime` varchar(256) NOT NULL,
+  `Email` varchar(256) NOT NULL,
+  `Telefon` varchar(20) DEFAULT NULL,
+  `Sadrzaj` text NOT NULL,
+  `DatumVreme` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Procitana` bit(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`PorukaId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
