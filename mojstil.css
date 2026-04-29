@@ -566,6 +566,110 @@ body.kontakt-page {
     .ct-footer { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
 }
 
+/* ── Auth stranice (prijava, registracija, zakazivanje) ── */
+.auth-page {
+    min-height: calc(100vh - 68px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 2.8rem 2.4rem 2.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+}
+
+.auth-card--wide {
+    max-width: 580px;
+}
+
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.35rem;
+}
+
+.auth-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+}
+
+.auth-grid--full {
+    grid-column: 1 / -1;
+}
+
+.auth-btn {
+    margin-top: 0.4rem;
+    padding: 0.78rem 2rem;
+    background: transparent;
+    border: 1px solid rgba(212,168,40,0.45);
+    color: #d4a828;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.22s, color 0.22s;
+    width: 100%;
+}
+
+.auth-btn:hover {
+    background: #d4a828;
+    color: #0d0d15;
+}
+
+.auth-switch {
+    text-align: center;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.28);
+    margin: 0;
+}
+
+.auth-switch a {
+    color: #d4a828;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.auth-switch a:hover { opacity: 0.75; }
+
+@media (max-width: 560px) {
+    .auth-card { padding: 2rem 1.4rem; }
+    .auth-grid { grid-template-columns: 1fr; }
+    .auth-grid--full { grid-column: 1; }
+}
+
 /* ── Kontakt forma ────────────────────────────────── */
 .ct-form-section {
     display: flex;

@@ -1,223 +1,226 @@
-<?php 
-  session_start(); 
+<?php
+  session_start();
   include 'konekcija.php';
-  if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']!='1')) 
+  if (!isset($_SESSION['korisnik']) || $_SESSION['nivo'] != '1')
     header('Location: nemaovlascenje.html');
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $poruka="";
-    $t1 = trim($_REQUEST['t1']);
-    $korisnik = trim($_REQUEST['korisnik']);
-    if(isset($_REQUEST['usluga'])) $usluga = trim($_REQUEST['usluga']);
-    else $usluga="";
-    $datum = trim($_REQUEST['datum']); 
-    if(isset($_REQUEST['frizer'])) $frizer = trim($_REQUEST['frizer']);  
-    else $frizer="";
-    if($t1==1)
-    {
-      $date1 = new DateTime(); // Current date and time    
-      $date1->setTime(0,0,0,0); // h,m,s,mikros, i vreme je u $date2 nula
-      $date2 = new DateTime($datum);
+    $poruka  = "";
+    $t1      = trim($_POST['t1'] ?? '1');
+    $korisnik = trim($_POST['korisnik'] ?? $_SESSION['korisnik']);
+    $usluga  = trim($_POST['usluga']  ?? '');
+    $datum   = trim($_POST['datum']   ?? '');
+    $frizer  = trim($_POST['frizer']  ?? '');
+
+    if ($t1 == 1) {
+      $date1 = new DateTime();
+      $date1->setTime(0,0,0,0);
+      $date2   = new DateTime($datum);
       $interval = $date1->diff($date2);
-      $tmp1 = intval($interval->format('%R%a'));
+      $tmp1    = intval($interval->format('%R%a'));
 
-      if($tmp1==0) 
-      {
-        // danas, izracunaj sledeci termin imajuci u vidu trenutno vreme
-        $tv=date("H:i:s"); // format je HH:MM:SS
-        $tmp2 = substr($tv,0, 2);
-        $tmp3 = substr($tv,3, 2);
-        $i1 = $tmp2 * 2;
-        $i2 = (int)($tmp3 / 30);
-        $tpoc = $i1+$i2+1;
-      }
-      else $tpoc=18; // 09:00
+      if ($tmp1 == 0) {
+        $tv   = date("H:i:s");
+        $tmp2 = substr($tv, 0, 2);
+        $tmp3 = substr($tv, 3, 2);
+        $tpoc = $tmp2 * 2 + (int)($tmp3 / 30) + 1;
+      } else $tpoc = 18;
 
-      if(strlen($usluga)==0) $poruka="Niste uzabrali uslugu";
-      else if(strlen($datum)==0) $poruka="Unesite datum";
-      else if(strlen($frizer)==0) $poruka="Niste izabrali frizera";
-      else if(date('w', strtotime($datum))==0) $poruka="Ne radimo nedeljom";
-      else if($tmp1<0) $poruka="Datum je u prošlosti";
-      else if($tmp1>7) $poruka="Zakazivanje maksimalno 7 dana unapred";
-      else 
-      {
-        $sql = "select Trajanje from usluga where UslugaId='".$usluga."'";
-        $result = $conn->query($sql);
-        if(!$data=$result->fetch_assoc())  die("Ne mogu da pročitam trajanje termina");
-        $ukupnoTermina = (int)(1+($data['Trajanje']-1)/30);
-        $zauzetiTermini = array();
+      if ($usluga === '')  $poruka = "Niste izabrali uslugu.";
+      elseif ($datum === '') $poruka = "Unesite datum.";
+      elseif ($frizer === '') $poruka = "Niste izabrali frizera.";
+      elseif (date('w', strtotime($datum)) == 0) $poruka = "Ne radimo nedeljom.";
+      elseif ($tmp1 < 0)  $poruka = "Datum je u prošlosti.";
+      elseif ($tmp1 > 7)  $poruka = "Zakazivanje maksimalno 7 dana unapred.";
+      else {
+        $stmt = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
+        $stmt->bind_param('s', $usluga);
+        $stmt->execute();
+        $data = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$data) die("Ne mogu da pročitam trajanje termina.");
 
-        // Zauzeti termini frizera za taj dan
-        $sql = "select Vreme,UslugaId from termin where KorisnikFrizerId='".$frizer."' and Datum='".$datum."'";
-        $result = $conn->query($sql);
-        while($data=$result->fetch_assoc())  
-        {
-          $tv = $data['Vreme'];
+        $ukupnoTermina = (int)(1 + ($data['Trajanje'] - 1) / 30);
+        $zauzetiTermini = [];
+
+        $stmt = $conn->prepare("SELECT Vreme, UslugaId FROM termin WHERE KorisnikFrizerId=? AND Datum=?");
+        $stmt->bind_param('ss', $frizer, $datum);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $stmt->close();
+        while ($row = $res->fetch_assoc()) {
+          $tv = $row['Vreme'];
           $zauzetiTermini[] = $tv;
-          $sql2 = "select Trajanje from usluga where UslugaId='".$data['UslugaId']."'";
-          $result2 = $conn->query($sql2);
-          $data2=$result2->fetch_assoc();
-          $trajanjeTermina = (int)(1 + ($data2['Trajanje']-1) / 30);
-          for($i=1;$i<$trajanjeTermina;$i++)
-          {
-            $tv++;
-            $zauzetiTermini[] = $tv;
-          }
-	      }
+          $stmt2 = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
+          $stmt2->bind_param('s', $row['UslugaId']);
+          $stmt2->execute();
+          $d2 = $stmt2->get_result()->fetch_assoc();
+          $stmt2->close();
+          $trajanje2 = (int)(1 + ($d2['Trajanje'] - 1) / 30);
+          for ($i = 1; $i < $trajanje2; $i++) { $tv++; $zauzetiTermini[] = $tv; }
+        }
 
-        // Pronadji slobodan termin
-        $vremena = array();
-        for ($i = $tpoc; $i <= (34 - $ukupnoTermina); $i++)
-        {
+        $vremena = [];
+        for ($i = $tpoc; $i <= (34 - $ukupnoTermina); $i++) {
           $nemoze = false;
-          if(!in_array($i, $zauzetiTermini))
-          {
-            for($j=1; $j<$ukupnoTermina; $j++)
-              if (in_array($i+$j, $zauzetiTermini)) $nemoze = true;
-            if (!$nemoze) 
-            {
-              $tmp1=$i/2;
-              $tmp2=($i % 2) * 30;
-              $tv=sprintf('%02d:%02d', $tmp1,$tmp2);
-              $vremena[]=$tv;
+          if (!in_array($i, $zauzetiTermini)) {
+            for ($j = 1; $j < $ukupnoTermina; $j++)
+              if (in_array($i + $j, $zauzetiTermini)) $nemoze = true;
+            if (!$nemoze) {
+              $vremena[] = sprintf('%02d:%02d', (int)($i / 2), ($i % 2) * 30);
             }
           }
         }
 
-        if(count($vremena)==0) $poruka = "Nema slobodnih termina";
-        else
-        {  
-          $vreme = "";
-          $t1=2;
-        }
+        if (count($vremena) == 0) $poruka = "Nema slobodnih termina za izabrani dan.";
+        else { $vreme = ""; $t1 = 2; }
       }
-    }
-    else // t1=2
-    {
-      if(isset($_REQUEST['vreme'])) $vreme = trim($_REQUEST['vreme']);
-      else $vreme="";
-      if(strlen($vreme)==0) $poruka="Unesite vreme";      
-      else
-      {
-        $tmp1 = substr($vreme,0, 2);
-        $tmp2 = substr($vreme,3, 2);
-        $i1 = $tmp1 * 2;
-        $i2 = (int)($tmp2 / 30);
-        $res = $i1+$i2;
-	      $sql = "insert into termin (UslugaId,KorisnikId,Datum,Vreme,KorisnikFrizerId,Uradjeno) values ( 
-         '".$usluga."',
-         '".$korisnik."',
-         '".$datum."',
-         $res,
-         '".$frizer."',
-         0)";
-        $conn->query($sql);
+    } else {
+      $vreme = trim($_POST['vreme'] ?? '');
+      if ($vreme === '') $poruka = "Izaberite vreme.";
+      else {
+        $h   = (int)substr($vreme, 0, 2);
+        $m   = (int)substr($vreme, 3, 2);
+        $res = $h * 2 + (int)($m / 30);
+        $stmt = $conn->prepare(
+          "INSERT INTO termin (UslugaId, KorisnikId, Datum, Vreme, KorisnikFrizerId, Uradjeno)
+           VALUES (?, ?, ?, ?, ?, 0)"
+        );
+        $stmt->bind_param('sssss', $usluga, $korisnik, $datum, $res, $frizer);
+        $stmt->execute();
+        $stmt->close();
         header('Location: termini.php');
+        exit;
       }
     }
+  } else {
+    $poruka = ""; $t1 = 1;
+    $korisnik = $_SESSION['korisnik'];
+    $usluga = $datum = $frizer = $vreme = "";
   }
-  else // GET
-  {
-    $poruka="";
-    $t1=1;
-    $korisnik=$_SESSION['korisnik'];
-    $usluga="";
-    $datum="";
-    $frizer="";
-  }
-?> 
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="mojstil.css">
-    <title>Zakazivanje</title>
+    <title>Zakazivanje – Frizerski salon</title>
 </head>
 <body>
-<?php include 'menu.php'; ?> 
-<form method="post" class="forma">
-    <fieldset>
-    <h1>Zakazivanje</h1>
-    <h5 style="color:#FF0000;"><?=$poruka?><h5>
-      <table>
-        <tr>
-            <td>Korisnik:</td>
-            <td><input readonly type="text" name="korisnik" value="<?=$korisnik?>"></td>
-        </tr>
-        <tr>
-            <td>Usluga:</td>
-            <td>
-<?php if($t1==1) { ?>
-<select name="usluga">
-<?php
-  $sql = "select UslugaId from usluga where Aktivna=1 order by UslugaId";
-  $result = $conn->query($sql);
-  while($data=$result->fetch_assoc())  { ?>
-    <option value="<?=$data['UslugaId']?>"
-      <?=($data['UslugaId'] == $usluga) ? "selected" : ''?>
-      ><?=$data['UslugaId']?></option>
-<?php } ?>
-</select>
-<?php } else { ?>
-<input readonly type="text" name="usluga" value="<?=$usluga?>">
-<?php } ?>
-            </td>
-        </tr>
-        <tr>
-            <td>Datum:</td>
-<?php if($t1==1) { ?>
-            <td><input type="date" name="datum" value="<?=$datum?>"></td>
-<?php } else { ?>
-            <td><input readonly type="text" name="datum" value="<?=$datum?>"></td>
-<?php } ?>
-        </tr>
-        <tr>
-            <td>Frizer:</td>
-<td>
-<?php if($t1==1) { ?>
-<select name="frizer">
-<?php
-  $sql = "select KorisnikId from korisnik where Nivo=2 order by KorisnikId";
-  $result = $conn->query($sql);
-  while($data=$result->fetch_assoc())  { ?>
-    <option value="<?=$data['KorisnikId']?>"
-      <?=($data['KorisnikId'] == $frizer) ? "selected" : ''?>
-      ><?=$data['KorisnikId']?></option>
-<?php } ?>
-</select>
-<?php } else { ?>
-<input readonly type="text" name="frizer" value="<?=$frizer?>">
-<?php } ?>
-</td>
-        </tr>
-<?php if($t1==2) { ?>
-        <tr>
-            <td>Vreme:</td>
-<td>
-<select name="vreme">
-<?php
-  $sql = "select KorisnikId from korisnik where Nivo=2 order by KorisnikId";
-  $result = $conn->query($sql);
-  foreach($vremena as $tv) { ?>
-    <option value="<?=$tv?>"
-      <?=($tv == $vreme) ? "selected" : ''?>
-      ><?=$tv?></option>
-<?php } ?>
-</select>
-</td>
-        </tr>
-<?php } ?>
-      </table>
-      <input type="hidden" name="t1" value="<?=$t1?>">
-      <input type="submit" name="potvrda" value="Potvrdi" class="button">
-    </fieldset>
-</form>
+<?php include 'menu.php'; ?>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-header">
+      <span class="ct-eyebrow">
+        <?= $t1 == 1 ? 'Korak 1 od 2' : 'Korak 2 od 2' ?>
+      </span>
+      <h1 class="auth-title">Zakazivanje</h1>
+      <div class="ct-orn">
+        <span></span>
+        <svg viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill="currentColor"/></svg>
+        <span></span>
+      </div>
+    </div>
+
+    <?php if (!empty($poruka)): ?>
+    <div class="ct-alert ct-alert--err">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+      </svg>
+      <?= htmlspecialchars($poruka) ?>
+    </div>
+    <?php endif; ?>
+
+    <form method="post" class="auth-form">
+      <input type="hidden" name="t1" value="<?= $t1 ?>">
+      <input type="hidden" name="korisnik" value="<?= htmlspecialchars($korisnik) ?>">
+
+      <div class="ct-field">
+        <label>Korisnik</label>
+        <input type="text" value="<?= htmlspecialchars($korisnik) ?>" disabled>
+      </div>
+
+      <div class="ct-field">
+        <label for="zk-usluga">Usluga <span class="ct-req">*</span></label>
+        <?php if ($t1 == 1): ?>
+        <select id="zk-usluga" name="usluga">
+          <?php
+            $res = $conn->query("SELECT UslugaId, Opis, Cena FROM usluga WHERE Aktivna=1 ORDER BY UslugaId");
+            while ($row = $res->fetch_assoc()):
+          ?>
+          <option value="<?= htmlspecialchars($row['UslugaId']) ?>"
+            <?= $row['UslugaId'] === $usluga ? 'selected' : '' ?>>
+            <?= htmlspecialchars($row['UslugaId']) ?> — <?= htmlspecialchars($row['Opis']) ?> (<?= $row['Cena'] ?> RSD)
+          </option>
+          <?php endwhile; ?>
+        </select>
+        <?php else: ?>
+        <input type="text" name="usluga" value="<?= htmlspecialchars($usluga) ?>" readonly>
+        <?php endif; ?>
+      </div>
+
+      <div class="ct-field">
+        <label for="zk-datum">Datum <span class="ct-req">*</span></label>
+        <?php if ($t1 == 1): ?>
+        <input type="date" id="zk-datum" name="datum"
+               value="<?= htmlspecialchars($datum) ?>"
+               min="<?= date('Y-m-d') ?>"
+               max="<?= date('Y-m-d', strtotime('+7 days')) ?>">
+        <?php else: ?>
+        <input type="text" name="datum" value="<?= htmlspecialchars($datum) ?>" readonly>
+        <?php endif; ?>
+      </div>
+
+      <div class="ct-field">
+        <label for="zk-frizer">Frizer <span class="ct-req">*</span></label>
+        <?php if ($t1 == 1): ?>
+        <select id="zk-frizer" name="frizer">
+          <?php
+            $res = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime");
+            while ($row = $res->fetch_assoc()):
+          ?>
+          <option value="<?= htmlspecialchars($row['KorisnikId']) ?>"
+            <?= $row['KorisnikId'] === $frizer ? 'selected' : '' ?>>
+            <?= htmlspecialchars($row['Ime'] . ' ' . $row['Prezime']) ?>
+          </option>
+          <?php endwhile; ?>
+        </select>
+        <?php else: ?>
+        <input type="text" name="frizer" value="<?= htmlspecialchars($frizer) ?>" readonly>
+        <?php endif; ?>
+      </div>
+
+      <?php if ($t1 == 2): ?>
+      <div class="ct-field">
+        <label for="zk-vreme">Slobodni termini <span class="ct-req">*</span></label>
+        <select id="zk-vreme" name="vreme">
+          <?php foreach ($vremena as $tv): ?>
+          <option value="<?= $tv ?>" <?= $tv === $vreme ? 'selected' : '' ?>><?= $tv ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <?php endif; ?>
+
+      <button type="submit" class="auth-btn">
+        <?= $t1 == 1 ? 'Pronađi termine' : 'Potvrdi zakazivanje' ?>
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const nav = document.querySelector('.kn-nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
+  nav.classList.add('scrolled');
+</script>
 </body>
-<script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 </html>
