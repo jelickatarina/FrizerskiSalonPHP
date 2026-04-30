@@ -102,10 +102,19 @@
             </a>
         </div>
         <div class="home-about-img">
-            <img src="salon1.jpg" alt="Frizerski salon">
+            <img src="baylee-gramling-MMz03PyCOZg-unsplash.jpg" alt="Stilizovanje kose">
         </div>
     </div>
 </section>
+
+<!-- Parallax traka -->
+<div class="home-parallax">
+    <div class="home-parallax-overlay"></div>
+    <div class="home-parallax-content">
+        <span class="ct-eyebrow">Beogradski frizerski salon</span>
+        <p class="home-parallax-quote">Svaki detalj je važan.</p>
+    </div>
+</div>
 
 <!-- Usluge preview -->
 <section class="home-services">
@@ -170,6 +179,19 @@
             <a href="registracija.php" class="ct-btn">Registruj se i zakaži</a>
         </div>
         <?php endif; ?>
+    </div>
+</section>
+
+<!-- Galerija -->
+<section class="home-gallery">
+    <div class="home-gallery-img">
+        <img src="farhad-ibrahimzade-V2HDOQTJh3o-unsplash.jpg" alt="Šišanje">
+    </div>
+    <div class="home-gallery-img">
+        <img src="lindsay-cash-Md_DhaFsnCQ-unsplash.jpg" alt="Pranje kose">
+    </div>
+    <div class="home-gallery-img">
+        <img src="shari-sirotnak-oM5YoMhTf8E-unsplash.jpg" alt="Oprema">
     </div>
 </section>
 
