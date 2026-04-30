@@ -44,44 +44,6 @@
     </a>
 </div>
 
-<!-- Info traka -->
-<div class="info-section" id="info">
-    <div class="info-strip">
-        <div class="info-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <div>
-                <span class="info-item-label">Radno vreme</span>
-                <span class="info-item-val">09:00 – 17:00</span>
-                <span class="info-item-sub">Ponedeljak – Subota</span>
-            </div>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-            </svg>
-            <div>
-                <span class="info-item-label">Adresa</span>
-                <span class="info-item-val">Bulevar oslobodjenja 45</span>
-                <span class="info-item-sub">11000 Beograd</span>
-            </div>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-            </svg>
-            <div>
-                <span class="info-item-label">Telefon</span>
-                <span class="info-item-val">065-676-5532</span>
-                <span class="info-item-sub"><a href="kontakt.php" class="info-link">Kontaktirajte nas →</a></span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- O nama -->
 <section class="home-about">
     <div class="home-about-inner">
@@ -196,6 +158,7 @@
     </div>
 </section>
 
+<?php include 'footer.php'; ?>
 <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const nav = document.querySelector('.kn-nav');
