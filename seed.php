@@ -28,22 +28,25 @@ INSERT IGNORE INTO usluga (UslugaId,Cena,Trajanje,Opis,Aktivna) VALUES
 ('Keratin tretman',  5500, 180, 'Ispravljanje i zaglađivanje kosom keratinom', 1),
 ('Nadogradnja',      6000, 120, 'Nadogradnja prirodnom ili sintetičkom kosom', 0);
 
-INSERT IGNORE INTO termin (UslugaId,KorisnikId,Datum,Vreme,KorisnikFrizerId,Uradjeno) VALUES
--- Danas
-('Šišanje muško',      'Stefan', CURDATE(), 18, 'Milica', 0),
-('Pranje i feniranje', 'Ana',    CURDATE(), 20, 'Petar',  0),
-('Highlights',         'Maja',   CURDATE(), 22, 'Milica', 0),
-('Tretman kose',       'Jelena', CURDATE(), 26, 'Petar',  0),
-('Šišanje žensko',     'Marko',  CURDATE(), 28, 'Milica', 1),
+INSERT IGNORE INTO termin (UslugaId,KorisnikId,Datum,Vreme,KorisnikFrizerId,Uradjeno,Potvrdjeno) VALUES
+-- Zahtevi (pending - Potvrdjeno=0)
+('Šišanje žensko',     'Ivana', DATE_ADD(CURDATE(),INTERVAL 1 DAY), 18, 'Milica', 0, 0),
+('Farbanje kose',      'Luka',  DATE_ADD(CURDATE(),INTERVAL 2 DAY), 20, 'Petar',  0, 0),
+('Tretman kose',       'Sara',  CURDATE(), 22, 'Milica', 0, 0),
+-- Confirmed (Potvrdjeno=1)
+('Šišanje muško',      'Stefan', CURDATE(), 18, 'Milica', 0, 1),
+('Pranje i feniranje', 'Ana',    CURDATE(), 20, 'Petar',  0, 1),
+('Highlights',         'Maja',   CURDATE(), 22, 'Milica', 0, 1),
+('Tretman kose',       'Jelena', CURDATE(), 26, 'Petar',  0, 1),
+('Šišanje žensko',     'Marko',  CURDATE(), 28, 'Milica', 1, 1),
 -- Sutra i dalje
-('Šišanje muško',      'Nikola', DATE_ADD(CURDATE(),INTERVAL 1 DAY), 18, 'Petar',  0),
-('Farbanje kose',      'Ana',    DATE_ADD(CURDATE(),INTERVAL 1 DAY), 20, 'Milica', 0),
-('Keratin tretman',    'Maja',   DATE_ADD(CURDATE(),INTERVAL 2 DAY), 18, 'Petar',  0),
-('Highlights',         'Stefan', DATE_ADD(CURDATE(),INTERVAL 2 DAY), 24, 'Milica', 0),
-('Šišanje žensko',     'Jelena', DATE_ADD(CURDATE(),INTERVAL 3 DAY), 22, 'Petar',  0),
+('Šišanje muško',      'Nikola', DATE_ADD(CURDATE(),INTERVAL 1 DAY), 24, 'Petar',  0, 1),
+('Keratin tretman',    'Maja',   DATE_ADD(CURDATE(),INTERVAL 2 DAY), 18, 'Petar',  0, 1),
+('Highlights',         'Stefan', DATE_ADD(CURDATE(),INTERVAL 2 DAY), 24, 'Milica', 0, 1),
+('Šišanje žensko',     'Jelena', DATE_ADD(CURDATE(),INTERVAL 3 DAY), 22, 'Petar',  0, 1),
 -- Prethodni (urađeni)
-('Šišanje žensko',     'Jelena', DATE_SUB(CURDATE(),INTERVAL 2 DAY), 18, 'Milica', 1),
-('Farbanje kose',      'Stefan', DATE_SUB(CURDATE(),INTERVAL 4 DAY), 20, 'Petar',  1);
+('Šišanje žensko',     'Jelena', DATE_SUB(CURDATE(),INTERVAL 2 DAY), 18, 'Milica', 1, 1),
+('Farbanje kose',      'Stefan', DATE_SUB(CURDATE(),INTERVAL 4 DAY), 20, 'Petar',  1, 1);
 ";
 
 $conn->multi_query($sql);
