@@ -3,6 +3,20 @@
   if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
     header('Location: nemaovlascenje.html');
   include 'konekcija.php';
+
+  $perPage = 15;
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $offset = ($page - 1) * $perPage;
+
+  if($_SESSION['nivo']==1) $wh=" where KorisnikId='".$_SESSION['korisnik']."'";
+  else if($_SESSION['nivo']==2) $wh=" where KorisnikFrizerId='".$_SESSION['korisnik']."'";
+  else $wh="";
+
+  $total = $conn->query("select count(*) from termin".$wh)->fetch_row()[0];
+  $pages = (int)ceil($total / $perPage);
+
+  $sql = "select * from termin".$wh." order by Datum desc, Vreme limit $perPage offset $offset";
+  $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,58 +43,79 @@
         </div>
     </header>
     <div class="pg-wrap">
+        <?php if($_SESSION['nivo']>='1') { ?>
+        <div class="pg-action" style="margin-bottom:2.5rem;margin-top:0;">
+            <a class="ct-btn" href="ternovi.php">+ Zakaži termin</a>
+        </div>
+        <?php } ?>
         <div class="tbl-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>Termin</th>
+                        <th>#</th>
                         <th>Usluga</th>
                         <th>Korisnik</th>
                         <th>Datum</th>
                         <th>Vreme</th>
                         <th>Frizer</th>
-                        <th>Urađeno</th>
+                        <th>Status</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
 <?php
-  if($_SESSION['nivo']==1) $wh1=" where KorisnikId='".$_SESSION['korisnik']."' ";
-  else if($_SESSION['nivo']==2) $wh1=" where KorisnikFrizerId='".$_SESSION['korisnik']."' ";
-  else $wh1=" ";
-  $sql = "select * from termin".$wh1."order by Datum,Vreme";
-  $result = $conn->query($sql);
+  $rows = 0;
   while($data=$result->fetch_assoc()) {
-    $tmp1=$data['Vreme']/2;
-    $tmp2=($data['Vreme'] % 2) * 30;
-    $tv=sprintf('%02d:%02d', $tmp1,$tmp2);
+    $rows++;
+    $tmp1 = $data['Vreme']/2;
+    $tmp2 = ($data['Vreme'] % 2) * 30;
+    $tv   = sprintf('%02d:%02d', $tmp1, $tmp2);
+    $done = $data['Uradjeno'] == 1;
 ?>
-                    <tr>
+                    <tr class="<?= $done ? 'tr--done' : '' ?>">
                         <td><?=$data['TerminId']?></td>
-                        <td><?=$data['UslugaId']?></td>
-                        <td><?=$data['KorisnikId']?></td>
+                        <td><?= htmlspecialchars($data['UslugaId']) ?></td>
+                        <td><?= htmlspecialchars($data['KorisnikId']) ?></td>
                         <td><?=$data['Datum']?></td>
                         <td><?=$tv?></td>
-                        <td><?=$data['KorisnikFrizerId']?></td>
-                        <td><input disabled <?=($data['Uradjeno']==1)?'checked':'';?> type="checkbox"></td>
+                        <td><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
+                        <td>
+                            <?php if($done) { ?>
+                            <span class="srv-badge srv-badge--on">Urađeno</span>
+                            <?php } else { ?>
+                            <span class="srv-badge srv-badge--off">Čeka</span>
+                            <?php } ?>
+                        </td>
                         <td>
                             <div class="tbl-actions">
-                            <?php if($_SESSION['nivo']>='1' && $data['Uradjeno']==0) { ?>
+                            <?php if(!$done && $_SESSION['nivo']>='1') { ?>
                                 <a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?=$data['TerminId']?>">Otkaži</a>
                             <?php } ?>
-                            <?php if($_SESSION['nivo']>='2' && $data['Uradjeno']==0) { ?>
+                            <?php if(!$done && $_SESSION['nivo']>='2') { ?>
                                 <a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?=$data['TerminId']?>">Urađeno</a>
                             <?php } ?>
                             </div>
                         </td>
                     </tr>
 <?php } ?>
+<?php if($rows === 0) { ?>
+                    <tr><td colspan="8" style="color:rgba(255,255,255,0.25);font-style:italic;padding:2rem;">Nema termina</td></tr>
+<?php } ?>
                 </tbody>
             </table>
         </div>
-        <?php if($_SESSION['nivo']>='1') { ?>
-        <div class="pg-action">
-            <a class="ct-btn" href="ternovi.php">Zakaži termin</a>
+
+        <?php if($pages > 1) { ?>
+        <div class="pg-pagination">
+            <?php if($page > 1) { ?>
+            <a class="pg-page" href="?page=<?= $page-1 ?>">&larr;</a>
+            <?php } ?>
+            <?php for($i=1;$i<=$pages;$i++) { ?>
+            <a class="pg-page <?= $i==$page?'pg-page--active':'' ?>" href="?page=<?= $i ?>"><?= $i ?></a>
+            <?php } ?>
+            <?php if($page < $pages) { ?>
+            <a class="pg-page" href="?page=<?= $page+1 ?>">&rarr;</a>
+            <?php } ?>
         </div>
         <?php } ?>
     </div>

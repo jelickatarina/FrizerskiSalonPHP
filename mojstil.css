@@ -1262,6 +1262,261 @@ select:focus, input:focus {
     .pg-wrap { padding: 0 1rem 3rem; }
 }
 
+.tr--done td { opacity: 0.45; }
+
+/* ── Cards grid ───────────────────────────────────── */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+/* ── Service cards ────────────────────────────────── */
+.srv-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color 0.25s, background 0.25s;
+}
+.srv-card:hover {
+    border-color: rgba(212,168,40,0.22);
+    background: rgba(212,168,40,0.025);
+}
+.srv-card--inactive {
+    opacity: 0.5;
+}
+.srv-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.srv-card-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #eeeae2;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+.srv-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.65rem;
+    border-radius: 20px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.56rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.srv-badge--on {
+    background: rgba(80,190,120,0.1);
+    border: 1px solid rgba(80,190,120,0.22);
+    color: #5dba7d;
+}
+.srv-badge--off {
+    background: rgba(180,80,80,0.08);
+    border: 1px solid rgba(180,80,80,0.2);
+    color: #d47070;
+}
+.srv-card-opis {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.35);
+    line-height: 1.6;
+    margin: 0;
+    flex: 1;
+}
+.srv-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.srv-meta-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.7rem 0.5rem;
+    gap: 0.15rem;
+}
+.srv-meta-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(255,255,255,0.07);
+}
+.srv-meta-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.52rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+}
+.srv-meta-val {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #eeeae2;
+}
+.srv-card-edit {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid rgba(212,168,40,0.3);
+    border-radius: 6px;
+    color: #d4a828;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+.srv-card-edit:hover {
+    background: #d4a828;
+    color: #0e0d0a;
+}
+
+/* ── User cards ───────────────────────────────────── */
+.usr-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color 0.25s;
+}
+.usr-card:hover { border-color: rgba(176,164,148,0.2); }
+
+.usr-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+.usr-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(212,168,40,0.12);
+    border: 1px solid rgba(212,168,40,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d4a828;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+.usr-info { flex: 1; min-width: 0; }
+.usr-name {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #eeeae2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.usr-username {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.28);
+}
+.usr-badge {
+    display: inline-flex;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.54rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.badge--client  { background: rgba(100,150,255,0.1); border: 1px solid rgba(100,150,255,0.22); color: #7aaaf0; }
+.badge--staff   { background: rgba(212,168,40,0.1);  border: 1px solid rgba(212,168,40,0.22);  color: #d4a828; }
+.badge--admin   { background: rgba(180,80,80,0.1);   border: 1px solid rgba(180,80,80,0.22);   color: #d47070; }
+.badge--blocked { background: rgba(80,80,80,0.1);    border: 1px solid rgba(80,80,80,0.22);    color: #888; }
+
+.usr-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+.usr-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.usr-detail:last-child { border-bottom: none; }
+.usr-detail-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+    flex-shrink: 0;
+}
+.usr-detail-val {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Pagination ───────────────────────────────────── */
+.pg-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+}
+.pg-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: rgba(255,255,255,0.4);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.pg-page:hover {
+    border-color: rgba(212,168,40,0.4);
+    color: #d4a828;
+}
+.pg-page--active {
+    background: rgba(212,168,40,0.12);
+    border-color: rgba(212,168,40,0.45);
+    color: #d4a828;
+}
+
 /* ── Footer ───────────────────────────────────────── */
 .site-footer {
     background: #080807;

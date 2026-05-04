@@ -29,42 +29,43 @@
         </div>
     </header>
     <div class="pg-wrap">
-        <div class="tbl-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Usluga</th>
-                        <th>Cena (RSD)</th>
-                        <th>Trajanje (min)</th>
-                        <th>Opis</th>
-                        <th>Aktivna</th>
-                        <?php if($_SESSION['nivo']>='2') { ?><th></th><?php } ?>
-                    </tr>
-                </thead>
-                <tbody>
+        <?php if($_SESSION['nivo']>='2') { ?>
+        <div class="pg-action" style="margin-bottom:2.5rem;margin-top:0;">
+            <a class="ct-btn" href="uslnova.php">+ Nova usluga</a>
+        </div>
+        <?php } ?>
+        <div class="cards-grid">
 <?php
   $sql = "select * from usluga order by UslugaId";
   $result = $conn->query($sql);
-  while($data=$result->fetch_assoc()) { ?>
-                    <tr>
-                        <td><?=$data['UslugaId']?></td>
-                        <td><?=$data['Cena']?></td>
-                        <td><?=$data['Trajanje']?></td>
-                        <td><?=$data['Opis']?></td>
-                        <td><input disabled <?=($data['Aktivna']==1)?'checked':'';?> type="checkbox"></td>
-                        <?php if($_SESSION['nivo']>='2') { ?>
-                        <td><a class="tbl-btn" href="uslizmeni.php?p=<?=$data['UslugaId']?>">Izmeni</a></td>
-                        <?php } ?>
-                    </tr>
+  while($data=$result->fetch_assoc()) {
+    $aktivna = $data['Aktivna'] == 1;
+?>
+            <div class="srv-card <?= $aktivna ? '' : 'srv-card--inactive' ?>">
+                <div class="srv-card-top">
+                    <h3 class="srv-card-name"><?= htmlspecialchars($data['UslugaId']) ?></h3>
+                    <span class="srv-badge <?= $aktivna ? 'srv-badge--on' : 'srv-badge--off' ?>">
+                        <?= $aktivna ? 'Aktivna' : 'Neaktivna' ?>
+                    </span>
+                </div>
+                <p class="srv-card-opis"><?= htmlspecialchars($data['Opis']) ?></p>
+                <div class="srv-card-meta">
+                    <div class="srv-meta-item">
+                        <span class="srv-meta-label">Cena</span>
+                        <span class="srv-meta-val"><?= $data['Cena'] ?> RSD</span>
+                    </div>
+                    <div class="srv-meta-divider"></div>
+                    <div class="srv-meta-item">
+                        <span class="srv-meta-label">Trajanje</span>
+                        <span class="srv-meta-val"><?= $data['Trajanje'] ?> min</span>
+                    </div>
+                </div>
+                <?php if($_SESSION['nivo']>='2') { ?>
+                <a class="srv-card-edit" href="uslizmeni.php?p=<?= urlencode($data['UslugaId']) ?>">Izmeni</a>
+                <?php } ?>
+            </div>
 <?php } ?>
-                </tbody>
-            </table>
         </div>
-        <?php if($_SESSION['nivo']>='2') { ?>
-        <div class="pg-action">
-            <a class="ct-btn" href="uslnova.php">Nova usluga</a>
-        </div>
-        <?php } ?>
     </div>
 </div>
 <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
