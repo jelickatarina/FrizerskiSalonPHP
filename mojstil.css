@@ -1206,8 +1206,8 @@ select:focus, input:focus {
     flex-wrap: nowrap;
 }
 .search-input {
-    flex: 1;
-    min-width: 160px;
+    flex: 3;
+    min-width: 200px;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px;
@@ -1230,8 +1230,8 @@ select:focus, input:focus {
     border-radius: 8px;
     color: #eeeae2;
     font-family: 'Jost', sans-serif;
-    font-size: 0.82rem;
-    padding: 0.58rem 2rem 0.58rem 0.85rem;
+    font-size: 0.75rem;
+    padding: 0.58rem 1.7rem 0.58rem 0.7rem;
     cursor: pointer;
     transition: border-color 0.2s;
     appearance: none;
@@ -1497,7 +1497,7 @@ select:focus, input:focus {
 
 .usr-card-top {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.9rem;
 }
 .usr-avatar {
@@ -1542,6 +1542,7 @@ select:focus, input:focus {
     text-transform: uppercase;
     white-space: nowrap;
     flex-shrink: 0;
+    margin-top: 0.15rem;
 }
 .badge--client  { background: rgba(100,150,255,0.1); border: 1px solid rgba(100,150,255,0.22); color: #7aaaf0; }
 .badge--staff   { background: rgba(212,168,40,0.1);  border: 1px solid rgba(212,168,40,0.22);  color: #d4a828; }
@@ -1747,7 +1748,7 @@ select:focus, input:focus {
     align-items: center;
     text-align: center;
     gap: 0.4rem;
-    padding: 1.2rem 1.5rem 1.2rem;
+    padding: 0.6rem 1.5rem 1rem;
 }
 
 .kp-title {
