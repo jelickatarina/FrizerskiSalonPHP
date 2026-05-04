@@ -1,6 +1,6 @@
 <?php 
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    session_start();
+require_once 'sesija.php';
     unset($_SESSION['korisnik']);
     unset($_SESSION['nivo']);
     header('Location: index.php');

@@ -1,8 +1,16 @@
 <?php
-  session_start();
-  if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
-    header('Location: nemaovlascenje.html');
-  include 'konekcija.php';
+require_once 'sesija.php';
+if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
+  header('Location: nemaovlascenje.html');
+include 'konekcija.php';
+
+$q = trim($_GET['q'] ?? '');
+$wh = "where 1=1";
+if($q !== '') {
+  $esc = $conn->real_escape_string($q);
+  $wh .= " and (UslugaId like '%$esc%' or Opis like '%$esc%')";
+}
+$result = $conn->query("select * from usluga $wh order by UslugaId");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,17 +37,26 @@
         </div>
     </header>
     <div class="pg-wrap">
-        <?php if($_SESSION['nivo']>='2') { ?>
-        <div class="pg-action" style="margin-bottom:2.5rem;margin-top:0;">
+        <div class="pg-toolbar">
+            <form method="get" class="search-form">
+                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
+                       placeholder="Pretraži usluge...">
+                <button class="search-btn" type="submit">Traži</button>
+            </form>
+            <?php if($_SESSION['nivo']>='2') { ?>
             <a class="ct-btn" href="uslnova.php">+ Nova usluga</a>
+            <?php } ?>
         </div>
+        <?php if($q !== '') { ?>
+        <p class="search-info">Rezultati za: <strong><?= htmlspecialchars($q) ?></strong>
+            — <a href="usluge.php">Poništi pretragu</a></p>
         <?php } ?>
         <div class="cards-grid">
 <?php
-  $sql = "select * from usluga order by UslugaId";
-  $result = $conn->query($sql);
-  while($data=$result->fetch_assoc()) {
-    $aktivna = $data['Aktivna'] == 1;
+$rows = 0;
+while($data=$result->fetch_assoc()) {
+  $rows++;
+  $aktivna = $data['Aktivna'] == 1;
 ?>
             <div class="srv-card <?= $aktivna ? '' : 'srv-card--inactive' ?>">
                 <div class="srv-card-top">
@@ -64,6 +81,9 @@
                 <a class="srv-card-edit" href="uslizmeni.php?p=<?= urlencode($data['UslugaId']) ?>">Izmeni</a>
                 <?php } ?>
             </div>
+<?php } ?>
+<?php if($rows===0) { ?>
+        <p class="search-info">Nema usluga<?= $q!==''?' za ovu pretragu':'' ?>.</p>
 <?php } ?>
         </div>
     </div>

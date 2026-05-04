@@ -2,7 +2,7 @@
 if(!isset($_REQUEST['p'])) echo "Neispravan poziv strane"; 
 else 
 {
-  session_start(); 
+require_once 'sesija.php'; 
   if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1')) 
     header('Location: nemaovlascenje.html');
 

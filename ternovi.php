@@ -1,5 +1,5 @@
 <?php
-  session_start();
+require_once 'sesija.php';
   include 'konekcija.php';
   if (!isset($_SESSION['korisnik']) || $_SESSION['nivo'] < '1')
     header('Location: nemaovlascenje.html');

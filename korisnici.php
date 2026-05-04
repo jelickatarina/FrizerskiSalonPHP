@@ -1,21 +1,27 @@
 <?php
-  session_start();
-  if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'2'))
-    header('Location: nemaovlascenje.html');
-  include 'konekcija.php';
+require_once 'sesija.php';
+if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'2'))
+  header('Location: nemaovlascenje.html');
+include 'konekcija.php';
 
-  $nivoLabel = ['0'=>'Blokiran','1'=>'Klijent','2'=>'Frizer','9'=>'Admin'];
-  $nivoClass  = ['0'=>'badge--blocked','1'=>'badge--client','2'=>'badge--staff','9'=>'badge--admin'];
+$nivoLabel = ['0'=>'Blokiran','1'=>'Klijent','2'=>'Frizer','9'=>'Admin'];
+$nivoClass  = ['0'=>'badge--blocked','1'=>'badge--client','2'=>'badge--staff','9'=>'badge--admin'];
 
-  $perPage = 12;
-  $page = max(1, (int)($_GET['page'] ?? 1));
-  $offset = ($page - 1) * $perPage;
+$q = trim($_GET['q'] ?? '');
+$wh = "where 1=1";
+if($q !== '') {
+  $esc = $conn->real_escape_string($q);
+  $wh .= " and (KorisnikId like '%$esc%' or Ime like '%$esc%'
+           or Prezime like '%$esc%' or Email like '%$esc%' or Telefon like '%$esc%')";
+}
 
-  $total = $conn->query("select count(*) from korisnik")->fetch_row()[0];
-  $pages = (int)ceil($total / $perPage);
-
-  $sql = "select * from korisnik order by Ime, Prezime limit $perPage offset $offset";
-  $result = $conn->query($sql);
+$perPage = 12;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$offset = ($page - 1) * $perPage;
+$total = $conn->query("select count(*) from korisnik $wh")->fetch_row()[0];
+$pages = (int)ceil($total / $perPage);
+$result = $conn->query("select * from korisnik $wh order by Ime, Prezime limit $perPage offset $offset");
+$qParam = $q !== '' ? '&q='.urlencode($q) : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,17 +48,29 @@
         </div>
     </header>
     <div class="pg-wrap">
-        <?php if($_SESSION['nivo']=='9') { ?>
-        <div class="pg-action" style="margin-bottom:2.5rem;margin-top:0;">
+        <div class="pg-toolbar">
+            <form method="get" class="search-form">
+                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
+                       placeholder="Pretraži po imenu, emailu, telefonu...">
+                <button class="search-btn" type="submit">Traži</button>
+            </form>
+            <?php if($_SESSION['nivo']=='9') { ?>
             <a class="ct-btn" href="kornovi.php">+ Novi korisnik</a>
+            <?php } ?>
         </div>
+        <?php if($q !== '') { ?>
+        <p class="search-info">Rezultati za: <strong><?= htmlspecialchars($q) ?></strong>
+            (<?= $total ?>) — <a href="korisnici.php">Poništi pretragu</a></p>
         <?php } ?>
         <div class="cards-grid">
-<?php while($data=$result->fetch_assoc()) {
-    $initials = mb_substr($data['Ime'],0,1).mb_substr($data['Prezime'],0,1);
-    $nivo = (string)$data['Nivo'];
-    $label = $nivoLabel[$nivo] ?? $nivo;
-    $cls   = $nivoClass[$nivo] ?? '';
+<?php
+$rows = 0;
+while($data=$result->fetch_assoc()) {
+  $rows++;
+  $initials = mb_substr($data['Ime'],0,1).mb_substr($data['Prezime'],0,1);
+  $nivo = (string)$data['Nivo'];
+  $label = $nivoLabel[$nivo] ?? $nivo;
+  $cls   = $nivoClass[$nivo] ?? '';
 ?>
             <div class="usr-card">
                 <div class="usr-card-top">
@@ -88,19 +106,17 @@
                 <?php } ?>
             </div>
 <?php } ?>
+<?php if($rows===0) { ?>
+        <p class="search-info">Nema korisnika<?= $q!==''?' za ovu pretragu':'' ?>.</p>
+<?php } ?>
         </div>
-
         <?php if($pages > 1) { ?>
         <div class="pg-pagination">
-            <?php if($page > 1) { ?>
-            <a class="pg-page" href="?page=<?= $page-1 ?>">&larr;</a>
-            <?php } ?>
+            <?php if($page>1) { ?><a class="pg-page" href="?page=<?=$page-1?><?=$qParam?>">&larr;</a><?php } ?>
             <?php for($i=1;$i<=$pages;$i++) { ?>
-            <a class="pg-page <?= $i==$page?'pg-page--active':'' ?>" href="?page=<?= $i ?>"><?= $i ?></a>
+            <a class="pg-page <?=$i==$page?'pg-page--active':''?>" href="?page=<?=$i?><?=$qParam?>"><?=$i?></a>
             <?php } ?>
-            <?php if($page < $pages) { ?>
-            <a class="pg-page" href="?page=<?= $page+1 ?>">&rarr;</a>
-            <?php } ?>
+            <?php if($page<$pages) { ?><a class="pg-page" href="?page=<?=$page+1?><?=$qParam?>">&rarr;</a><?php } ?>
         </div>
         <?php } ?>
     </div>
