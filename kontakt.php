@@ -197,7 +197,6 @@
 <script>
   const nav = document.querySelector('.kn-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
-  nav.classList.add('scrolled');
 </script>
 </body>
 </html>

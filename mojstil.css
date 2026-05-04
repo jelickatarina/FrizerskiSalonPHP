@@ -1581,6 +1581,25 @@ select:focus, input:focus {
     border: 1px solid rgba(180,80,80,0.2);
     color: #d47070;
 }
+.srv-badge--pending {
+    background: rgba(212,168,40,0.1);
+    border: 1px solid rgba(212,168,40,0.25);
+    color: #d4a828;
+}
+.tbl-contact {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 0.15rem;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.3);
+}
+.tbl-contact a {
+    color: rgba(212,168,40,0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.tbl-contact a:hover { color: #d4a828; }
 .srv-card-opis {
     font-family: 'Jost', sans-serif;
     font-size: 0.82rem;
