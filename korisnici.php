@@ -7,8 +7,10 @@ include 'konekcija.php';
 $nivoLabel = ['0'=>'Blokiran','1'=>'Klijent','2'=>'Frizer','9'=>'Admin'];
 $nivoClass  = ['0'=>'badge--blocked','1'=>'badge--client','2'=>'badge--staff','9'=>'badge--admin'];
 
-$q = trim($_GET['q'] ?? '');
+$q    = trim($_GET['q'] ?? '');
+$uloga = $_GET['uloga'] ?? '';
 $wh = "where 1=1";
+if(in_array($uloga, ['0','1','2','9'])) $wh .= " and Nivo=".(int)$uloga;
 if($q !== '') {
   $esc = $conn->real_escape_string($q);
   $wh .= " and (KorisnikId like '%$esc%' or Ime like '%$esc%'
@@ -21,7 +23,7 @@ $offset = ($page - 1) * $perPage;
 $total = $conn->query("select count(*) from korisnik $wh")->fetch_row()[0];
 $pages = (int)ceil($total / $perPage);
 $result = $conn->query("select * from korisnik $wh order by Ime, Prezime limit $perPage offset $offset");
-$qParam = $q !== '' ? '&q='.urlencode($q) : '';
+$qParam = ($q !== '' ? '&q='.urlencode($q) : '').($uloga !== '' ? '&uloga='.urlencode($uloga) : '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -52,6 +54,13 @@ $qParam = $q !== '' ? '&q='.urlencode($q) : '';
             <form method="get" class="search-form">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži po imenu, emailu, telefonu...">
+                <select class="filter-select" name="uloga">
+                    <option value="" <?= $uloga===''?'selected':'' ?>>Sve uloge</option>
+                    <option value="1" <?= $uloga==='1'?'selected':'' ?>>Klijent</option>
+                    <option value="2" <?= $uloga==='2'?'selected':'' ?>>Frizer</option>
+                    <option value="9" <?= $uloga==='9'?'selected':'' ?>>Admin</option>
+                    <option value="0" <?= $uloga==='0'?'selected':'' ?>>Blokiran</option>
+                </select>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
             <?php if($_SESSION['nivo']=='9') { ?>

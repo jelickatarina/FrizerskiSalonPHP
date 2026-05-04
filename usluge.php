@@ -4,8 +4,11 @@ if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
   header('Location: nemaovlascenje.html');
 include 'konekcija.php';
 
-$q = trim($_GET['q'] ?? '');
+$q       = trim($_GET['q'] ?? '');
+$aktivan = $_GET['aktivan'] ?? '';
 $wh = "where 1=1";
+if($aktivan === '1') $wh .= " and Aktivna=1";
+if($aktivan === '0') $wh .= " and Aktivna=0";
 if($q !== '') {
   $esc = $conn->real_escape_string($q);
   $wh .= " and (UslugaId like '%$esc%' or Opis like '%$esc%')";
@@ -41,6 +44,11 @@ $result = $conn->query("select * from usluga $wh order by UslugaId");
             <form method="get" class="search-form">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži usluge...">
+                <select class="filter-select" name="aktivan">
+                    <option value="" <?= $aktivan===''?'selected':'' ?>>Sve usluge</option>
+                    <option value="1" <?= $aktivan==='1'?'selected':'' ?>>Aktivne</option>
+                    <option value="0" <?= $aktivan==='0'?'selected':'' ?>>Neaktivne</option>
+                </select>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
             <?php if($_SESSION['nivo']>='2') { ?>

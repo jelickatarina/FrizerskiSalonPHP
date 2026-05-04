@@ -4,7 +4,8 @@ if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
   header('Location: nemaovlascenje.html');
 include 'konekcija.php';
 
-$q = trim($_GET['q'] ?? '');
+$q      = trim($_GET['q'] ?? '');
+$status = $_GET['status'] ?? '';
 $perPage = 15;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $perPage;
@@ -12,6 +13,9 @@ $offset = ($page - 1) * $perPage;
 if($_SESSION['nivo']==1)      $wh = "where KorisnikId='".$conn->real_escape_string($_SESSION['korisnik'])."'";
 else if($_SESSION['nivo']==2) $wh = "where KorisnikFrizerId='".$conn->real_escape_string($_SESSION['korisnik'])."'";
 else                           $wh = "where 1=1";
+
+if($status === 'ceka')   $wh .= " and Uradjeno=0";
+if($status === 'uradjeno') $wh .= " and Uradjeno=1";
 
 if($q !== '') {
   $esc = $conn->real_escape_string($q);
@@ -22,7 +26,7 @@ if($q !== '') {
 $total = $conn->query("select count(*) from termin $wh")->fetch_row()[0];
 $pages = (int)ceil($total / $perPage);
 $result = $conn->query("select * from termin $wh order by Datum desc, Vreme limit $perPage offset $offset");
-$qParam = $q !== '' ? '&q='.urlencode($q) : '';
+$qParam = ($q !== '' ? '&q='.urlencode($q) : '').($status !== '' ? '&status='.urlencode($status) : '');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,6 +57,11 @@ $qParam = $q !== '' ? '&q='.urlencode($q) : '';
             <form method="get" class="search-form">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži po usluzi, korisniku, datumu...">
+                <select class="filter-select" name="status">
+                    <option value="" <?= $status===''?'selected':'' ?>>Svi statusi</option>
+                    <option value="ceka" <?= $status==='ceka'?'selected':'' ?>>Čeka</option>
+                    <option value="uradjeno" <?= $status==='uradjeno'?'selected':'' ?>>Urađeno</option>
+                </select>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
             <?php if($_SESSION['nivo']>='1') { ?>
