@@ -1199,60 +1199,74 @@ select:focus, input:focus {
 }
 .search-form {
     display: flex;
-    gap: 0;
+    align-items: center;
+    gap: 0.5rem;
     flex: 1;
-    max-width: 440px;
+    max-width: 560px;
+    flex-wrap: wrap;
 }
 .search-input {
     flex: 1;
+    min-width: 160px;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.1);
-    border-right: none;
-    border-radius: 6px 0 0 6px;
+    border-radius: 8px;
     color: #eeeae2;
     font-family: 'Jost', sans-serif;
-    font-size: 0.88rem;
-    padding: 0.6rem 0.9rem;
-    transition: border-color 0.2s;
+    font-size: 0.86rem;
+    padding: 0.58rem 0.9rem;
+    transition: border-color 0.2s, background 0.2s;
 }
 .search-input:focus {
     outline: none;
-    border-color: rgba(212,168,40,0.4);
+    border-color: rgba(212,168,40,0.45);
+    background: rgba(255,255,255,0.06);
 }
 .search-input::placeholder { color: rgba(255,255,255,0.2); }
+
 .filter-select {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.1);
-    border-left: none;
+    border-radius: 8px;
     color: #eeeae2;
     font-family: 'Jost', sans-serif;
     font-size: 0.82rem;
-    padding: 0.6rem 0.7rem;
+    padding: 0.58rem 2rem 0.58rem 0.85rem;
     cursor: pointer;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background 0.2s;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E");
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.25)'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.6rem center;
-    padding-right: 1.8rem;
-}
-.filter-select:focus { outline: none; border-color: rgba(212,168,40,0.4); }
-.filter-select option { background: #1a1814; }
-
-.search-btn {
-    padding: 0.6rem 1.1rem;
-    background: rgba(212,168,40,0.12);
-    border: 1px solid rgba(212,168,40,0.35);
-    border-radius: 0 6px 6px 0;
-    color: #d4a828;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    cursor: pointer;
-    transition: background 0.2s;
+    background-position: right 0.7rem center;
     white-space: nowrap;
 }
-.search-btn:hover { background: rgba(212,168,40,0.22); }
+.filter-select:focus {
+    outline: none;
+    border-color: rgba(212,168,40,0.45);
+    background-color: rgba(255,255,255,0.06);
+}
+.filter-select option { background: #1a1814; color: #eeeae2; }
+
+.search-btn {
+    padding: 0.58rem 1.2rem;
+    background: transparent;
+    border: 1px solid rgba(212,168,40,0.4);
+    border-radius: 8px;
+    color: #d4a828;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+.search-btn:hover {
+    background: #d4a828;
+    color: #0e0d0a;
+}
 .search-info {
     font-family: 'Jost', sans-serif;
     font-size: 0.8rem;
