@@ -1,15 +1,13 @@
-<?php 
-  session_start(); 
-  if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1')) 
+<?php
+  session_start();
+  if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
     header('Location: nemaovlascenje.html');
-
   include 'konekcija.php';
-?> 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,38 +17,56 @@
     <title>Usluge</title>
 </head>
 <body>
-<?php include 'menu.php'; ?> 
-    <h1>Usluge</h1>
-      <table>
-        <tr>
-            <td>Usluga</td>
-	    <td>Cena</td>
-            <td>Trajanje</td>
-            <td>Opis</td>
-            <td>Aktivna</td>
-            <td></td>
-        </tr>
+<?php include 'menu.php'; ?>
+<div class="kp-page">
+    <header class="kp-header">
+        <p class="ct-eyebrow">Frizerski salon</p>
+        <h1 class="kp-title">Usluge</h1>
+        <div class="ct-orn">
+            <span></span>
+            <svg viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="2"/></svg>
+            <span></span>
+        </div>
+    </header>
+    <div class="pg-wrap">
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usluga</th>
+                        <th>Cena (RSD)</th>
+                        <th>Trajanje (min)</th>
+                        <th>Opis</th>
+                        <th>Aktivna</th>
+                        <?php if($_SESSION['nivo']>='2') { ?><th></th><?php } ?>
+                    </tr>
+                </thead>
+                <tbody>
 <?php
   $sql = "select * from usluga order by UslugaId";
   $result = $conn->query($sql);
-  while($data=$result->fetch_assoc())  { ?>
-        <tr>
-            <td><?=$data['UslugaId']?></td>
-	    <td><?=$data['Cena']?></td>
-            <td><?=$data['Trajanje']?></td>
-            <td><?=$data['Opis']?></td>
-            <td><input disabled <?=($data['Aktivna']==1)?'checked':'';?> type="checkbox"></td>      
-<?php if($_SESSION['nivo']>='2') { ?>
-            <td><a class="nav-link" href="uslizmeni.php?p=<?=$data['UslugaId']?>">Izmeni</a></td>
+  while($data=$result->fetch_assoc()) { ?>
+                    <tr>
+                        <td><?=$data['UslugaId']?></td>
+                        <td><?=$data['Cena']?></td>
+                        <td><?=$data['Trajanje']?></td>
+                        <td><?=$data['Opis']?></td>
+                        <td><input disabled <?=($data['Aktivna']==1)?'checked':'';?> type="checkbox"></td>
+                        <?php if($_SESSION['nivo']>='2') { ?>
+                        <td><a class="tbl-btn" href="uslizmeni.php?p=<?=$data['UslugaId']?>">Izmeni</a></td>
+                        <?php } ?>
+                    </tr>
 <?php } ?>
-        </tr>
-<?php } ?> 
-      </table>
-<?php if($_SESSION['nivo']>='2') { ?> 
-    <div class="forma">
-        <button class="button" type="click" onclick="location.href='uslnova.php'">Nova usluga</button>
+                </tbody>
+            </table>
+        </div>
+        <?php if($_SESSION['nivo']>='2') { ?>
+        <div class="pg-action">
+            <a class="ct-btn" href="uslnova.php">Nova usluga</a>
+        </div>
+        <?php } ?>
     </div>
-<?php } ?>  
-</body>
+</div>
 <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
