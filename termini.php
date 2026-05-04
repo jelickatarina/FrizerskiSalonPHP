@@ -14,15 +14,18 @@ if($nivo==1)      $baseWh = "KorisnikId='".$conn->real_escape_string($me)."'";
 else if($nivo==2) $baseWh = "KorisnikFrizerId='".$conn->real_escape_string($me)."'";
 else              $baseWh = "1=1";
 
-// Danas tab data
 if($view === 'danas') {
-    $resDanas = $conn->query("select * from termin where $baseWh and Datum='$danas' order by Vreme");
+    $wh = "where $baseWh and Datum='$danas'";
+    if($q !== '') {
+        $esc = $conn->real_escape_string($q);
+        $wh .= " and (UslugaId like '%$esc%' or KorisnikId like '%$esc%' or KorisnikFrizerId like '%$esc%')";
+    }
+    $resDanas = $conn->query("select * from termin $wh order by Vreme");
     $todayRows = [];
     while($d=$resDanas->fetch_assoc()) $todayRows[] = $d;
 }
 
-// Table tabs data
-$result = null; $total = 0; $pages = 0;
+$result = null; $total = 0; $pages = 0; $page = 1; $qParam = '';
 if($view !== 'danas') {
     $perPage = 15;
     $page    = max(1, (int)($_GET['page'] ?? 1));
@@ -77,30 +80,46 @@ if($view !== 'danas') {
             </a>
         </div>
 
+        <!-- PRETRAGA (iznad tabova, važi za sve) -->
+        <div class="ter-search-wrap">
+            <form method="get" class="search-form">
+                <input type="hidden" name="view" value="<?= htmlspecialchars($view) ?>">
+                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
+                       placeholder="Pretraži po usluzi, korisniku<?= $view!=='danas' ? ', datumu' : '' ?>...">
+                <button class="search-btn" type="submit">Traži</button>
+            </form>
+            <?php if($q!=='') { ?>
+            <p class="search-info" style="margin-top:0.5rem;">
+                <?= $view==='danas' ? count($todayRows) : $total ?> rezultata za „<?= htmlspecialchars($q) ?>"
+                — <a href="termini.php?view=<?= $view ?>">Poništi</a>
+            </p>
+            <?php } ?>
+        </div>
+
         <!-- TABS -->
         <div class="ter-tabs">
-            <a class="ter-tab <?= $view==='danas'?'ter-tab--active':'' ?>" href="termini.php?view=danas">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <a class="ter-tab <?= $view==='danas'?'ter-tab--active':'' ?>" href="termini.php?view=danas<?= $q?'&q='.urlencode($q):'' ?>">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
                     <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
                 Danas
             </a>
-            <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi">Svi</a>
-            <a class="ter-tab <?= $view==='zakazani'?'ter-tab--active':'' ?>" href="termini.php?view=zakazani">Zakazani</a>
-            <a class="ter-tab <?= $view==='uradjeni'?'ter-tab--active':'' ?>" href="termini.php?view=uradjeni">Urađeni</a>
+            <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi<?= $q?'&q='.urlencode($q):'' ?>">Svi</a>
+            <a class="ter-tab <?= $view==='zakazani'?'ter-tab--active':'' ?>" href="termini.php?view=zakazani<?= $q?'&q='.urlencode($q):'' ?>">Zakazani</a>
+            <a class="ter-tab <?= $view==='uradjeni'?'ter-tab--active':'' ?>" href="termini.php?view=uradjeni<?= $q?'&q='.urlencode($q):'' ?>">Urađeni</a>
         </div>
 
         <?php if($view === 'danas') { ?>
         <!-- DANAS TAB -->
-        <div class="today-section" style="border-top:none; padding-top:0;">
+        <div class="today-section">
             <div class="today-header">
                 <div class="today-title">
-                    Raspored danas — <?= date('d.m.Y.') ?>
+                    <?= date('d.m.Y.') ?> — <?= date('l') ?>
                 </div>
                 <span class="today-count"><?= count($todayRows) ?> termin<?= count($todayRows)===1?'':'a' ?></span>
             </div>
             <?php if(count($todayRows)===0) { ?>
-            <p class="today-empty">Nema zakazanih termina za danas.</p>
+            <p class="today-empty">Nema zakazanih termina za danas<?= $q!==''?' za ovu pretragu':'' ?>.</p>
             <?php } else { ?>
             <div class="today-cards">
                 <?php foreach($todayRows as $d) {
@@ -134,20 +153,7 @@ if($view !== 'danas') {
 
         <?php } else { ?>
         <!-- TABLE TABS (Svi / Zakazani / Urađeni) -->
-        <div class="pg-toolbar" style="margin-top:1rem;">
-            <form method="get" class="search-form">
-                <input type="hidden" name="view" value="<?= htmlspecialchars($view) ?>">
-                <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
-                       placeholder="Pretraži po usluzi, korisniku, datumu...">
-                <button class="search-btn" type="submit">Traži</button>
-            </form>
-        </div>
-
-        <?php if($q!=='') { ?>
-        <p class="search-info"><?= $total ?> rezultata za „<?= htmlspecialchars($q) ?>" — <a href="termini.php?view=<?= $view ?>">Poništi</a></p>
-        <?php } ?>
-
-        <div class="tbl-wrap">
+        <div class="tbl-wrap" style="margin-top:1.2rem;">
             <table>
                 <thead>
                     <tr>

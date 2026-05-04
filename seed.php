@@ -26,16 +26,21 @@ INSERT IGNORE INTO usluga (UslugaId,Cena,Trajanje,Opis,Aktivna) VALUES
 ('Nadogradnja',      6000, 120, 'Nadogradnja prirodnom ili sintetičkom kosom', 0);
 
 INSERT IGNORE INTO termin (UslugaId,KorisnikId,Datum,Vreme,KorisnikFrizerId,Uradjeno) VALUES
-('Šišanje muško',    'Stefan', '2026-05-05', 18, 'Milica', 0),
-('Šišanje žensko',   'Ana',    '2026-05-05', 22, 'Petar',  0),
-('Farbanje kose',    'Maja',   '2026-05-06', 20, 'Milica', 0),
-('Pranje i feniranje','Jelena','2026-05-06', 28, 'Petar',  0),
-('Highlights',       'Marko',  '2026-05-07', 18, 'Milica', 0),
-('Šišanje muško',    'Nikola', '2026-05-07', 24, 'Petar',  0),
-('Tretman kose',     'Ana',    '2026-05-08', 18, 'Milica', 0),
-('Keratin tretman',  'Maja',   '2026-05-08', 22, 'Petar',  0),
-('Šišanje žensko',   'Jelena', '2026-04-30', 18, 'Milica', 1),
-('Farbanje kose',    'Stefan', '2026-04-28', 20, 'Petar',  1);
+-- Danas
+('Šišanje muško',      'Stefan', CURDATE(), 18, 'Milica', 0),
+('Pranje i feniranje', 'Ana',    CURDATE(), 20, 'Petar',  0),
+('Highlights',         'Maja',   CURDATE(), 22, 'Milica', 0),
+('Tretman kose',       'Jelena', CURDATE(), 26, 'Petar',  0),
+('Šišanje žensko',     'Marko',  CURDATE(), 28, 'Milica', 1),
+-- Sutra i dalje
+('Šišanje muško',      'Nikola', DATE_ADD(CURDATE(),INTERVAL 1 DAY), 18, 'Petar',  0),
+('Farbanje kose',      'Ana',    DATE_ADD(CURDATE(),INTERVAL 1 DAY), 20, 'Milica', 0),
+('Keratin tretman',    'Maja',   DATE_ADD(CURDATE(),INTERVAL 2 DAY), 18, 'Petar',  0),
+('Highlights',         'Stefan', DATE_ADD(CURDATE(),INTERVAL 2 DAY), 24, 'Milica', 0),
+('Šišanje žensko',     'Jelena', DATE_ADD(CURDATE(),INTERVAL 3 DAY), 22, 'Petar',  0),
+-- Prethodni (urađeni)
+('Šišanje žensko',     'Jelena', DATE_SUB(CURDATE(),INTERVAL 2 DAY), 18, 'Milica', 1),
+('Farbanje kose',      'Stefan', DATE_SUB(CURDATE(),INTERVAL 4 DAY), 20, 'Petar',  1);
 ";
 
 $conn->multi_query($sql);

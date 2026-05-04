@@ -27,7 +27,6 @@
 /* Offset za sadržaj ispod fixed navbara */
 body { padding-top: 68px; }
 body.index-page { padding-top: 0; }
-body.kontakt-page { padding-top: 0; }
 
 .kn-brand {
     text-decoration: none;
@@ -1386,20 +1385,20 @@ select:focus, input:focus {
 }
 .ter-cta-btn svg { flex-shrink: 0; }
 
-.ter-separator {
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    margin: 2rem 0 0;
+.ter-search-wrap {
+    margin-bottom: 1.4rem;
 }
 
 .ter-tabs {
     display: flex;
     gap: 0.4rem;
-    margin-top: 2rem;
     border-bottom: 1px solid rgba(255,255,255,0.07);
     padding-bottom: 0;
 }
 .ter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     padding: 0.55rem 1.2rem;
     font-family: 'Jost', sans-serif;
     font-size: 0.72rem;
@@ -1430,8 +1429,8 @@ select:focus, input:focus {
     background: rgba(212,168,40,0.04);
     border: 1px solid rgba(212,168,40,0.15);
     border-radius: 12px;
-    padding: 1.4rem 1.6rem;
-    margin-bottom: 2rem;
+    padding: 1.6rem 1.8rem;
+    margin-top: 1.6rem;
 }
 .today-header {
     display: flex;
@@ -1896,7 +1895,9 @@ select:focus, input:focus {
 /* ── Kontakt stranica (kp-* layout) ─────────────────── */
 .kp-page {
     min-height: 100vh;
-    background: #0e0d0a;
+    background:
+        linear-gradient(rgba(14,13,10,0.96), rgba(14,13,10,0.96)),
+        url('salon1.jpg') center/cover fixed;
 }
 
 .kp-header {
