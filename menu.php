@@ -1,5 +1,5 @@
 <?php
-  require_once 'sesija.php';
+  if(session_status() === PHP_SESSION_NONE) session_start();
   if(isset($_SESSION['nivo'])) $nivo=$_SESSION['nivo'];
   else $nivo='0';
 ?>
