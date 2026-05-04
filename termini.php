@@ -4,29 +4,37 @@ if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
   header('Location: nemaovlascenje.html');
 include 'konekcija.php';
 
+$danas = date('Y-m-d');
+
+// Termini danas (samo za ulogovanog korisnika)
+if($_SESSION['nivo']==1)
+  $whDanas = "where KorisnikId='".$conn->real_escape_string($_SESSION['korisnik'])."' and Datum='$danas'";
+else if($_SESSION['nivo']==2)
+  $whDanas = "where KorisnikFrizerId='".$conn->real_escape_string($_SESSION['korisnik'])."' and Datum='$danas'";
+else
+  $whDanas = "where Datum='$danas'";
+$resDanas = $conn->query("select * from termin $whDanas order by Vreme");
+
+// Svi termini sa filterom
 $q      = trim($_GET['q'] ?? '');
 $status = $_GET['status'] ?? '';
 $perPage = 15;
-$page = max(1, (int)($_GET['page'] ?? 1));
+$page   = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $perPage;
 
 if($_SESSION['nivo']==1)      $wh = "where KorisnikId='".$conn->real_escape_string($_SESSION['korisnik'])."'";
 else if($_SESSION['nivo']==2) $wh = "where KorisnikFrizerId='".$conn->real_escape_string($_SESSION['korisnik'])."'";
 else                           $wh = "where 1=1";
-
-if($status === 'ceka')   $wh .= " and Uradjeno=0";
-if($status === 'uradjeno') $wh .= " and Uradjeno=1";
-
-if($q !== '') {
+if($status==='ceka')    $wh .= " and Uradjeno=0";
+if($status==='uradjeno') $wh .= " and Uradjeno=1";
+if($q!=='') {
   $esc = $conn->real_escape_string($q);
-  $wh .= " and (UslugaId like '%$esc%' or KorisnikId like '%$esc%'
-           or KorisnikFrizerId like '%$esc%' or Datum like '%$esc%')";
+  $wh .= " and (UslugaId like '%$esc%' or KorisnikId like '%$esc%' or KorisnikFrizerId like '%$esc%' or Datum like '%$esc%')";
 }
-
-$total = $conn->query("select count(*) from termin $wh")->fetch_row()[0];
-$pages = (int)ceil($total / $perPage);
+$total  = $conn->query("select count(*) from termin $wh")->fetch_row()[0];
+$pages  = (int)ceil($total / $perPage);
 $result = $conn->query("select * from termin $wh order by Datum desc, Vreme limit $perPage offset $offset");
-$qParam = ($q !== '' ? '&q='.urlencode($q) : '').($status !== '' ? '&status='.urlencode($status) : '');
+$qParam = ($q!==''?'&q='.urlencode($q):'').($status!==''?'&status='.urlencode($status):'');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,6 +61,62 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($status !== '' ? '&status='.ur
         </div>
     </header>
     <div class="pg-wrap">
+
+        <!-- DANAS -->
+        <div class="today-section">
+            <div class="today-header">
+                <div class="today-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Danas — <?= date('d.m.Y.') ?>
+                </div>
+                <?php if($_SESSION['nivo']>='1') { ?>
+                <a class="ct-btn" href="ternovi.php" style="font-size:0.62rem;padding:0.45rem 1.1rem;">+ Zakaži</a>
+                <?php } ?>
+            </div>
+            <?php
+            $todayRows = [];
+            while($d = $resDanas->fetch_assoc()) $todayRows[] = $d;
+            if(count($todayRows) === 0) { ?>
+            <p class="today-empty">Nema zakazanih termina za danas.</p>
+            <?php } else { ?>
+            <div class="today-cards">
+                <?php foreach($todayRows as $d) {
+                    $tv = sprintf('%02d:%02d', (int)($d['Vreme']/2), ($d['Vreme']%2)*30);
+                    $done = $d['Uradjeno']==1;
+                ?>
+                <div class="today-card <?= $done ? 'today-card--done' : '' ?>">
+                    <div class="today-card-time"><?= $tv ?></div>
+                    <div class="today-card-info">
+                        <div class="today-card-usluga"><?= htmlspecialchars($d['UslugaId']) ?></div>
+                        <div class="today-card-meta">
+                            <?php if($_SESSION['nivo']!=1) { ?>
+                            <span><?= htmlspecialchars($d['KorisnikId']) ?></span>
+                            <span class="today-card-dot">·</span>
+                            <?php } ?>
+                            <span>Frizer: <?= htmlspecialchars($d['KorisnikFrizerId']) ?></span>
+                        </div>
+                    </div>
+                    <div class="today-card-actions">
+                        <?= $done
+                            ? '<span class="srv-badge srv-badge--on">Urađeno</span>'
+                            : '<span class="srv-badge srv-badge--off">Čeka</span>' ?>
+                        <?php if(!$done && $_SESSION['nivo']>='2') { ?>
+                        <a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?=$d['TerminId']?>">Urađeno</a>
+                        <?php } ?>
+                        <?php if(!$done && $_SESSION['nivo']>='1') { ?>
+                        <a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?=$d['TerminId']?>">Otkaži</a>
+                        <?php } ?>
+                    </div>
+                </div>
+                <?php } ?>
+            </div>
+            <?php } ?>
+        </div>
+
+        <!-- SVI TERMINI -->
+        <div class="today-title" style="margin-bottom:1rem;">Svi termini</div>
         <div class="pg-toolbar">
             <form method="get" class="search-form">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
@@ -64,16 +128,13 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($status !== '' ? '&status='.ur
                 </select>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
-            <?php if($_SESSION['nivo']>='1') { ?>
-            <a class="ct-btn" href="ternovi.php">+ Zakaži termin</a>
-            <?php } ?>
         </div>
-
-        <?php if($q !== '') { ?>
-        <p class="search-info">Rezultati za: <strong><?= htmlspecialchars($q) ?></strong>
-            (<?= $total ?>) — <a href="termini.php">Poništi pretragu</a></p>
+        <?php if($q!==''||$status!=='') { ?>
+        <p class="search-info">
+            <?= $total ?> rezultata
+            — <a href="termini.php">Poništi</a>
+        </p>
         <?php } ?>
-
         <div class="tbl-wrap">
             <table>
                 <thead>
@@ -89,9 +150,9 @@ $rows = 0;
 while($data=$result->fetch_assoc()) {
   $rows++;
   $tv = sprintf('%02d:%02d', (int)($data['Vreme']/2), ($data['Vreme']%2)*30);
-  $done = $data['Uradjeno'] == 1;
+  $done = $data['Uradjeno']==1;
 ?>
-                    <tr class="<?= $done ? 'tr--done' : '' ?>">
+                    <tr class="<?= $done?'tr--done':'' ?>">
                         <td><?=$data['TerminId']?></td>
                         <td><?= htmlspecialchars($data['UslugaId']) ?></td>
                         <td><?= htmlspecialchars($data['KorisnikId']) ?></td>
@@ -101,16 +162,14 @@ while($data=$result->fetch_assoc()) {
                         <td><?= $done
                             ? '<span class="srv-badge srv-badge--on">Urađeno</span>'
                             : '<span class="srv-badge srv-badge--off">Čeka</span>' ?></td>
-                        <td>
-                            <div class="tbl-actions">
-                            <?php if(!$done && $_SESSION['nivo']>='1') { ?>
+                        <td><div class="tbl-actions">
+                            <?php if(!$done&&$_SESSION['nivo']>='1') { ?>
                                 <a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?=$data['TerminId']?>">Otkaži</a>
                             <?php } ?>
-                            <?php if(!$done && $_SESSION['nivo']>='2') { ?>
+                            <?php if(!$done&&$_SESSION['nivo']>='2') { ?>
                                 <a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?=$data['TerminId']?>">Urađeno</a>
                             <?php } ?>
-                            </div>
-                        </td>
+                        </div></td>
                     </tr>
 <?php } ?>
 <?php if($rows===0) { ?>
@@ -119,7 +178,7 @@ while($data=$result->fetch_assoc()) {
                 </tbody>
             </table>
         </div>
-        <?php if($pages > 1) { ?>
+        <?php if($pages>1) { ?>
         <div class="pg-pagination">
             <?php if($page>1) { ?><a class="pg-page" href="?page=<?=$page-1?><?=$qParam?>">&larr;</a><?php } ?>
             <?php for($i=1;$i<=$pages;$i++) { ?>
