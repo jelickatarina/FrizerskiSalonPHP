@@ -1,7 +1,7 @@
 <?php
   session_start();
   include 'konekcija.php';
-  if (!isset($_SESSION['korisnik']) || $_SESSION['nivo'] != '1')
+  if (!isset($_SESSION['korisnik']) || $_SESSION['nivo'] < '1')
     header('Location: nemaovlascenje.html');
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
