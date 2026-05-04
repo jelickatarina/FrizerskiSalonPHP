@@ -862,6 +862,9 @@ body.kontakt-page {
     align-items: center;
     justify-content: center;
     padding: 3rem 1.5rem;
+    background:
+        linear-gradient(rgba(14,13,10,0.94), rgba(14,13,10,0.94)),
+        url('farhad-ibrahimzade-V2HDOQTJh3o-unsplash.jpg') center/cover fixed;
 }
 
 .auth-card {
@@ -1240,7 +1243,7 @@ select:focus, input:focus {
     background-position: right 0.5rem center;
     white-space: nowrap;
     flex-shrink: 0;
-    width: auto;
+    min-width: 148px;
 }
 .filter-select:focus {
     outline: none;
@@ -1926,14 +1929,15 @@ select:focus, input:focus {
     gap: 3rem;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 0 2rem 5rem;
-    align-items: start;
+    padding: 0 2rem 2rem;
+    align-items: stretch;
 }
 
 .kp-left {
     display: flex;
     flex-direction: column;
     gap: 1.8rem;
+    justify-content: space-between;
 }
 
 .kp-right {

@@ -1,6 +1,6 @@
 <?php
 require_once 'sesija.php';
-if(!isset($_SESSION['korisnik']) || $_SESSION['nivo'] != '9')
+if(!isset($_SESSION['korisnik']) || (int)$_SESSION['nivo'] < 9)
   die("Pristup odbijen.");
 include 'konekcija.php';
 
@@ -13,7 +13,10 @@ INSERT IGNORE INTO korisnik (KorisnikId,Lozinka,Ime,Prezime,DatumRodjenja,Telefo
 ('Maja','Maja123','Maja','Petrović','1998-08-30','0633333333','maja.p@gmail.com',1),
 ('Nikola','Nikola123','Nikola','Milošević','1991-12-01','0644444444','nikola.m@gmail.com',1),
 ('Jelena','Jelena123','Jelena','Ristić','2000-02-14','0655555555','jelena.r@gmail.com',1),
-('Marko','Marko123','Marko','Lazić','1996-06-20','0666666666','marko.l@gmail.com',1);
+('Marko','Marko123','Marko','Lazić','1996-06-20','0666666666','marko.l@gmail.com',1),
+('Ivana','Ivana123','Ivana','Kovačević','1997-09-11','0677777777','ivana.k@gmail.com',1),
+('Luka','Luka123','Luka','Savić','1994-03-25','0688888888','luka.s@gmail.com',1),
+('Sara','Sara123','Sara','Đukić','2001-07-08','0699999999','sara.dj@gmail.com',1);
 
 INSERT IGNORE INTO usluga (UslugaId,Cena,Trajanje,Opis,Aktivna) VALUES
 ('Šišanje muško',    1200, 30,  'Klasično muško šišanje sa stilizovanjem', 1),
@@ -48,7 +51,7 @@ do { $conn->use_result(); } while ($conn->more_results() && $conn->next_result()
 
 echo "<style>body{font-family:sans-serif;background:#100f0c;color:#f0ece4;padding:2rem;}</style>";
 echo "<h2>Seed završen!</h2>";
-echo "<p>Dodato: 8 korisnika, 8 usluga, 10 termina (INSERT IGNORE - duplikati se preskačaju).</p>";
+echo "<p>Dodato: 11 korisnika, 8 usluga, 12 termina (INSERT IGNORE - duplikati se preskačaju).</p>";
 echo "<p><a href='korisnici.php' style='color:#d4a828'>→ Korisnici</a> &nbsp;
       <a href='usluge.php' style='color:#d4a828'>→ Usluge</a> &nbsp;
       <a href='termini.php' style='color:#d4a828'>→ Termini</a></p>";

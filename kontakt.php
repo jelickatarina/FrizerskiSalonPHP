@@ -120,10 +120,6 @@
         </iframe>
       </div>
 
-      <a href="<?= isset($_SESSION['korisnik']) ? 'ternovi.php' : 'prijava.php' ?>" class="ct-btn">
-        Zakaži termin
-      </a>
-
     </div>
 
     <!-- Desna kolona: forma -->
@@ -186,6 +182,14 @@
     </div>
 
   </div>
+
+  <!-- CTA ispod grida, centrirano -->
+  <div style="text-align:center; padding: 0 2rem 4rem;">
+    <a href="<?= isset($_SESSION['korisnik']) ? 'ternovi.php' : 'prijava.php' ?>" class="ct-btn">
+      Zakaži termin
+    </a>
+  </div>
+
 </div>
 
 <?php include 'footer.php'; ?>

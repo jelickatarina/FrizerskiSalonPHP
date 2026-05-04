@@ -70,31 +70,22 @@ if($view !== 'danas') {
     </header>
     <div class="pg-wrap">
 
-        <!-- CTA zakaži -->
-        <div class="ter-cta">
-            <a class="ter-cta-btn" href="ternovi.php">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
-                </svg>
-                Zakaži novi termin
-            </a>
-        </div>
-
-        <!-- PRETRAGA (iznad tabova, važi za sve) -->
-        <div class="ter-search-wrap">
+        <!-- PRETRAGA + CTA u jednom redu -->
+        <div class="pg-toolbar ter-search-wrap">
             <form method="get" class="search-form">
                 <input type="hidden" name="view" value="<?= htmlspecialchars($view) ?>">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži po usluzi, korisniku<?= $view!=='danas' ? ', datumu' : '' ?>...">
                 <button class="search-btn" type="submit">Traži</button>
             </form>
-            <?php if($q!=='') { ?>
-            <p class="search-info" style="margin-top:0.5rem;">
-                <?= $view==='danas' ? count($todayRows) : $total ?> rezultata za „<?= htmlspecialchars($q) ?>"
-                — <a href="termini.php?view=<?= $view ?>">Poništi</a>
-            </p>
-            <?php } ?>
+            <a class="ct-btn" href="ternovi.php">+ Zakaži termin</a>
         </div>
+        <?php if($q!=='') { ?>
+        <p class="search-info">
+            <?= $view==='danas' ? count($todayRows) : $total ?> rezultata za „<?= htmlspecialchars($q) ?>"
+            — <a href="termini.php?view=<?= $view ?>">Poništi</a>
+        </p>
+        <?php } ?>
 
         <!-- TABS -->
         <div class="ter-tabs">
