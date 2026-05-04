@@ -7,35 +7,39 @@ $danas = date('Y-m-d');
 $nivo  = $_SESSION['nivo'];
 $me    = $_SESSION['korisnik'];
 
-$view = $_GET['view'] ?? 'svi';
+$view = $_GET['view'] ?? 'danas';
 $q    = trim($_GET['q'] ?? '');
 
-// Baza WHERE za ulogovanog korisnika
 if($nivo==1)      $baseWh = "KorisnikId='".$conn->real_escape_string($me)."'";
 else if($nivo==2) $baseWh = "KorisnikFrizerId='".$conn->real_escape_string($me)."'";
 else              $baseWh = "1=1";
 
-// Termini danas
-$resDanas = $conn->query("select * from termin where $baseWh and Datum='$danas' order by Vreme");
-$todayRows = [];
-while($d=$resDanas->fetch_assoc()) $todayRows[] = $d;
-
-// Tabela (zakazani / urađeni)
-$perPage = 15;
-$page    = max(1, (int)($_GET['page'] ?? 1));
-$offset  = ($page-1)*$perPage;
-
-$wh = "where $baseWh";
-if($view==='zakazani') $wh .= " and Uradjeno=0";
-if($view==='uradjeni')  $wh .= " and Uradjeno=1";
-if($q!=='') {
-  $esc = $conn->real_escape_string($q);
-  $wh .= " and (UslugaId like '%$esc%' or KorisnikId like '%$esc%' or KorisnikFrizerId like '%$esc%' or Datum like '%$esc%')";
+// Danas tab data
+if($view === 'danas') {
+    $resDanas = $conn->query("select * from termin where $baseWh and Datum='$danas' order by Vreme");
+    $todayRows = [];
+    while($d=$resDanas->fetch_assoc()) $todayRows[] = $d;
 }
-$total  = $conn->query("select count(*) from termin $wh")->fetch_row()[0];
-$pages  = (int)ceil($total/$perPage);
-$result = $conn->query("select * from termin $wh order by Datum desc, Vreme limit $perPage offset $offset");
-$qParam = ($q!==''?'&q='.urlencode($q):'');
+
+// Table tabs data
+$result = null; $total = 0; $pages = 0;
+if($view !== 'danas') {
+    $perPage = 15;
+    $page    = max(1, (int)($_GET['page'] ?? 1));
+    $offset  = ($page-1)*$perPage;
+
+    $wh = "where $baseWh";
+    if($view==='zakazani') $wh .= " and Uradjeno=0";
+    if($view==='uradjeni')  $wh .= " and Uradjeno=1";
+    if($q!=='') {
+        $esc = $conn->real_escape_string($q);
+        $wh .= " and (UslugaId like '%$esc%' or KorisnikId like '%$esc%' or KorisnikFrizerId like '%$esc%' or Datum like '%$esc%')";
+    }
+    $total  = $conn->query("select count(*) from termin $wh")->fetch_row()[0];
+    $pages  = (int)ceil($total/$perPage);
+    $result = $conn->query("select * from termin $wh order by Datum desc, Vreme limit $perPage offset $offset");
+    $qParam = ($q!==''?'&q='.urlencode($q):'');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -73,13 +77,24 @@ $qParam = ($q!==''?'&q='.urlencode($q):'');
             </a>
         </div>
 
-        <!-- DANAS -->
-        <div class="today-section">
+        <!-- TABS -->
+        <div class="ter-tabs">
+            <a class="ter-tab <?= $view==='danas'?'ter-tab--active':'' ?>" href="termini.php?view=danas">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Danas
+            </a>
+            <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi">Svi</a>
+            <a class="ter-tab <?= $view==='zakazani'?'ter-tab--active':'' ?>" href="termini.php?view=zakazani">Zakazani</a>
+            <a class="ter-tab <?= $view==='uradjeni'?'ter-tab--active':'' ?>" href="termini.php?view=uradjeni">Urađeni</a>
+        </div>
+
+        <?php if($view === 'danas') { ?>
+        <!-- DANAS TAB -->
+        <div class="today-section" style="border-top:none; padding-top:0;">
             <div class="today-header">
                 <div class="today-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
                     Raspored danas — <?= date('d.m.Y.') ?>
                 </div>
                 <span class="today-count"><?= count($todayRows) ?> termin<?= count($todayRows)===1?'':'a' ?></span>
@@ -117,17 +132,8 @@ $qParam = ($q!==''?'&q='.urlencode($q):'');
             <?php } ?>
         </div>
 
-        <!-- SEPARATOR -->
-        <div class="ter-separator"></div>
-
-        <!-- TABS -->
-        <div class="ter-tabs">
-            <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi">Svi</a>
-            <a class="ter-tab <?= $view==='zakazani'?'ter-tab--active':'' ?>" href="termini.php?view=zakazani">Zakazani</a>
-            <a class="ter-tab <?= $view==='uradjeni'?'ter-tab--active':'' ?>" href="termini.php?view=uradjeni">Urađeni</a>
-        </div>
-
-        <!-- TABELA -->
+        <?php } else { ?>
+        <!-- TABLE TABS (Svi / Zakazani / Urađeni) -->
         <div class="pg-toolbar" style="margin-top:1rem;">
             <form method="get" class="search-form">
                 <input type="hidden" name="view" value="<?= htmlspecialchars($view) ?>">
@@ -187,6 +193,8 @@ while($data=$result->fetch_assoc()) {
             <?php if($page<$pages) { ?><a class="pg-page" href="?view=<?=$view?>&page=<?=$page+1?><?=$qParam?>">&rarr;</a><?php } ?>
         </div>
         <?php } ?>
+        <?php } ?>
+
     </div>
 </div>
 <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
