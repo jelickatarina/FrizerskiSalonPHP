@@ -1,15 +1,13 @@
 <?php
 require_once 'sesija.php';
-if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
-  header('Location: nemaovlascenje.html');
+requireNivo('1');
 include 'konekcija.php';
 
 $danas = date('Y-m-d');
 $nivo  = $_SESSION['nivo'];
 $me    = $_SESSION['korisnik'];
 
-// Prikaz: today | zakazani | uradjeni
-$view = $_GET['view'] ?? 'today';
+$view = $_GET['view'] ?? 'svi';
 $q    = trim($_GET['q'] ?? '');
 
 // Baza WHERE za ulogovanog korisnika
@@ -119,12 +117,14 @@ $qParam = ($q!==''?'&q='.urlencode($q):'');
             <?php } ?>
         </div>
 
+        <!-- SEPARATOR -->
+        <div class="ter-separator"></div>
+
         <!-- TABS -->
         <div class="ter-tabs">
-            <a class="ter-tab <?= $view==='today'?'ter-tab--active':'' ?>" href="termini.php?view=today">Pregled</a>
+            <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi">Svi</a>
             <a class="ter-tab <?= $view==='zakazani'?'ter-tab--active':'' ?>" href="termini.php?view=zakazani">Zakazani</a>
             <a class="ter-tab <?= $view==='uradjeni'?'ter-tab--active':'' ?>" href="termini.php?view=uradjeni">Urađeni</a>
-            <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi">Svi</a>
         </div>
 
         <!-- TABELA -->

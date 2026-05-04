@@ -1386,6 +1386,12 @@ select:focus, input:focus {
 }
 .ter-cta-btn svg { flex-shrink: 0; }
 
+.ter-separator {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 2rem 0 0;
+}
+
 .ter-tabs {
     display: flex;
     gap: 0.4rem;

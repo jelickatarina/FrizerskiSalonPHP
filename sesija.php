@@ -14,3 +14,25 @@ if (isset($_SESSION['korisnik'])) {
     }
     $_SESSION['last_activity'] = time();
 }
+
+function requireNivo($min) {
+    if (!isset($_SESSION['korisnik'])) {
+        header('Location: prijava.php');
+        exit;
+    }
+    if ($_SESSION['nivo'] < $min) {
+        header('Location: nemaovlascenje.html');
+        exit;
+    }
+}
+
+function requireNivoExact($nivo) {
+    if (!isset($_SESSION['korisnik'])) {
+        header('Location: prijava.php');
+        exit;
+    }
+    if ($_SESSION['nivo'] != $nivo) {
+        header('Location: nemaovlascenje.html');
+        exit;
+    }
+}

@@ -1,7 +1,6 @@
 <?php
 require_once 'sesija.php';
-if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'2'))
-  header('Location: nemaovlascenje.html');
+requireNivo('2');
 include 'konekcija.php';
 
 $nivoLabel = ['0'=>'Blokiran','1'=>'Klijent','2'=>'Frizer','9'=>'Admin'];

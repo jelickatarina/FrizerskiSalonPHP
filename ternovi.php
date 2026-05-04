@@ -1,8 +1,7 @@
 <?php
 require_once 'sesija.php';
   include 'konekcija.php';
-  if (!isset($_SESSION['korisnik']) || $_SESSION['nivo'] < '1')
-    header('Location: nemaovlascenje.html');
+  requireNivo('1');
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $poruka  = "";

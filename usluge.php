@@ -1,7 +1,6 @@
 <?php
 require_once 'sesija.php';
-if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1'))
-  header('Location: nemaovlascenje.html');
+requireNivo('1');
 include 'konekcija.php';
 
 $q       = trim($_GET['q'] ?? '');

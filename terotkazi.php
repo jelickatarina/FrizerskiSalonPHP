@@ -3,8 +3,7 @@ if(!isset($_REQUEST['p'])) echo "Neispravan poziv strane";
 else 
 {
 require_once 'sesija.php'; 
-  if(!isset($_SESSION['korisnik'])||($_SESSION['nivo']<'1')) 
-    header('Location: nemaovlascenje.html');
+  requireNivo('1');
 
   $termin = $_REQUEST['p']; 
   include 'konekcija.php';
