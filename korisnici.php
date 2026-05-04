@@ -99,16 +99,6 @@ while($data=$result->fetch_assoc()) {
                         <span class="usr-detail-label">Telefon</span>
                         <span class="usr-detail-val"><?= htmlspecialchars($data['Telefon']) ?></span>
                     </div>
-                    <div class="usr-detail">
-                        <span class="usr-detail-label">Datum rođenja</span>
-                        <span class="usr-detail-val"><?= htmlspecialchars($data['DatumRodjenja']) ?></span>
-                    </div>
-                    <?php if($_SESSION['nivo']=='9') { ?>
-                    <div class="usr-detail">
-                        <span class="usr-detail-label">Lozinka</span>
-                        <span class="usr-detail-val"><?= htmlspecialchars($data['Lozinka']) ?></span>
-                    </div>
-                    <?php } ?>
                 </div>
                 <?php if($_SESSION['nivo']=='9') { ?>
                 <a class="srv-card-edit" href="korizmeni.php?p=<?= urlencode($data['KorisnikId']) ?>">Izmeni</a>
