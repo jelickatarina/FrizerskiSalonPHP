@@ -59,7 +59,6 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($uloga !== '' ? '&uloga='.urle
                     <option value="1" <?= $uloga==='1'?'selected':'' ?>>Klijent</option>
                     <option value="2" <?= $uloga==='2'?'selected':'' ?>>Frizer</option>
                     <option value="9" <?= $uloga==='9'?'selected':'' ?>>Admin</option>
-                    <option value="0" <?= $uloga==='0'?'selected':'' ?>>Blokiran</option>
                 </select>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
