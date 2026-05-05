@@ -1012,6 +1012,53 @@ body.kontakt-page {
     max-width: 580px;
 }
 
+/* ── Profile tabs ─────────────────────────────────── */
+.prof-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+}
+
+.prof-tab-nav {
+    display: flex;
+    gap: 1.8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: -0.4rem;
+}
+
+.prof-tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    margin-bottom: -1px;
+    padding: 0 0 0.75rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.prof-tab-btn:hover {
+    color: rgba(255,255,255,0.6);
+}
+
+.prof-tab-btn.active {
+    color: #d4a828;
+    border-bottom-color: rgba(212,168,40,0.55);
+}
+
+.prof-tab-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.prof-tab-panel[hidden] { display: none; }
+
 .auth-header {
     display: flex;
     flex-direction: column;

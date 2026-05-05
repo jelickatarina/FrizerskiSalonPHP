@@ -71,17 +71,18 @@ require_once 'sesija.php';
       <div class="ct-field">
         <label for="korisnik">Korisničko ime</label>
         <input type="text" id="korisnik" name="korisnik"
-               value="<?= htmlspecialchars($korisnik) ?>"
-               placeholder="Vaše korisničko ime" autocomplete="username">
+               value="<?= htmlspecialchars($korisnik) ?>" autocomplete="username">
       </div>
       <div class="ct-field">
         <label for="lozinka">Lozinka</label>
-        <input type="password" id="lozinka" name="lozinka"
-               placeholder="••••••••" autocomplete="current-password">
+        <input type="password" id="lozinka" name="lozinka" autocomplete="current-password">
       </div>
       <button type="submit" class="auth-btn">Prijavi se</button>
     </form>
 
+    <p class="auth-switch">
+      <a href="zaboravljena_lozinka.php">Zaboravili ste lozinku?</a>
+    </p>
     <p class="auth-switch">
       Nemate nalog? <a href="registracija.php">Registrujte se</a>
     </p>
