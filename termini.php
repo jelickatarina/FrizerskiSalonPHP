@@ -31,7 +31,7 @@ function searchClause($esc, $inclDatum = false) {
 
 // --- DANAS tab ---
 if ($view === 'danas') {
-    $wh = "WHERE $baseWh AND t.Datum='$danas' AND t.Potvrdjeno=1";
+    $wh = "WHERE $baseWh AND t.Datum='$danas' AND t.Potvrdjeno=1 AND t.Uradjeno=0 AND (t.Otkazano IS NULL OR t.Otkazano=0)";
     if ($q !== '') {
         $esc = $conn->real_escape_string($q);
         $wh .= searchClause($esc, false);
@@ -46,7 +46,7 @@ if ($view === 'zahtevi') {
     $perPage = 15;
     $page    = max(1, (int)($_GET['page'] ?? 1));
     $offset  = ($page-1)*$perPage;
-    $wh = "WHERE $baseWh AND t.Potvrdjeno=0";
+    $wh = "WHERE $baseWh AND t.Potvrdjeno=0 AND (t.Otkazano IS NULL OR t.Otkazano=0)";
     if ($q !== '') {
         $esc = $conn->real_escape_string($q);
         $wh .= searchClause($esc, true);
@@ -62,9 +62,10 @@ if (!in_array($view, ['danas', 'zahtevi'])) {
     $perPage = 15;
     $page    = max(1, (int)($_GET['page'] ?? 1));
     $offset  = ($page-1)*$perPage;
-    $wh = "WHERE $baseWh AND t.Potvrdjeno=1";
-    if ($view === 'zakazani') $wh .= " AND t.Uradjeno=0";
-    if ($view === 'uradjeni')  $wh .= " AND t.Uradjeno=1";
+    if ($view === 'svi')      $wh = "WHERE $baseWh AND (t.Potvrdjeno=1 OR t.Otkazano=1)";
+    else                      $wh = "WHERE $baseWh AND t.Potvrdjeno=1";
+    if ($view === 'zakazani') $wh .= " AND t.Uradjeno=0 AND (t.Otkazano IS NULL OR t.Otkazano=0)";
+    if ($view === 'uradjeni') $wh .= " AND t.Uradjeno=1";
     if ($q !== '') {
         $esc = $conn->real_escape_string($q);
         $wh .= searchClause($esc, true);
@@ -199,9 +200,8 @@ if ($nivo === 9) {
                         </div>
                     </div>
                     <div class="today-card-actions">
-                        <?= $done ? '<span class="srv-badge srv-badge--on">Urađeno</span>' : '<span class="srv-badge srv-badge--off">Čeka</span>' ?>
-                        <?php if (!$done && $nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $d['TerminId'] ?>">Urađeno</a><?php endif; ?>
-                        <?php if (!$done && $nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $d['TerminId'] ?>">Otkaži</a><?php endif; ?>
+                        <?php if ($nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $d['TerminId'] ?>">Urađeno</a><?php endif; ?>
+                        <?php if ($nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $d['TerminId'] ?>">Otkaži</a><?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -283,8 +283,9 @@ if ($nivo === 9) {
                 $rows = 0;
                 while ($data = $result->fetch_assoc()):
                     $rows++;
-                    $tv   = sprintf('%02d:%02d', (int)($data['Vreme']/2), ($data['Vreme']%2)*30);
-                    $done = $data['Uradjeno'] == 1;
+                    $tv        = sprintf('%02d:%02d', (int)($data['Vreme']/2), ($data['Vreme']%2)*30);
+                    $done      = $data['Uradjeno'] == 1;
+                    $cancelled = $data['Otkazano'] == 1;
                     $displayName = ($data['Ime'] && $data['Prezime']) ? $data['Ime'].' '.$data['Prezime'] : $data['KorisnikId'];
                 ?>
                     <tr class="<?= $done ? 'tr--done' : '' ?>">
@@ -304,10 +305,14 @@ if ($nivo === 9) {
                         <td><?= htmlspecialchars($data['Datum']) ?></td>
                         <td><?= $tv ?></td>
                         <td><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
-                        <td><?= $done ? '<span class="srv-badge srv-badge--on">Urađeno</span>' : '<span class="srv-badge srv-badge--off">Čeka</span>' ?></td>
+                        <td><?php
+                            if ($cancelled) echo '<span class="srv-badge srv-badge--off">Otkazano</span>';
+                            elseif ($done)  echo '<span class="srv-badge srv-badge--on">Urađeno</span>';
+                            else            echo '<span class="srv-badge srv-badge--off">Čeka</span>';
+                        ?></td>
                         <td><div class="tbl-actions">
-                            <?php if (!$done && $nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $data['TerminId'] ?>">Otkaži</a><?php endif; ?>
-                            <?php if (!$done && $nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $data['TerminId'] ?>">Urađeno</a><?php endif; ?>
+                            <?php if (!$done && !$cancelled && $nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $data['TerminId'] ?>">Otkaži</a><?php endif; ?>
+                            <?php if (!$done && !$cancelled && $nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $data['TerminId'] ?>">Urađeno</a><?php endif; ?>
                         </div></td>
                     </tr>
                 <?php endwhile; ?>

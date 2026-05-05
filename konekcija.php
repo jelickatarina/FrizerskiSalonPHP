@@ -30,5 +30,9 @@ if (!@$conn->query("SELECT 1 FROM termin WHERE 1=0")) {
         $conn->query("ALTER TABLE termin ADD COLUMN Potvrdjeno TINYINT NOT NULL DEFAULT 1");
         $conn->query("UPDATE termin SET Potvrdjeno=1 WHERE Potvrdjeno IS NULL");
     }
+    $colCheck2 = $conn->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='termin' AND COLUMN_NAME='Otkazano'");
+    if (!$colCheck2 || $colCheck2->num_rows === 0) {
+        $conn->query("ALTER TABLE termin ADD COLUMN Otkazano TINYINT NOT NULL DEFAULT 0");
+    }
 }
 ?>

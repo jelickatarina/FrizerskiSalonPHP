@@ -26,7 +26,9 @@
 
 /* Offset za sadržaj ispod fixed navbara */
 body { padding-top: 68px; }
-body.index-page { padding-top: 0; }
+body.index-page,
+body:has(.kp-page),
+body:has(.auth-page) { padding-top: 0; }
 
 .kn-brand {
     text-decoration: none;
@@ -857,11 +859,11 @@ body.kontakt-page {
 
 /* ── Auth stranice (prijava, registracija, zakazivanje) ── */
 .auth-page {
-    min-height: calc(100vh - 68px);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1.5rem;
+    padding: calc(68px + 3rem) 1.5rem 3rem;
     background:
         linear-gradient(rgba(14,13,10,0.94), rgba(14,13,10,0.94)),
         url('farhad-ibrahimzade-V2HDOQTJh3o-unsplash.jpg') center/cover fixed;
@@ -1917,6 +1919,7 @@ select:focus, input:focus {
 /* ── Kontakt stranica (kp-* layout) ─────────────────── */
 .kp-page {
     min-height: 100vh;
+    padding-top: 68px;
     background:
         linear-gradient(rgba(14,13,10,0.96), rgba(14,13,10,0.96)),
         url('salon1.jpg') center/cover fixed;

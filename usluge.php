@@ -4,7 +4,8 @@ requireNivo('1');
 include 'konekcija.php';
 
 $q       = trim($_GET['q'] ?? '');
-$aktivan = $_GET['aktivan'] ?? '';
+$nivo    = (int)$_SESSION['nivo'];
+$aktivan = ($nivo === 1) ? '1' : ($_GET['aktivan'] ?? '');
 $wh = "where 1=1";
 if($aktivan === '1') $wh .= " and Aktivna=1";
 if($aktivan === '0') $wh .= " and Aktivna=0";
@@ -43,11 +44,13 @@ $result = $conn->query("select * from usluga $wh order by UslugaId");
             <form method="get" class="search-form">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži usluge...">
+                <?php if($nivo >= 2): ?>
                 <select class="filter-select" name="aktivan">
                     <option value="" <?= $aktivan===''?'selected':'' ?>>Sve usluge</option>
                     <option value="1" <?= $aktivan==='1'?'selected':'' ?>>Aktivne</option>
                     <option value="0" <?= $aktivan==='0'?'selected':'' ?>>Neaktivne</option>
                 </select>
+                <?php endif; ?>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
             <?php if($_SESSION['nivo']>='2') { ?>

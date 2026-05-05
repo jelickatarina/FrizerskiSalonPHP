@@ -11,7 +11,7 @@ require_once 'sesija.php';
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $poruka="";
     $termin = trim($_REQUEST['termin']);
-    $sql = "delete from termin where TerminId=".$termin;
+    $sql = "UPDATE termin SET Otkazano=1 WHERE TerminId=".$termin;
     $conn->query($sql);
     header('Location: termini.php');
   }
