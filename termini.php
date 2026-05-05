@@ -228,9 +228,9 @@ if ($nivo === 9) {
                     $displayName = ($data['Ime'] && $data['Prezime']) ? $data['Ime'].' '.$data['Prezime'] : $data['KorisnikId'];
                 ?>
                     <tr>
-                        <td><?= $data['TerminId'] ?></td>
-                        <td><?= htmlspecialchars($data['UslugaId']) ?></td>
-                        <td>
+                        <td data-label="#"><?= $data['TerminId'] ?></td>
+                        <td data-label="Usluga"><?= htmlspecialchars($data['UslugaId']) ?></td>
+                        <td data-label="Klijent">
                             <div><?= htmlspecialchars($displayName) ?></div>
                             <?php if ($data['KTel'] || $data['KEmail']): ?>
                             <div class="tbl-contact">
@@ -239,12 +239,12 @@ if ($nivo === 9) {
                             </div>
                             <?php endif; ?>
                         </td>
-                        <td><?= htmlspecialchars($data['Datum']) ?></td>
-                        <td><?= $tv ?></td>
-                        <td><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
-                        <td><?= $data['CenaNaplacena'] !== null ? number_format((float)$data['CenaNaplacena'], 0, '.', '.') . ' RSD' : '—' ?></td>
-                        <td><span class="srv-badge srv-badge--pending">Čeka odobrenje</span></td>
-                        <td><div class="tbl-actions">
+                        <td data-label="Datum"><?= htmlspecialchars($data['Datum']) ?></td>
+                        <td data-label="Vreme"><?= $tv ?></td>
+                        <td data-label="Frizer"><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
+                        <td data-label="Cena"><?= $data['CenaNaplacena'] !== null ? number_format((float)$data['CenaNaplacena'], 0, '.', '.') . ' RSD' : '—' ?></td>
+                        <td data-label="Status"><span class="srv-badge srv-badge--pending">Čeka odobrenje</span></td>
+                        <td data-label=""><div class="tbl-actions">
                             <a class="tbl-btn tbl-btn--green" href="potvrdi.php?p=<?= $data['TerminId'] ?>">Potvrdi</a>
                             <a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $data['TerminId'] ?>">Odbij</a>
                         </div></td>
@@ -290,10 +290,10 @@ if ($nivo === 9) {
                     $displayName = ($data['Ime'] && $data['Prezime']) ? $data['Ime'].' '.$data['Prezime'] : $data['KorisnikId'];
                 ?>
                     <tr class="<?= $done ? 'tr--done' : '' ?>">
-                        <?php if ($nivo !== 1): ?><td><?= $data['TerminId'] ?></td><?php endif; ?>
-                        <td><?= htmlspecialchars($data['UslugaId']) ?></td>
+                        <?php if ($nivo !== 1): ?><td data-label="#"><?= $data['TerminId'] ?></td><?php endif; ?>
+                        <td data-label="Usluga"><?= htmlspecialchars($data['UslugaId']) ?></td>
                         <?php if ($nivo !== 1): ?>
-                        <td>
+                        <td data-label="Klijent">
                             <div><?= htmlspecialchars($displayName) ?></div>
                             <?php if ($data['KTel'] || $data['KEmail']): ?>
                             <div class="tbl-contact">
@@ -303,16 +303,16 @@ if ($nivo === 9) {
                             <?php endif; ?>
                         </td>
                         <?php endif; ?>
-                        <td><?= htmlspecialchars($data['Datum']) ?></td>
-                        <td><?= $tv ?></td>
-                        <td><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
-                        <td><?= $data['CenaNaplacena'] !== null ? number_format((float)$data['CenaNaplacena'], 0, '.', '.') . ' RSD' : '—' ?></td>
-                        <td><?php
+                        <td data-label="Datum"><?= htmlspecialchars($data['Datum']) ?></td>
+                        <td data-label="Vreme"><?= $tv ?></td>
+                        <td data-label="Frizer"><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
+                        <td data-label="Cena"><?= $data['CenaNaplacena'] !== null ? number_format((float)$data['CenaNaplacena'], 0, '.', '.') . ' RSD' : '—' ?></td>
+                        <td data-label="Status"><?php
                             if ($cancelled) echo '<span class="srv-badge srv-badge--off">Otkazano</span>';
                             elseif ($done)  echo '<span class="srv-badge srv-badge--on">Urađeno</span>';
                             else            echo '<span class="srv-badge srv-badge--off">Čeka</span>';
                         ?></td>
-                        <td><div class="tbl-actions">
+                        <td data-label=""><div class="tbl-actions">
                             <?php if (!$done && !$cancelled && $nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $data['TerminId'] ?>">Otkaži</a><?php endif; ?>
                             <?php if (!$done && !$cancelled && $nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $data['TerminId'] ?>">Urađeno</a><?php endif; ?>
                         </div></td>

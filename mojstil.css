@@ -2491,6 +2491,26 @@ select:focus, input:focus {
     .kp-page       { background-attachment: scroll; }
 }
 
+/* ── Parallax sekcija "Svaki detalj" — bolji mobilni prikaz ── */
+@media (max-width: 640px) {
+    .home-parallax {
+        height: auto;
+        min-height: 220px;
+        background-position: center center;
+        background-size: cover;
+    }
+    .home-parallax-content {
+        padding: 3.5rem 1.5rem;
+    }
+    .home-parallax-quote {
+        font-size: clamp(1.5rem, 6vw, 2.2rem);
+        letter-spacing: 0.04em;
+    }
+    .home-parallax-overlay {
+        background: rgba(10,9,7,0.72);
+    }
+}
+
 /* ── Termini tabovi — horizontal scroll na mobilnom ── */
 @media (max-width: 768px) {
     .ter-tabs {
@@ -2505,6 +2525,67 @@ select:focus, input:focus {
 
 /* ── Tabele — min-width forsirava scroll umesto cimsanja ── */
 .tbl-wrap table { min-width: 640px; }
+
+/* ── Tabele → kartice na mobilnom ────────────────── */
+@media (max-width: 640px) {
+    .tbl-wrap {
+        border: none;
+        border-radius: 0;
+        overflow-x: visible;
+        background: transparent;
+    }
+    .tbl-wrap table { min-width: unset; background: transparent; border: none; }
+    .tbl-wrap table thead { display: none; }
+    .tbl-wrap table,
+    .tbl-wrap tbody { display: block; }
+    .tbl-wrap tbody tr {
+        display: block;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        margin-bottom: 0.65rem;
+        padding: 0.9rem 1rem;
+        background: rgba(255,255,255,0.025);
+        transition: border-color 0.2s;
+    }
+    .tbl-wrap tbody tr:hover { border-color: rgba(212,168,40,0.18); background: rgba(212,168,40,0.02); }
+    .tbl-wrap tr.tr--done { opacity: 0.45; }
+    .tbl-wrap tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.35rem 0;
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.045);
+        font-size: 0.82rem;
+        text-align: right;
+        white-space: normal;
+        background: transparent !important;
+    }
+    .tbl-wrap tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+    .tbl-wrap tbody td:first-child { padding-top: 0; }
+    .tbl-wrap tbody td::before {
+        content: attr(data-label);
+        font-family: 'Jost', sans-serif;
+        font-size: 0.58rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.28);
+        flex-shrink: 0;
+        text-align: left;
+        padding-right: 0.75rem;
+        padding-top: 0.12rem;
+        white-space: nowrap;
+    }
+    .tbl-wrap tbody td[data-label=""] { justify-content: flex-end; padding-top: 0.6rem; }
+    .tbl-wrap tbody td[data-label=""]::before { display: none; }
+    .tbl-actions { flex-direction: row; justify-content: flex-end; }
+    /* Prazna poruka */
+    .tbl-wrap tbody tr:has(.tbl-empty) {
+        border: none; background: none; padding: 1rem 0; margin: 0;
+    }
+    .tbl-empty { width: 100%; text-align: center; padding: 0 !important; }
+    .tbl-contact { flex-direction: column; gap: 0.15rem; align-items: flex-end; }
+}
 
 /* ── Toolbar stacking na mobilnom ─────────────────── */
 @media (max-width: 640px) {
@@ -2547,6 +2628,20 @@ select:focus, input:focus {
     .zk-combo-input,
     .search-input,
     .filter-select {
+        font-size: 16px;
+    }
+}
+
+/* ── Date input — pun width, bez iOS renderinga ──── */
+input[type="date"],
+input[type="time"] {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (max-width: 560px) {
+    input[type="date"],
+    input[type="time"] {
         font-size: 16px;
     }
 }
