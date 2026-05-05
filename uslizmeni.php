@@ -1,106 +1,129 @@
-<?php 
-if(!isset($_REQUEST['p'])) echo "Neispravan poziv strane"; 
-else 
-{
-require_once 'sesija.php'; 
-  requireNivo('2');
+<?php
+if (!isset($_REQUEST['p'])) { echo "Neispravan poziv strane"; exit; }
 
-  $usluga = $_REQUEST['p']; 
-  include 'konekcija.php';
+require_once 'sesija.php';
+requireNivo('2');
 
-  if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $poruka="";
-    $usluga = trim($_REQUEST['usluga']);
-    $cena = trim($_REQUEST['cena']);
-    $trajanje = trim($_REQUEST['trajanje']);
-    $opis = trim($_REQUEST['opis']);
-    if(isset($_REQUEST['aktivna']))
-    {
-      $aktivna = 1;
-      $aktivnaf = "checked";
+$usluga = $_REQUEST['p'];
+include 'konekcija.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $poruka   = "";
+    $usluga   = trim($_POST['usluga']   ?? '');
+    $cena     = trim($_POST['cena']     ?? '');
+    $trajanje = trim($_POST['trajanje'] ?? '');
+    $opis     = trim($_POST['opis']     ?? '');
+    $aktivna  = isset($_POST['aktivna']) ? 1 : 0;
+
+    if (strlen($usluga)   === 0)  $poruka = "Naziv usluge je obavezan.";
+    elseif (strlen($cena) === 0)  $poruka = "Unesite cenu.";
+    elseif (!is_numeric($cena))   $poruka = "Cena mora biti broj.";
+    elseif (strlen($trajanje) === 0) $poruka = "Unesite trajanje.";
+    elseif (!is_numeric($trajanje))  $poruka = "Trajanje mora biti broj.";
+    elseif (strlen($opis) === 0)  $poruka = "Unesite opis.";
+    else {
+        $upd = $conn->prepare(
+            "UPDATE usluga SET Cena=?, Trajanje=?, Opis=?, Aktivna=? WHERE UslugaId=?"
+        );
+        $upd->bind_param('ddsis', $cena, $trajanje, $opis, $aktivna, $usluga);
+        $upd->execute();
+        $upd->close();
+        header('Location: usluge.php');
+        exit;
     }
-    else
-    {
-      $aktivna = 0;
-      $aktivnaf = "";
-    }
-  
-    if(strlen($usluga)==0) $poruka="Unesite uslugu";
-    else if(strlen($cena)==0) $poruka="Unesite cenu";
-    else if(!is_numeric($cena)) $poruka="Cena je broj";
-    else if(strlen($trajanje)==0) $poruka="Unesite trajanje";
-    else if(!is_numeric($trajanje)) $poruka="Trajanje je broj";
-    else if(strlen($opis)==0) $poruka="Unesite opis";
-    else
-    {
-      $sql = "update usluga set Cena=".$cena.",
-       Trajanje=".$trajanje.",
-       Opis='".$opis."',
-       Aktivna=".$aktivna."
-       where UslugaId='".$usluga."';";
-       $conn->query($sql);
-       header('Location: usluge.php');
-    }
-  }
-  else // GET
-  {
-    $poruka="";
-    $sql = "select * from usluga where UslugaId='".$usluga."'";
-    $result = $conn->query($sql);
-    if($data=$result->fetch_assoc())  { 
-      $cena=$data['Cena'];
-      $trajanje=$data['Trajanje'];
-      $opis=$data['Opis'];
-      if($data['Aktivna']) $aktivnaf="checked";
-      else $aktivnaf="";
-    }
-    else
-      die("Ne mogu da proadjem uslugu:".$usluga);
-    $poruka="";
-  }
-?> 
+} else {
+    $poruka = "";
+    $sel = $conn->prepare("SELECT * FROM usluga WHERE UslugaId=?");
+    $sel->bind_param('s', $usluga);
+    $sel->execute();
+    $data = $sel->get_result()->fetch_assoc();
+    $sel->close();
+    if (!$data) { echo "Usluga nije pronađena."; exit; }
+    $cena     = $data['Cena'];
+    $trajanje = $data['Trajanje'];
+    $opis     = $data['Opis'];
+    $aktivna  = (int)$data['Aktivna'];
+}
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="mojstil.css">
-    <title>Izmeni uslugu</title>
+    <title>Izmeni uslugu – Frizerski salon</title>
 </head>
 <body>
-<?php include 'menu.php'; ?> 
-<form method="post" class="forma">
-    <fieldset>
-    <h1>Izmeni uslugu</h1>
-    <h5 style="color:#FF0000;"><?=$poruka?><h5>
-      <table>
-        <tr>
-            <td>Usluga:</td>
-            <td><input readonly type="text" name="usluga" value="<?=$usluga?>"></td>
-        </tr>
-        <tr>
-          <td>Cena:</td>
-          <td><input type="text" name="cena" value="<?=$cena?>"></td>
-        </tr>
-        <tr>
-          <td>Trajanje:</td>
-          <td><input type="text" name="trajanje" value="<?=$trajanje?>"></td>
-        </tr>
-        <tr>
-            <td>Opis:</td>
-            <td><input type="text" name="opis" value="<?=$opis?>"></td>
-        </tr>
-        <tr>
-            <td>Aktivna:</td>
-            <td><input <?=$aktivnaf?> type="checkbox" name="aktivna" value="<?=$aktivna?>"></td>
-        </tr>
-      </table>
-      <input type="submit" name="potvrda" value="Potvrdi" class="button">
-    </fieldset>
-</form>
+<?php include 'menu.php'; ?>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <div class="auth-header">
+      <span class="ct-eyebrow">Upravljanje uslugama</span>
+      <h1 class="auth-title">Izmeni uslugu</h1>
+      <div class="ct-orn">
+        <span></span>
+        <svg viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill="currentColor"/></svg>
+        <span></span>
+      </div>
+    </div>
+
+    <?php if (!empty($poruka)): ?>
+    <div class="ct-alert ct-alert--err">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+      </svg>
+      <?= htmlspecialchars($poruka) ?>
+    </div>
+    <?php endif; ?>
+
+    <form method="post" class="auth-form">
+
+      <div class="ct-field">
+        <label>Naziv usluge</label>
+        <input type="text" name="usluga" value="<?= htmlspecialchars($usluga) ?>" readonly>
+      </div>
+
+      <div class="auth-grid">
+        <div class="ct-field">
+          <label for="cena">Cena (RSD) <span class="ct-req">*</span></label>
+          <input type="number" id="cena" name="cena" min="0" step="any"
+                 value="<?= htmlspecialchars($cena) ?>" autocomplete="off">
+        </div>
+        <div class="ct-field">
+          <label for="trajanje">Trajanje (min) <span class="ct-req">*</span></label>
+          <input type="number" id="trajanje" name="trajanje" min="1" step="1"
+                 value="<?= htmlspecialchars($trajanje) ?>" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="ct-field">
+        <label for="opis">Opis <span class="ct-req">*</span></label>
+        <textarea id="opis" name="opis" rows="3"><?= htmlspecialchars($opis) ?></textarea>
+      </div>
+
+      <div class="ct-field">
+        <label>Status</label>
+        <div class="ct-toggle">
+          <input type="checkbox" id="aktivna" name="aktivna"
+                 <?= $aktivna ? 'checked' : '' ?>>
+          <label for="aktivna" class="ct-toggle-label">Aktivna usluga</label>
+        </div>
+      </div>
+
+      <button type="submit" class="auth-btn">Sačuvaj izmene</button>
+
+    </form>
+
+    <p class="auth-switch"><a href="usluge.php">← Nazad na usluge</a></p>
+
+  </div>
+</div>
+
+<?php include 'footer.php'; ?>
+<script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 </html>
-<?php } ?>

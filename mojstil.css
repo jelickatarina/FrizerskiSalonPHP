@@ -942,6 +942,16 @@ body.kontakt-page {
     color: #0e0d0a;
 }
 
+.auth-btn--danger {
+    border-color: rgba(180,80,80,0.45);
+    color: #d47070;
+}
+.auth-btn--danger:hover {
+    background: #c05050;
+    border-color: #c05050;
+    color: #fff;
+}
+
 .auth-switch {
     text-align: center;
     font-family: 'Jost', sans-serif;
