@@ -39,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $upd->execute();
         $upd->close();
+        $_SESSION['ime']     = $ime;
+        $_SESSION['prezime'] = $prezime;
         $success = true;
     }
 } else {

@@ -12,7 +12,7 @@ require_once 'sesija.php';
     elseif ($lozinka === '') $poruka = "Unesite lozinku.";
     else {
       include 'konekcija.php';
-      $stmt = $conn->prepare("SELECT Nivo FROM korisnik WHERE KorisnikId=? AND Lozinka=? AND Nivo>0");
+      $stmt = $conn->prepare("SELECT Nivo, Ime, Prezime FROM korisnik WHERE KorisnikId=? AND Lozinka=? AND Nivo>0");
       $stmt->bind_param('ss', $korisnik, $lozinka);
       $stmt->execute();
       $result = $stmt->get_result();
@@ -21,6 +21,8 @@ require_once 'sesija.php';
       } else {
         $_SESSION['korisnik'] = $korisnik;
         $_SESSION['nivo']     = $data['Nivo'];
+        $_SESSION['ime']      = $data['Ime'];
+        $_SESSION['prezime']  = $data['Prezime'];
         header('Location: index.php');
         exit;
       }

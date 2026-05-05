@@ -131,6 +131,119 @@ body:has(.auth-page) { padding-top: 0; }
     transition: transform 0.3s, opacity 0.3s;
 }
 
+/* ── Profile avatar + dropdown ─────────────────────── */
+.kn-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kn-profile {
+    position: relative;
+}
+
+.kn-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(212,168,40,0.12);
+    border: 1px solid rgba(212,168,40,0.35);
+    color: #d4a828;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+}
+
+.kn-avatar:hover,
+.kn-avatar[aria-expanded="true"] {
+    background: rgba(212,168,40,0.22);
+    border-color: rgba(212,168,40,0.6);
+}
+
+.kn-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 200px;
+    background: #18160f;
+    border: 1px solid rgba(212,168,40,0.18);
+    border-radius: 10px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+    z-index: 1100;
+    overflow: hidden;
+}
+
+.kn-drop--open { display: block; }
+
+.kn-drop-info {
+    padding: 0.9rem 1.1rem 0.75rem;
+}
+
+.kn-drop-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #eeeae2;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+}
+
+.kn-drop-role {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(212,168,40,0.7);
+    margin-top: 0.2rem;
+}
+
+.kn-drop-sep {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 0;
+}
+
+.kn-drop-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1.1rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.kn-drop-link svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.kn-drop-link:hover {
+    background: rgba(255,255,255,0.04);
+    color: #eeeae2;
+}
+
+.kn-drop-link--out {
+    color: rgba(180,80,80,0.7);
+}
+
+.kn-drop-link--out:hover {
+    background: rgba(180,80,80,0.06);
+    color: #d47070;
+}
+
 @media (max-width: 768px) {
     .kn-nav { padding: 0 1.5rem; }
     .kn-toggler { display: flex; }
@@ -154,6 +267,11 @@ body:has(.auth-page) { padding-top: 0; }
     .kn-links li { width: 100%; }
     .kn-links li a { width: 100%; padding: 0.6rem 0; }
     .kn-cta { margin-left: 0 !important; margin-top: 0.5rem; }
+
+    .kn-drop {
+        right: 0;
+        min-width: 180px;
+    }
 }
 
 /* ── Reset / Base ─────────────────────────────────── */
