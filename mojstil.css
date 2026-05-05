@@ -2089,7 +2089,7 @@ select:focus, input:focus {
 /* ── Footer ───────────────────────────────────────── */
 .site-footer {
     background: #080807;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(212,168,40,0.12);
     font-family: 'Jost', sans-serif;
 }
 
@@ -2121,7 +2121,7 @@ select:focus, input:focus {
 
 .sf-tagline {
     font-size: 0.75rem;
-    color: rgba(255,255,255,0.22);
+    color: rgba(212,168,40,0.45);
     letter-spacing: 0.06em;
     font-style: italic;
     margin: 0.2rem 0 0.8rem;
@@ -2140,21 +2140,21 @@ select:focus, input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(212,168,40,0.2);
     border-radius: 50%;
-    color: rgba(255,255,255,0.3);
+    color: rgba(212,168,40,0.4);
     transition: border-color 0.2s, color 0.2s;
     text-decoration: none;
 }
 .sf-social-link svg { width: 14px; height: 14px; }
-.sf-social-link:hover { border-color: rgba(212,168,40,0.45); color: #d4a828; }
+.sf-social-link:hover { border-color: rgba(212,168,40,0.65); color: #d4a828; }
 
 .sf-col-title {
     font-family: 'Jost', sans-serif;
     font-size: 0.58rem;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.22);
+    color: rgba(212,168,40,0.5);
     margin: 0 0 1.2rem;
     font-weight: 500;
 }
@@ -2170,30 +2170,30 @@ select:focus, input:focus {
 
 .sf-links li a {
     font-size: 0.82rem;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.38);
     text-decoration: none;
     letter-spacing: 0.03em;
     transition: color 0.2s;
 }
-.sf-links li a:hover { color: rgba(255,255,255,0.85); }
+.sf-links li a:hover { color: #d4a828; }
 
 .sf-contact li {
     display: flex;
     align-items: flex-start;
     gap: 0.65rem;
     font-size: 0.82rem;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.38);
 }
-.sf-contact li svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: rgba(255,255,255,0.2); }
+.sf-contact li svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: rgba(212,168,40,0.4); }
 .sf-contact li span { line-height: 1.4; }
 
 .sf-bottom {
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid rgba(212,168,40,0.08);
     padding: 1.4rem 2rem;
     max-width: 1080px;
     margin: 0 auto;
     font-size: 0.68rem;
-    color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.18);
     letter-spacing: 0.06em;
 }
 
