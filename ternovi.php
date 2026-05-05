@@ -8,12 +8,13 @@ $poruka   = "";
 $success  = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $t1       = trim($_POST['t1'] ?? '1');
-    $korisnik = trim($_POST['korisnik'] ?? $_SESSION['korisnik']);
-    $usluga   = trim($_POST['usluga']   ?? '');
-    $datum    = trim($_POST['datum']    ?? '');
-    $frizer   = trim($_POST['frizer']   ?? ''); // KorisnikId (hidden, from step 1 lookup)
-    $frizerNaziv = trim($_POST['frizer_naziv'] ?? '');
+    $t1          = trim($_POST['t1'] ?? '1');
+    $korisnik    = trim($_POST['korisnik']      ?? ($nivo >= 2 ? '' : $_SESSION['korisnik']));
+    $korisnikNaziv = trim($_POST['korisnik_naziv'] ?? '');
+    $usluga      = trim($_POST['usluga']        ?? '');
+    $datum       = trim($_POST['datum']         ?? '');
+    $frizer      = trim($_POST['frizer']        ?? '');
+    $frizerNaziv = trim($_POST['frizer_naziv']  ?? '');
 
     if ($t1 == 1) {
         // Step 1: validate and find frizer KorisnikId from displayed name
@@ -21,7 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date2 = new DateTime($datum);
         $diff  = (int)$date1->diff($date2)->format('%R%a');
 
-        if ($usluga === '')  $poruka = "Niste izabrali uslugu.";
+        if ($nivo >= 2 && $korisnik === '') $poruka = "Izaberite klijenta.";
+        elseif ($usluga === '')  $poruka = "Niste izabrali uslugu.";
         elseif ($datum === '') $poruka = "Unesite datum.";
         elseif ($frizerNaziv === '') $poruka = "Niste izabrali frizera.";
         elseif (date('w', strtotime($datum)) == 0) $poruka = "Ne radimo nedeljom.";
@@ -41,51 +43,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else {
                 $frizer = $fr['KorisnikId'];
 
-                $stmt = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
-                $stmt->bind_param('s', $usluga);
-                $stmt->execute();
-                $data = $stmt->get_result()->fetch_assoc();
-                $stmt->close();
-                if (!$data) { $poruka = "Usluga nije pronađena."; }
-                else {
-                    $ukupnoTermina  = (int)(1 + ($data['Trajanje'] - 1) / 30);
-                    $zauzetiTermini = [];
-                    $stmt = $conn->prepare("SELECT t.Vreme, t.UslugaId FROM termin t WHERE t.KorisnikFrizerId=? AND t.Datum=?");
-                    $stmt->bind_param('ss', $frizer, $datum);
+                if ($nivo >= 2) {
+                    $ck = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=? AND Nivo=1");
+                    $ck->bind_param('s', $korisnik);
+                    $ck->execute();
+                    $kRow2 = $ck->get_result()->fetch_assoc();
+                    $ck->close();
+                    if (!$kRow2) $poruka = "Klijent nije pronađen. Izaberite iz liste.";
+                    else $korisnikNaziv = $kRow2['Ime'].' '.$kRow2['Prezime'];
+                }
+
+                if (!$poruka) {
+                    $stmt = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
+                    $stmt->bind_param('s', $usluga);
                     $stmt->execute();
-                    $res = $stmt->get_result();
+                    $data = $stmt->get_result()->fetch_assoc();
                     $stmt->close();
-                    while ($row = $res->fetch_assoc()) {
-                        $tv = $row['Vreme'];
-                        $zauzetiTermini[] = $tv;
-                        $s2 = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
-                        $s2->bind_param('s', $row['UslugaId']);
-                        $s2->execute();
-                        $d2 = $s2->get_result()->fetch_assoc();
-                        $s2->close();
-                        $t2 = (int)(1 + ($d2['Trajanje'] - 1) / 30);
-                        for ($i = 1; $i < $t2; $i++) { $tv++; $zauzetiTermini[] = $tv; }
-                    }
-
-                    if ($diff == 0) {
-                        $tv   = date("H:i:s");
-                        $h    = (int)substr($tv, 0, 2);
-                        $m    = (int)substr($tv, 3, 2);
-                        $tpoc = $h * 2 + (int)($m / 30) + 1;
-                    } else { $tpoc = 18; }
-
-                    $vremena = [];
-                    for ($i = $tpoc; $i <= (34 - $ukupnoTermina); $i++) {
-                        $nemoze = false;
-                        if (!in_array($i, $zauzetiTermini)) {
-                            for ($j = 1; $j < $ukupnoTermina; $j++)
-                                if (in_array($i + $j, $zauzetiTermini)) $nemoze = true;
-                            if (!$nemoze) $vremena[] = sprintf('%02d:%02d', (int)($i/2), ($i%2)*30);
+                    if (!$data) { $poruka = "Usluga nije pronađena."; }
+                    else {
+                        $ukupnoTermina  = (int)(1 + ($data['Trajanje'] - 1) / 30);
+                        $zauzetiTermini = [];
+                        $stmt = $conn->prepare("SELECT t.Vreme, t.UslugaId FROM termin t WHERE t.KorisnikFrizerId=? AND t.Datum=?");
+                        $stmt->bind_param('ss', $frizer, $datum);
+                        $stmt->execute();
+                        $res = $stmt->get_result();
+                        $stmt->close();
+                        while ($row = $res->fetch_assoc()) {
+                            $tv = $row['Vreme'];
+                            $zauzetiTermini[] = $tv;
+                            $s2 = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
+                            $s2->bind_param('s', $row['UslugaId']);
+                            $s2->execute();
+                            $d2 = $s2->get_result()->fetch_assoc();
+                            $s2->close();
+                            $t2 = (int)(1 + ($d2['Trajanje'] - 1) / 30);
+                            for ($i = 1; $i < $t2; $i++) { $tv++; $zauzetiTermini[] = $tv; }
                         }
-                    }
 
-                    if (count($vremena) == 0) $poruka = "Nema slobodnih termina za izabrani dan.";
-                    else { $vreme = ""; $t1 = 2; }
+                        if ($diff == 0) {
+                            $tv   = date("H:i:s");
+                            $h    = (int)substr($tv, 0, 2);
+                            $m    = (int)substr($tv, 3, 2);
+                            $tpoc = $h * 2 + (int)($m / 30) + 1;
+                        } else { $tpoc = 18; }
+
+                        $vremena = [];
+                        for ($i = $tpoc; $i <= (34 - $ukupnoTermina); $i++) {
+                            $nemoze = false;
+                            if (!in_array($i, $zauzetiTermini)) {
+                                for ($j = 1; $j < $ukupnoTermina; $j++)
+                                    if (in_array($i + $j, $zauzetiTermini)) $nemoze = true;
+                                if (!$nemoze) $vremena[] = sprintf('%02d:%02d', (int)($i/2), ($i%2)*30);
+                            }
+                        }
+
+                        if (count($vremena) == 0) $poruka = "Nema slobodnih termina za izabrani dan.";
+                        else { $vreme = ""; $t1 = 2; }
+                    }
                 }
             }
         }
@@ -142,13 +156,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 } else {
     $poruka = ""; $t1 = 1;
-    $korisnik = $_SESSION['korisnik'];
+    $korisnik     = ($nivo >= 2) ? '' : $_SESSION['korisnik'];
+    $korisnikNaziv = '';
     $usluga = $datum = $frizer = $frizerNaziv = $vreme = "";
 }
 
-// Load usluge and frizeri for datalists
-$usluge  = $conn->query("SELECT UslugaId FROM usluga WHERE Aktivna=1 ORDER BY UslugaId");
-$frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime");
+// Load lists for combos
+$usluge   = $conn->query("SELECT UslugaId FROM usluga WHERE Aktivna=1 ORDER BY UslugaId");
+$frizeri  = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime");
+$klijenti = ($nivo >= 2)
+    ? $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=1 ORDER BY Ime, Prezime")
+    : null;
 ?>
 <!DOCTYPE html>
 <html lang="sr">
@@ -205,8 +223,34 @@ $frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Niv
       <input type="hidden" name="korisnik" value="<?= htmlspecialchars($korisnik) ?>">
 
       <div class="ct-field">
-        <label>Korisnik</label>
-        <input type="text" value="<?= htmlspecialchars($korisnik) ?>" disabled>
+        <label for="<?= $nivo >= 2 ? 'zk-korisnik-text' : 'zk-korisnik-ro' ?>">
+          Klijent<?= $nivo >= 2 ? ' <span class="ct-req">*</span>' : '' ?>
+        </label>
+        <?php if ($nivo >= 2 && $t1 == 1): ?>
+        <div class="zk-combo" id="combo-korisnik">
+          <input type="text" class="zk-combo-input" id="zk-korisnik-text"
+                 value="<?= htmlspecialchars($korisnikNaziv) ?>"
+                 placeholder="Pretražite ili izaberite klijenta…" autocomplete="off">
+          <input type="hidden" name="korisnik"       id="zk-korisnik-val"   value="<?= htmlspecialchars($korisnik) ?>">
+          <input type="hidden" name="korisnik_naziv" id="zk-korisnik-naziv" value="<?= htmlspecialchars($korisnikNaziv) ?>">
+          <ul class="zk-combo-list" role="listbox">
+            <?php while ($row = $klijenti->fetch_assoc()): ?>
+            <li role="option"
+                data-val="<?= htmlspecialchars($row['KorisnikId']) ?>"
+                data-label="<?= htmlspecialchars($row['Ime'].' '.$row['Prezime']) ?>">
+              <?= htmlspecialchars($row['Ime'].' '.$row['Prezime']) ?>
+            </li>
+            <?php endwhile; ?>
+          </ul>
+        </div>
+        <?php elseif ($nivo >= 2): ?>
+        <input type="hidden" name="korisnik"       value="<?= htmlspecialchars($korisnik) ?>">
+        <input type="hidden" name="korisnik_naziv" value="<?= htmlspecialchars($korisnikNaziv) ?>">
+        <input id="zk-korisnik-ro" type="text" value="<?= htmlspecialchars($korisnikNaziv ?: $korisnik) ?>" readonly>
+        <?php else: ?>
+        <input type="hidden" name="korisnik" value="<?= htmlspecialchars($korisnik) ?>">
+        <input id="zk-korisnik-ro" type="text" value="<?= htmlspecialchars($korisnik) ?>" disabled>
+        <?php endif; ?>
       </div>
 
       <div class="ct-field">
@@ -331,8 +375,13 @@ $frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Niv
       items.forEach(li => {
         li.addEventListener('mousedown', e => {
           e.preventDefault();
-          textInput.value = li.dataset.val;
+          // data-label = display text; data-val = submitted value
+          const label = li.dataset.label ?? li.dataset.val;
+          textInput.value = label;
           hidden.value    = li.dataset.val;
+          // sync companion naziv field if present
+          const nazField = combo.querySelector('input[id$="-naziv"]');
+          if (nazField) nazField.value = label;
           close();
         });
       });
@@ -378,16 +427,19 @@ $frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Niv
     const form = document.querySelector('form[method="post"]');
     if (form) {
       form.addEventListener('submit', e => {
-        const usVal = document.getElementById('zk-usluga-val');
-        const frVal = document.getElementById('zk-frizer-val');
-        if (usVal && !usVal.value) {
-          e.preventDefault();
-          document.getElementById('zk-usluga-text').focus();
-          document.getElementById('combo-usluga').querySelector('.zk-combo-list').classList.add('open');
-        } else if (frVal && !frVal.value) {
-          e.preventDefault();
-          document.getElementById('zk-frizer-text').focus();
-          document.getElementById('combo-frizer').querySelector('.zk-combo-list').classList.add('open');
+        const checks = [
+          { val: 'zk-korisnik-val', txt: 'zk-korisnik-text', combo: 'combo-korisnik' },
+          { val: 'zk-usluga-val',   txt: 'zk-usluga-text',   combo: 'combo-usluga'   },
+          { val: 'zk-frizer-val',   txt: 'zk-frizer-text',   combo: 'combo-frizer'   },
+        ];
+        for (const c of checks) {
+          const valEl = document.getElementById(c.val);
+          if (valEl && !valEl.value) {
+            e.preventDefault();
+            document.getElementById(c.txt)?.focus();
+            document.getElementById(c.combo)?.querySelector('.zk-combo-list')?.classList.add('open');
+            break;
+          }
         }
       });
     }
