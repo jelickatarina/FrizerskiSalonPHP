@@ -67,19 +67,37 @@ $rows = 0;
 while($data=$result->fetch_assoc()) {
   $rows++;
   $aktivna = $data['Aktivna'] == 1;
+  $danas = date('Y-m-d');
+  $popust = (int)($data['Popust'] ?? 0);
+  $naPopustu = $popust > 0
+      && !empty($data['PopustOd']) && !empty($data['PopustDo'])
+      && $danas >= $data['PopustOd'] && $danas <= $data['PopustDo'];
+  $cenaSaPopustom = $naPopustu ? round($data['Cena'] * (1 - $popust / 100)) : null;
 ?>
             <div class="srv-card <?= $aktivna ? '' : 'srv-card--inactive' ?>">
                 <div class="srv-card-top">
                     <h3 class="srv-card-name"><?= htmlspecialchars($data['UslugaId']) ?></h3>
-                    <span class="srv-badge <?= $aktivna ? 'srv-badge--on' : 'srv-badge--off' ?>">
-                        <?= $aktivna ? 'Aktivna' : 'Neaktivna' ?>
-                    </span>
+                    <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap">
+                        <?php if ($naPopustu): ?>
+                        <span class="srv-badge srv-badge--sale">-<?= $popust ?>%</span>
+                        <?php endif; ?>
+                        <span class="srv-badge <?= $aktivna ? 'srv-badge--on' : 'srv-badge--off' ?>">
+                            <?= $aktivna ? 'Aktivna' : 'Neaktivna' ?>
+                        </span>
+                    </div>
                 </div>
                 <p class="srv-card-opis"><?= htmlspecialchars($data['Opis']) ?></p>
                 <div class="srv-card-meta">
                     <div class="srv-meta-item">
                         <span class="srv-meta-label">Cena</span>
+                        <?php if ($naPopustu): ?>
+                        <span class="srv-meta-val">
+                            <span class="srv-price-old"><?= $data['Cena'] ?></span>
+                            <span class="srv-price-sale"><?= $cenaSaPopustom ?> RSD</span>
+                        </span>
+                        <?php else: ?>
                         <span class="srv-meta-val"><?= $data['Cena'] ?> RSD</span>
+                        <?php endif; ?>
                     </div>
                     <div class="srv-meta-divider"></div>
                     <div class="srv-meta-item">

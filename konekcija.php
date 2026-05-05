@@ -35,4 +35,14 @@ if (!@$conn->query("SELECT 1 FROM termin WHERE 1=0")) {
         $conn->query("ALTER TABLE termin ADD COLUMN Otkazano TINYINT NOT NULL DEFAULT 0");
     }
 }
+
+// Auto-migrate: discount columns on usluga
+if (@$conn->query("SELECT 1 FROM usluga WHERE 1=0")) {
+    $chkPop = $conn->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='usluga' AND COLUMN_NAME='Popust'");
+    if (!$chkPop || $chkPop->num_rows === 0) {
+        $conn->query("ALTER TABLE usluga ADD COLUMN Popust INT NOT NULL DEFAULT 0");
+        $conn->query("ALTER TABLE usluga ADD COLUMN PopustOd DATE NULL");
+        $conn->query("ALTER TABLE usluga ADD COLUMN PopustDo DATE NULL");
+    }
+}
 ?>
