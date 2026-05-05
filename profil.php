@@ -5,56 +5,62 @@ requireNivo('1');
 $korisnik = $_SESSION['korisnik'];
 include 'konekcija.php';
 
-$success = false;
+$success_info = false;
+$success_loz  = false;
+$poruka_info  = "";
+$poruka_loz   = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $poruka   = "";
-    $ime      = trim($_POST['ime']      ?? '');
-    $prezime  = trim($_POST['prezime']  ?? '');
-    $datumr   = trim($_POST['datumr']   ?? '');
-    $email    = trim($_POST['email']    ?? '');
-    $telefon  = trim($_POST['telefon']  ?? '');
-    $lozinka  = trim($_POST['lozinka']  ?? '');
-    $lozinka2 = trim($_POST['lozinka2'] ?? '');
+    $tip = $_POST['tip'] ?? '';
 
-    if (strlen($ime) === 0)     $poruka = "Unesite ime.";
-    elseif (strlen($prezime) === 0)  $poruka = "Unesite prezime.";
-    elseif (strlen($datumr) === 0)   $poruka = "Unesite datum rođenja.";
-    elseif (strlen($email) === 0)    $poruka = "Unesite email.";
-    elseif (strlen($telefon) === 0)  $poruka = "Unesite telefon.";
-    elseif ($lozinka !== '' && $lozinka !== $lozinka2) $poruka = "Lozinke se ne podudaraju.";
-    else {
-        if ($lozinka !== '') {
+    if ($tip === 'info') {
+        $ime     = trim($_POST['ime']     ?? '');
+        $prezime = trim($_POST['prezime'] ?? '');
+        $datumr  = trim($_POST['datumr']  ?? '');
+        $email   = trim($_POST['email']   ?? '');
+        $telefon = trim($_POST['telefon'] ?? '');
+
+        if (strlen($ime) === 0)     $poruka_info = "Unesite ime.";
+        elseif (strlen($prezime) === 0) $poruka_info = "Unesite prezime.";
+        elseif (strlen($datumr) === 0)  $poruka_info = "Unesite datum rođenja.";
+        elseif (strlen($email) === 0)   $poruka_info = "Unesite email.";
+        elseif (strlen($telefon) === 0) $poruka_info = "Unesite telefon.";
+        else {
             $upd = $conn->prepare(
-                "UPDATE korisnik SET Ime=?, Prezime=?, DatumRodjenja=?, Email=?, Telefon=?, Lozinka=?
-                 WHERE KorisnikId=?"
-            );
-            $upd->bind_param('sssssss', $ime, $prezime, $datumr, $email, $telefon, $lozinka, $korisnik);
-        } else {
-            $upd = $conn->prepare(
-                "UPDATE korisnik SET Ime=?, Prezime=?, DatumRodjenja=?, Email=?, Telefon=?
-                 WHERE KorisnikId=?"
+                "UPDATE korisnik SET Ime=?, Prezime=?, DatumRodjenja=?, Email=?, Telefon=? WHERE KorisnikId=?"
             );
             $upd->bind_param('ssssss', $ime, $prezime, $datumr, $email, $telefon, $korisnik);
+            $upd->execute();
+            $upd->close();
+            $_SESSION['ime']     = $ime;
+            $_SESSION['prezime'] = $prezime;
+            $success_info = true;
         }
-        $upd->execute();
-        $upd->close();
-        $_SESSION['ime']     = $ime;
-        $_SESSION['prezime'] = $prezime;
-        $success = true;
+    } elseif ($tip === 'lozinka') {
+        $lozinka  = trim($_POST['lozinka']  ?? '');
+        $lozinka2 = trim($_POST['lozinka2'] ?? '');
+
+        if (strlen($lozinka) === 0)      $poruka_loz = "Unesite novu lozinku.";
+        elseif ($lozinka !== $lozinka2)  $poruka_loz = "Lozinke se ne podudaraju.";
+        elseif (strlen($lozinka) < 4)    $poruka_loz = "Lozinka mora imati najmanje 4 karaktera.";
+        else {
+            $upd = $conn->prepare("UPDATE korisnik SET Lozinka=? WHERE KorisnikId=?");
+            $upd->bind_param('ss', $lozinka, $korisnik);
+            $upd->execute();
+            $upd->close();
+            $success_loz = true;
+        }
     }
-} else {
-    $poruka = "";
 }
 
-// Always reload fresh data from DB
+// Load current data from DB
 $sel = $conn->prepare("SELECT * FROM korisnik WHERE KorisnikId=?");
 $sel->bind_param('s', $korisnik);
 $sel->execute();
 $data = $sel->get_result()->fetch_assoc();
 $sel->close();
 
-if (!$success || !isset($ime)) {
+if (!$success_info) {
     $ime     = $data['Ime'];
     $prezime = $data['Prezime'];
     $datumr  = $data['DatumRodjenja'];
@@ -78,98 +84,121 @@ $nivoLabel = ['0' => 'Neaktivan', '1' => 'Klijent', '2' => 'Frizer', '9' => 'Adm
 <?php include 'menu.php'; ?>
 
 <div class="auth-page">
-  <div class="auth-card auth-card--wide">
+  <div class="prof-stack">
 
-    <div class="auth-header">
-      <span class="ct-eyebrow"><?= htmlspecialchars($korisnik) ?></span>
-      <h1 class="auth-title">Moj profil</h1>
-      <div class="ct-orn">
-        <span></span>
-        <svg viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill="currentColor"/></svg>
-        <span></span>
+    <!-- ── Lični podaci ── -->
+    <div class="auth-card auth-card--wide">
+      <div class="auth-header">
+        <span class="ct-eyebrow"><?= htmlspecialchars($korisnik) ?></span>
+        <h1 class="auth-title">Moj profil</h1>
+        <div class="ct-orn">
+          <span></span>
+          <svg viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill="currentColor"/></svg>
+          <span></span>
+        </div>
       </div>
+
+      <?php if ($success_info): ?>
+      <div class="ct-alert ct-alert--ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Podaci su uspešno sačuvani.
+      </div>
+      <?php elseif ($poruka_info !== ''): ?>
+      <div class="ct-alert ct-alert--err">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+        </svg>
+        <?= htmlspecialchars($poruka_info) ?>
+      </div>
+      <?php endif; ?>
+
+      <form method="post" class="auth-form" autocomplete="off">
+        <input type="hidden" name="tip" value="info">
+
+        <div class="auth-grid">
+          <div class="ct-field">
+            <label>Korisničko ime</label>
+            <input type="text" value="<?= htmlspecialchars($korisnik) ?>" readonly>
+          </div>
+          <div class="ct-field">
+            <label>Nivo pristupa</label>
+            <input type="text" value="<?= htmlspecialchars($nivoLabel[(string)$nivo] ?? (string)$nivo) ?>" readonly>
+          </div>
+        </div>
+
+        <div class="auth-grid">
+          <div class="ct-field">
+            <label for="ime">Ime <span class="ct-req">*</span></label>
+            <input type="text" id="ime" name="ime" value="<?= htmlspecialchars($ime) ?>" autocomplete="off">
+          </div>
+          <div class="ct-field">
+            <label for="prezime">Prezime <span class="ct-req">*</span></label>
+            <input type="text" id="prezime" name="prezime" value="<?= htmlspecialchars($prezime) ?>" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="ct-field">
+          <label for="datumr">Datum rođenja <span class="ct-req">*</span></label>
+          <input type="date" id="datumr" name="datumr" value="<?= htmlspecialchars($datumr) ?>" autocomplete="off">
+        </div>
+
+        <div class="ct-field">
+          <label for="email">Email <span class="ct-req">*</span></label>
+          <input type="email" id="email" name="email" value="<?= htmlspecialchars($email) ?>" autocomplete="off">
+        </div>
+
+        <div class="ct-field">
+          <label for="telefon">Telefon <span class="ct-req">*</span></label>
+          <input type="tel" id="telefon" name="telefon" value="<?= htmlspecialchars($telefon) ?>" autocomplete="off">
+        </div>
+
+        <button type="submit" class="auth-btn">Sačuvaj podatke</button>
+      </form>
     </div>
 
-    <?php if ($success): ?>
-    <div class="ct-alert ct-alert--ok">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-      Podaci su uspešno sačuvani.
+    <!-- ── Promena lozinke ── -->
+    <div class="auth-card auth-card--wide">
+      <div class="auth-header">
+        <span class="ct-eyebrow">Bezbednost</span>
+        <h2 class="auth-title" style="font-size:clamp(1.4rem,3.5vw,2rem);">Promena lozinke</h2>
+        <div class="ct-orn">
+          <span></span>
+          <svg viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill="currentColor"/></svg>
+          <span></span>
+        </div>
+      </div>
+
+      <?php if ($success_loz): ?>
+      <div class="ct-alert ct-alert--ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Lozinka je uspešno promenjena.
+      </div>
+      <?php elseif ($poruka_loz !== ''): ?>
+      <div class="ct-alert ct-alert--err">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+        </svg>
+        <?= htmlspecialchars($poruka_loz) ?>
+      </div>
+      <?php endif; ?>
+
+      <form method="post" class="auth-form" autocomplete="off">
+        <input type="hidden" name="tip" value="lozinka">
+
+        <div class="auth-grid">
+          <div class="ct-field">
+            <label for="lozinka">Nova lozinka <span class="ct-req">*</span></label>
+            <input type="password" id="lozinka" name="lozinka" value="" autocomplete="new-password">
+          </div>
+          <div class="ct-field">
+            <label for="lozinka2">Ponovite lozinku <span class="ct-req">*</span></label>
+            <input type="password" id="lozinka2" name="lozinka2" value="" autocomplete="new-password">
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn">Promeni lozinku</button>
+      </form>
     </div>
-    <?php elseif (!empty($poruka)): ?>
-    <div class="ct-alert ct-alert--err">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
-      </svg>
-      <?= htmlspecialchars($poruka) ?>
-    </div>
-    <?php endif; ?>
-
-    <form method="post" class="auth-form" autocomplete="off">
-
-      <div class="auth-grid">
-        <div class="ct-field">
-          <label>Korisničko ime</label>
-          <input type="text" value="<?= htmlspecialchars($korisnik) ?>" readonly>
-        </div>
-        <div class="ct-field">
-          <label>Nivo pristupa</label>
-          <input type="text" value="<?= htmlspecialchars($nivoLabel[(string)$nivo] ?? (string)$nivo) ?>" readonly>
-        </div>
-      </div>
-
-      <div class="auth-grid">
-        <div class="ct-field">
-          <label for="ime">Ime <span class="ct-req">*</span></label>
-          <input type="text" id="ime" name="ime"
-                 value="<?= htmlspecialchars($ime) ?>" autocomplete="off">
-        </div>
-        <div class="ct-field">
-          <label for="prezime">Prezime <span class="ct-req">*</span></label>
-          <input type="text" id="prezime" name="prezime"
-                 value="<?= htmlspecialchars($prezime) ?>" autocomplete="off">
-        </div>
-      </div>
-
-      <div class="ct-field">
-        <label for="datumr">Datum rođenja <span class="ct-req">*</span></label>
-        <input type="date" id="datumr" name="datumr"
-               value="<?= htmlspecialchars($datumr) ?>" autocomplete="off">
-      </div>
-
-      <div class="ct-field">
-        <label for="email">Email <span class="ct-req">*</span></label>
-        <input type="email" id="email" name="email"
-               value="<?= htmlspecialchars($email) ?>" autocomplete="off">
-      </div>
-
-      <div class="ct-field">
-        <label for="telefon">Telefon <span class="ct-req">*</span></label>
-        <input type="tel" id="telefon" name="telefon"
-               value="<?= htmlspecialchars($telefon) ?>" autocomplete="off">
-      </div>
-
-      <div class="prof-divider">
-        <span>Promena lozinke <span class="ct-opt">(opciono)</span></span>
-      </div>
-
-      <div class="auth-grid">
-        <div class="ct-field">
-          <label for="lozinka">Nova lozinka</label>
-          <input type="password" id="lozinka" name="lozinka"
-                 value="" autocomplete="new-password" placeholder="Ostavite prazno da ne menjate">
-        </div>
-        <div class="ct-field">
-          <label for="lozinka2">Ponovite lozinku</label>
-          <input type="password" id="lozinka2" name="lozinka2"
-                 value="" autocomplete="new-password" placeholder="Ponovite novu lozinku">
-        </div>
-      </div>
-
-      <button type="submit" class="auth-btn">Sačuvaj izmene</button>
-
-    </form>
 
   </div>
 </div>

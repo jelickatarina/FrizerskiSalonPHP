@@ -47,7 +47,10 @@ $roleLabel = $nivoLabel[$nivo] ?? '';
     <?php if ($nivo != '0'): ?>
     <div class="kn-profile" id="kn-profile">
       <button class="kn-avatar" id="kn-avatar-btn" aria-label="Moj profil" aria-expanded="false">
-        <?= htmlspecialchars($initials) ?>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
       </button>
       <div class="kn-drop" id="kn-drop" role="menu">
         <div class="kn-drop-info">
