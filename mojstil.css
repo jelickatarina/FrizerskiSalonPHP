@@ -811,8 +811,13 @@ body.kontakt-page {
     opacity: 0.75;
     flex-shrink: 0;
 }
+.auth-header .ct-orn {
+    width: 180px;
+}
 .auth-header .ct-orn span {
-    width: 68px;
+    flex: 1;
+    min-width: 0;
+    width: auto;
     height: 1px;
     background: rgba(212,168,40,0.65);
 }
@@ -1895,15 +1900,31 @@ select:focus, input:focus {
     font-weight: 600;
     letter-spacing: 0.05em;
 }
+.srv-badge-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+    flex-shrink: 0;
+}
+.srv-meta-prices {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.05rem;
+}
 .srv-price-old {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.3);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.28);
     text-decoration: line-through;
-    margin-right: 0.3rem;
 }
 .srv-price-sale {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
     color: #d4a828;
-    font-weight: 600;
 }
 .tbl-contact {
     display: flex;

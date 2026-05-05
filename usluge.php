@@ -77,7 +77,7 @@ while($data=$result->fetch_assoc()) {
             <div class="srv-card <?= $aktivna ? '' : 'srv-card--inactive' ?>">
                 <div class="srv-card-top">
                     <h3 class="srv-card-name"><?= htmlspecialchars($data['UslugaId']) ?></h3>
-                    <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap">
+                    <div class="srv-badge-group">
                         <?php if ($naPopustu): ?>
                         <span class="srv-badge srv-badge--sale">-<?= $popust ?>%</span>
                         <?php endif; ?>
@@ -91,10 +91,10 @@ while($data=$result->fetch_assoc()) {
                     <div class="srv-meta-item">
                         <span class="srv-meta-label">Cena</span>
                         <?php if ($naPopustu): ?>
-                        <span class="srv-meta-val">
-                            <span class="srv-price-old"><?= $data['Cena'] ?></span>
+                        <div class="srv-meta-prices">
+                            <span class="srv-price-old"><?= $data['Cena'] ?> RSD</span>
                             <span class="srv-price-sale"><?= $cenaSaPopustom ?> RSD</span>
-                        </span>
+                        </div>
                         <?php else: ?>
                         <span class="srv-meta-val"><?= $data['Cena'] ?> RSD</span>
                         <?php endif; ?>
