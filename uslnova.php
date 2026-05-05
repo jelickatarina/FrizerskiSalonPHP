@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = $chk->get_result()->fetch_assoc();
         $chk->close();
         if ($row['c1'] > 0) {
-            $poruka = "Usluga „" . htmlspecialchars($usluga) . "" već postoji.";
+            $poruka = "Usluga '" . htmlspecialchars($usluga) . "' već postoji.";
         } else {
             include_once 'konekcija.php';
             $ins = $conn->prepare("INSERT INTO usluga (UslugaId, Cena, Trajanje, Opis, Aktivna) VALUES (?, ?, ?, ?, ?)");

@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = $chk->get_result()->fetch_assoc();
         $chk->close();
         if ($row['c1'] > 0) {
-            $poruka = "Korisnik „" . htmlspecialchars($korisnik) . "" je već registrovan.";
+            $poruka = "Korisnik '" . htmlspecialchars($korisnik) . "' je već registrovan.";
         } else {
             $ins = $conn->prepare(
                 "INSERT INTO korisnik (KorisnikId, Lozinka, Ime, Prezime, DatumRodjenja, Telefon, Email, Nivo)
