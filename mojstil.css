@@ -1257,6 +1257,25 @@ body.kontakt-page {
     resize: vertical;
 }
 
+/* Visoka specifičnost (0,2,0,1) pobija globalni input[type=] (0,1,0,1)
+   koji dolazi posle .ct-field input u kaskadi i overriduje padding/bg */
+.ct-field input[type="date"],
+.ct-field input[type="text"],
+.ct-field input[type="password"],
+.ct-field input[type="email"],
+.ct-field input[type="tel"],
+.ct-field input[type="number"],
+.ct-field input[type="search"] {
+    padding: 0.65rem 0.9rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: #eeeae2;
+    font-size: 0.9rem;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 .ct-field input::placeholder,
 .ct-field textarea::placeholder {
     color: rgba(255,255,255,0.18);
@@ -2637,6 +2656,7 @@ input[type="date"],
 input[type="time"] {
     min-width: 0;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 @media (max-width: 560px) {
