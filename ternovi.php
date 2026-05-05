@@ -114,11 +114,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $potvrdjeno = ($nivo === 1) ? 0 : 1;
 
+            // Calculate price at booking time (captures any active discount)
+            $sp = $conn->prepare("SELECT Cena, Popust, PopustOd, PopustDo FROM usluga WHERE UslugaId=?");
+            $sp->bind_param('s', $usluga);
+            $sp->execute();
+            $uRow = $sp->get_result()->fetch_assoc();
+            $sp->close();
+            $cenaNaplacena = null;
+            if ($uRow) {
+                $p = (int)($uRow['Popust'] ?? 0);
+                $danas2 = date('Y-m-d');
+                $naAkciji = $p > 0 && !empty($uRow['PopustOd']) && !empty($uRow['PopustDo'])
+                    && $danas2 >= $uRow['PopustOd'] && $danas2 <= $uRow['PopustDo'];
+                $cenaNaplacena = $naAkciji ? round($uRow['Cena'] * (1 - $p / 100), 2) : (float)$uRow['Cena'];
+            }
+
             $stmt = $conn->prepare(
-                "INSERT INTO termin (UslugaId, KorisnikId, Datum, Vreme, KorisnikFrizerId, Uradjeno, Potvrdjeno)
-                 VALUES (?, ?, ?, ?, ?, 0, ?)"
+                "INSERT INTO termin (UslugaId, KorisnikId, Datum, Vreme, KorisnikFrizerId, Uradjeno, Potvrdjeno, CenaNaplacena)
+                 VALUES (?, ?, ?, ?, ?, 0, ?, ?)"
             );
-            $stmt->bind_param('sssssi', $usluga, $korisnik, $datum, $res, $frizer, $potvrdjeno);
+            $stmt->bind_param('sssssid', $usluga, $korisnik, $datum, $res, $frizer, $potvrdjeno, $cenaNaplacena);
             $stmt->execute();
             $stmt->close();
 

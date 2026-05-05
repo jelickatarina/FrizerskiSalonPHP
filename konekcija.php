@@ -36,6 +36,14 @@ if (!@$conn->query("SELECT 1 FROM termin WHERE 1=0")) {
     }
 }
 
+// Auto-migrate: CenaNaplacena on termin
+if (@$conn->query("SELECT 1 FROM termin WHERE 1=0")) {
+    $chkCena = $conn->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='termin' AND COLUMN_NAME='CenaNaplacena'");
+    if (!$chkCena || $chkCena->num_rows === 0) {
+        $conn->query("ALTER TABLE termin ADD COLUMN CenaNaplacena DECIMAL(10,2) NULL DEFAULT NULL");
+    }
+}
+
 // Auto-migrate: discount columns on usluga
 if (@$conn->query("SELECT 1 FROM usluga WHERE 1=0")) {
     $chkPop = $conn->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='usluga' AND COLUMN_NAME='Popust'");

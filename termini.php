@@ -216,7 +216,7 @@ if ($nivo === 9) {
                 <thead>
                     <tr>
                         <th>#</th><th>Usluga</th><th>Klijent</th>
-                        <th>Datum</th><th>Vreme</th><th>Frizer</th><th>Status</th><th></th>
+                        <th>Datum</th><th>Vreme</th><th>Frizer</th><th>Cena</th><th>Status</th><th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -242,6 +242,7 @@ if ($nivo === 9) {
                         <td><?= htmlspecialchars($data['Datum']) ?></td>
                         <td><?= $tv ?></td>
                         <td><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
+                        <td><?= $data['CenaNaplacena'] !== null ? number_format((float)$data['CenaNaplacena'], 0, '.', '.') . ' RSD' : '—' ?></td>
                         <td><span class="srv-badge srv-badge--pending">Čeka odobrenje</span></td>
                         <td><div class="tbl-actions">
                             <a class="tbl-btn tbl-btn--green" href="potvrdi.php?p=<?= $data['TerminId'] ?>">Potvrdi</a>
@@ -275,7 +276,7 @@ if ($nivo === 9) {
                         <th>Usluga</th>
                         <?php if ($nivo !== 1): ?><th>Klijent</th><?php endif; ?>
                         <th>Datum</th><th>Vreme</th><th>Frizer</th>
-                        <th>Status</th><th></th>
+                        <th>Cena</th><th>Status</th><th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -305,6 +306,7 @@ if ($nivo === 9) {
                         <td><?= htmlspecialchars($data['Datum']) ?></td>
                         <td><?= $tv ?></td>
                         <td><?= htmlspecialchars($data['KorisnikFrizerId']) ?></td>
+                        <td><?= $data['CenaNaplacena'] !== null ? number_format((float)$data['CenaNaplacena'], 0, '.', '.') . ' RSD' : '—' ?></td>
                         <td><?php
                             if ($cancelled) echo '<span class="srv-badge srv-badge--off">Otkazano</span>';
                             elseif ($done)  echo '<span class="srv-badge srv-badge--on">Urađeno</span>';
@@ -317,7 +319,7 @@ if ($nivo === 9) {
                     </tr>
                 <?php endwhile; ?>
                 <?php if ($rows === 0): ?>
-                    <tr><td colspan="<?= $nivo !== 1 ? 8 : 6 ?>" class="tbl-empty">Nema termina<?= $q !== '' ? ' za ovu pretragu' : '' ?></td></tr>
+                    <tr><td colspan="<?= $nivo !== 1 ? 9 : 7 ?>" class="tbl-empty">Nema termina<?= $q !== '' ? ' za ovu pretragu' : '' ?></td></tr>
                 <?php endif; ?>
                 </tbody>
             </table>

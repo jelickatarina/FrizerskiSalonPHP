@@ -78,12 +78,12 @@ while($data=$result->fetch_assoc()) {
                 <div class="srv-card-top">
                     <h3 class="srv-card-name"><?= htmlspecialchars($data['UslugaId']) ?></h3>
                     <div class="srv-badge-group">
-                        <?php if ($naPopustu): ?>
-                        <span class="srv-badge srv-badge--sale">-<?= $popust ?>%</span>
-                        <?php endif; ?>
                         <span class="srv-badge <?= $aktivna ? 'srv-badge--on' : 'srv-badge--off' ?>">
                             <?= $aktivna ? 'Aktivna' : 'Neaktivna' ?>
                         </span>
+                        <?php if ($naPopustu): ?>
+                        <span class="srv-badge srv-badge--sale">-<?= $popust ?>%</span>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <p class="srv-card-opis"><?= htmlspecialchars($data['Opis']) ?></p>
