@@ -76,13 +76,11 @@ require_once 'sesija.php';
       <div class="ct-field">
         <label for="lozinka">Lozinka</label>
         <input type="password" id="lozinka" name="lozinka" autocomplete="current-password">
+        <a href="zaboravljena_lozinka.php" class="ct-forgot">Zaboravili ste lozinku?</a>
       </div>
       <button type="submit" class="auth-btn">Prijavi se</button>
     </form>
 
-    <p class="auth-switch">
-      <a href="zaboravljena_lozinka.php">Zaboravili ste lozinku?</a>
-    </p>
     <p class="auth-switch">
       Nemate nalog? <a href="registracija.php">Registrujte se</a>
     </p>

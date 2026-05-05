@@ -1255,6 +1255,19 @@ body.kontakt-page {
     background: rgba(255,255,255,0.06);
 }
 
+.ct-forgot {
+    display: block;
+    text-align: right;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: rgba(212,168,40,0.55);
+    text-decoration: none;
+    margin-top: 0.3rem;
+    transition: color 0.2s;
+}
+.ct-forgot:hover { color: #d4a828; }
+
 .ct-field select {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.1);
