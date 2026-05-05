@@ -161,6 +161,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usluga = $datum = $frizer = $frizerNaziv = $vreme = "";
 }
 
+// For nivo=1 resolve their Ime+Prezime for display (KorisnikId stays in $korisnik for DB)
+if ($nivo === 1 && $korisnik !== '') {
+    $sn = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=?");
+    $sn->bind_param('s', $korisnik);
+    $sn->execute();
+    $snRow = $sn->get_result()->fetch_assoc();
+    $sn->close();
+    if ($snRow) $korisnikNaziv = $snRow['Ime'].' '.$snRow['Prezime'];
+}
+
 // Load lists for combos
 $usluge   = $conn->query("SELECT UslugaId FROM usluga WHERE Aktivna=1 ORDER BY UslugaId");
 $frizeri  = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime");
@@ -220,7 +230,6 @@ $klijenti = ($nivo >= 2)
 
     <form method="post" class="auth-form">
       <input type="hidden" name="t1" value="<?= $t1 ?>">
-      <input type="hidden" name="korisnik" value="<?= htmlspecialchars($korisnik) ?>">
 
       <div class="ct-field">
         <label for="<?= $nivo >= 2 ? 'zk-korisnik-text' : 'zk-korisnik-ro' ?>">
@@ -249,7 +258,7 @@ $klijenti = ($nivo >= 2)
         <input id="zk-korisnik-ro" type="text" value="<?= htmlspecialchars($korisnikNaziv ?: $korisnik) ?>" readonly>
         <?php else: ?>
         <input type="hidden" name="korisnik" value="<?= htmlspecialchars($korisnik) ?>">
-        <input id="zk-korisnik-ro" type="text" value="<?= htmlspecialchars($korisnik) ?>" disabled>
+        <input id="zk-korisnik-ro" type="text" value="<?= htmlspecialchars($korisnikNaziv ?: $korisnik) ?>" disabled>
         <?php endif; ?>
       </div>
 

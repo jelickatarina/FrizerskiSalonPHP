@@ -78,35 +78,35 @@ require_once 'sesija.php';
       <table>
         <tr>
             <td>Korisničko ime:</td>
-            <td><input type="text" name="korisnik" value="<?=$korisnik?>"></td>
+            <td><input type="text" name="korisnik" value="<?=$korisnik?>" autocomplete="off"></td>
         </tr>
         <tr>
           <td>Lozinka:</td>
-          <td><input type="password" name="lozinka" value="<?=$lozinka?>"></td>
+          <td><input type="password" name="lozinka" value="" autocomplete="new-password"></td>
         </tr>
         <tr>
           <td>Ime:</td>
-          <td><input type="text" name="ime" value="<?=$ime?>"></td>
+          <td><input type="text" name="ime" value="<?=$ime?>" autocomplete="off"></td>
         </tr>
         <tr>
             <td>Prezime:</td>
-            <td><input type="text" name="prezime" value="<?=$prezime?>"></td>
+            <td><input type="text" name="prezime" value="<?=$prezime?>" autocomplete="off"></td>
         </tr>
         <tr>
             <td>Datum rodjenja:</td>
-            <td><input type="date" name="datumr" value="<?=$datumr?>"></td>
+            <td><input type="date" name="datumr" value="<?=$datumr?>" autocomplete="off"></td>
         </tr>
         <tr>
             <td>Email:</td>
-            <td><input type="text" name="email" value="<?=$email?>"></td>
+            <td><input type="text" name="email" value="<?=$email?>" autocomplete="off"></td>
         </tr>
         <tr>
             <td>Telefon:</td>
-            <td><input type="text" name="telefon" value="<?=$telefon?>"></td>
+            <td><input type="text" name="telefon" value="<?=$telefon?>" autocomplete="off"></td>
         </tr>
         <tr>
             <td>Nivo:</td>
-            <td><input type="text" name="nivo" value="<?=$nivop?>"></td>
+            <td><input type="text" name="nivo" value="<?=$nivop?>" autocomplete="off"></td>
         </tr>
       </table>
       <input type="submit" name="potvrda" value="Potvrdi" class="button">

@@ -2104,33 +2104,39 @@ select:focus, input:focus {
     position: absolute;
     top: 100%;
     left: 0; right: 0;
-    background: #1a1814;
-    border: 1px solid rgba(212,168,40,0.3);
+    background: #161410;
+    border: 1px solid rgba(212,168,40,0.25);
     border-top: none;
-    border-radius: 0 0 6px 6px;
-    max-height: 200px;
+    border-radius: 0 0 8px 8px;
+    max-height: 148px;
     overflow-y: auto;
     z-index: 200;
     list-style: none;
-    margin: 0; padding: 0.2rem 0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    margin: 0; padding: 0.15rem 0;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212,168,40,0.25) transparent;
 }
+.zk-combo-list::-webkit-scrollbar { width: 4px; }
+.zk-combo-list::-webkit-scrollbar-track { background: transparent; }
+.zk-combo-list::-webkit-scrollbar-thumb { background: rgba(212,168,40,0.25); border-radius: 2px; }
 .zk-combo-list.open { display: block; }
 .zk-combo-list li {
-    padding: 0.5rem 0.9rem;
+    padding: 0.42rem 0.9rem;
     cursor: pointer;
     font-family: 'Jost', sans-serif;
-    font-size: 0.86rem;
-    color: #eeeae2;
-    transition: background 0.15s, color 0.15s;
+    font-size: 0.82rem;
+    color: rgba(240,236,228,0.8);
+    transition: background 0.12s, color 0.12s;
+    letter-spacing: 0.01em;
 }
 .zk-combo-list li:hover,
 .zk-combo-list li.zk-active { background: rgba(212,168,40,0.1); color: #d4a828; }
 .zk-combo-list li[hidden] { display: none; }
 .zk-combo-empty {
-    padding: 0.5rem 0.9rem;
+    padding: 0.42rem 0.9rem;
     font-family: 'Jost', sans-serif;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.25);
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.22);
     font-style: italic;
 }
