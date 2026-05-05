@@ -1071,6 +1071,78 @@ body.kontakt-page {
     background: rgba(255,255,255,0.06);
 }
 
+.ct-field select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: #eeeae2;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 2rem 0.65rem 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(212,168,40,0.5)'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    transition: border-color 0.2s, background 0.2s;
+}
+.ct-field select:focus {
+    outline: none;
+    border-color: rgba(212,168,40,0.5);
+    background: rgba(255,255,255,0.06);
+}
+.ct-field select option { background: #1a1814; color: #eeeae2; }
+
+/* Toggle checkbox for boolean fields */
+.ct-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+}
+.ct-toggle input[type="checkbox"] {
+    width: 36px;
+    height: 20px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+}
+.ct-toggle input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: transform 0.2s, background 0.2s;
+}
+.ct-toggle input[type="checkbox"]:checked {
+    background: rgba(212,168,40,0.2);
+    border-color: rgba(212,168,40,0.5);
+}
+.ct-toggle input[type="checkbox"]:checked::after {
+    transform: translateX(16px);
+    background: #d4a828;
+}
+.ct-toggle-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+    cursor: pointer;
+    user-select: none;
+}
+
 .ct-submit {
     align-self: flex-start;
     padding: 0.72rem 2.4rem;
@@ -1235,17 +1307,17 @@ select:focus, input:focus {
     color: #eeeae2;
     font-family: 'Jost', sans-serif;
     font-size: 0.75rem;
-    padding: 0.58rem 1.6rem 0.58rem 0.65rem;
+    padding: 0.52rem 1.8rem 0.52rem 0.75rem;
     cursor: pointer;
     transition: border-color 0.2s;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.35)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(212,168,40,0.5)'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.5rem center;
+    background-position: right 0.55rem center;
     white-space: nowrap;
     flex-shrink: 0;
-    min-width: 148px;
+    width: auto;
 }
 .filter-select:focus {
     outline: none;
