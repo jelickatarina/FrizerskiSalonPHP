@@ -28,6 +28,7 @@
     <li><a href="prijava.php">Prijavi se</a></li>
     <li><a href="registracija.php">Registruj se</a></li>
     <?php else: ?>
+    <li><a href="profil.php">Moj profil</a></li>
     <li><a href="odjava.php">Odjava</a></li>
     <?php endif; ?>
   </ul>

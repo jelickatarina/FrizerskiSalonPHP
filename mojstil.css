@@ -1153,6 +1153,28 @@ body.kontakt-page {
     user-select: none;
 }
 
+.prof-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0.4rem 0 0.2rem;
+}
+.prof-divider::before,
+.prof-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+}
+.prof-divider span {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    white-space: nowrap;
+}
+
 .ct-submit {
     align-self: flex-start;
     padding: 0.72rem 2.4rem;
