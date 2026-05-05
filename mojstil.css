@@ -2478,3 +2478,115 @@ select:focus, input:focus {
     color: rgba(255,255,255,0.22);
     font-style: italic;
 }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — mobile & tablet additions
+   ══════════════════════════════════════════════════ */
+
+/* iOS Safari ne podržava background-attachment:fixed */
+@supports (-webkit-touch-callout: none) {
+    .auth-page { background-attachment: scroll; }
+    .kp-page   { background-attachment: scroll; }
+    .home-parallax { background-attachment: scroll; }
+}
+
+/* ── Termini tabovi — horizontal scroll na mobilnom ── */
+@media (max-width: 768px) {
+    .ter-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .ter-tabs::-webkit-scrollbar { display: none; }
+    .ter-tab { white-space: nowrap; flex-shrink: 0; }
+}
+
+/* ── Toolbar stacking na mobilnom ─────────────────── */
+@media (max-width: 640px) {
+    .pg-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+    }
+    .search-form {
+        max-width: 100%;
+        min-width: 0;
+    }
+    .ct-btn {
+        text-align: center;
+        display: block;
+    }
+    .ter-search-wrap .ct-btn {
+        order: -1;
+    }
+}
+
+/* ── Auth page manja visina na mobilnom ───────────── */
+@media (max-width: 560px) {
+    .auth-page {
+        padding-top: calc(68px + 1.5rem);
+        padding-bottom: 2rem;
+        align-items: flex-start;
+    }
+    .auth-card {
+        padding: 1.8rem 1.2rem;
+        gap: 1.2rem;
+    }
+    .auth-card--wide {
+        padding: 1.8rem 1.2rem;
+    }
+}
+
+/* ── Table cells — manji padding na mobilnom ─────── */
+@media (max-width: 640px) {
+    .tbl-wrap table th,
+    .tbl-wrap table td {
+        padding: 8px 6px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+    .tbl-actions {
+        flex-direction: column;
+        gap: 0.3rem;
+        align-items: stretch;
+    }
+    .tbl-btn { text-align: center; }
+    .tbl-contact { gap: 0.4rem; }
+}
+
+/* ── pg-wrap i kp-header padding ─────────────────── */
+@media (max-width: 480px) {
+    .pg-wrap { padding: 0 0.75rem 3rem; }
+    .kp-header { padding: 0.4rem 1rem 0.8rem; }
+
+    /* Dropdown ne izlazi van ekrana */
+    .kn-drop {
+        right: -0.5rem;
+        left: auto;
+        min-width: 190px;
+    }
+
+    /* Service & user cards */
+    .srv-card  { padding: 1.2rem; }
+    .usr-card  { padding: 1.1rem; }
+
+    /* Today section */
+    .today-section { padding: 1.2rem 0.9rem; }
+    .today-card    { padding: 0.7rem 0.85rem; gap: 0.8rem; }
+    .today-card-time { font-size: 1.1rem; min-width: 44px; }
+
+    /* Pagination */
+    .pg-pagination { gap: 0.25rem; }
+    .pg-page { min-width: 32px; height: 32px; font-size: 0.72rem; }
+}
+
+/* ── Filter select na mobilnom ────────────────────── */
+@media (max-width: 640px) {
+    .filter-select { width: 100%; }
+}
+
+/* ── Footer bottom centering na mobilnom ─────────── */
+@media (max-width: 480px) {
+    .sf-bottom { text-align: center; }
+}
