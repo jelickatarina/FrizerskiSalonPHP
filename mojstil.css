@@ -811,6 +811,15 @@ body.kontakt-page {
     opacity: 0.75;
     flex-shrink: 0;
 }
+.auth-header .ct-orn span {
+    width: 68px;
+    height: 1px;
+    background: rgba(212,168,40,0.65);
+}
+.auth-header .ct-orn svg {
+    width: 8px; height: 8px;
+    opacity: 0.9;
+}
 
 /* Info blok */
 .ct-info {

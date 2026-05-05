@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "UPDATE usluga SET Cena=?, Trajanje=?, Opis=?, Aktivna=?, Popust=?, PopustOd=?, PopustDo=?
              WHERE UslugaId=?"
         );
-        $upd->bind_param('ddsiiiss', $cena, $trajanje, $opis, $aktivna, $popust, $popustOd, $popustDo, $usluga);
+        $upd->bind_param('ddsiisss', $cena, $trajanje, $opis, $aktivna, $popust, $popustOd, $popustDo, $usluga);
         $upd->execute();
         $upd->close();
         header('Location: usluge.php');
