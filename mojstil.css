@@ -2076,3 +2076,61 @@ select:focus, input:focus {
     .kp-right { padding: 1.8rem 1.4rem; }
     .kp-body { padding: 0 1rem 3rem; }
 }
+
+/* ── Custom combo-box (ternovi) ──────────────────── */
+.zk-combo { position: relative; }
+
+.zk-combo-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: #eeeae2;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    transition: border-color 0.2s, background 0.2s;
+    box-sizing: border-box;
+}
+.zk-combo-input:focus {
+    outline: none;
+    border-color: rgba(212,168,40,0.5);
+    background: rgba(255,255,255,0.06);
+}
+.zk-combo-input::placeholder { color: rgba(255,255,255,0.18); }
+
+.zk-combo-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: #1a1814;
+    border: 1px solid rgba(212,168,40,0.3);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 200;
+    list-style: none;
+    margin: 0; padding: 0.2rem 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.zk-combo-list.open { display: block; }
+.zk-combo-list li {
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.86rem;
+    color: #eeeae2;
+    transition: background 0.15s, color 0.15s;
+}
+.zk-combo-list li:hover,
+.zk-combo-list li.zk-active { background: rgba(212,168,40,0.1); color: #d4a828; }
+.zk-combo-list li[hidden] { display: none; }
+.zk-combo-empty {
+    padding: 0.5rem 0.9rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.25);
+    font-style: italic;
+}

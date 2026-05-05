@@ -210,16 +210,21 @@ $frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Niv
       </div>
 
       <div class="ct-field">
-        <label for="zk-usluga">Usluga <span class="ct-req">*</span></label>
+        <label for="zk-usluga-text">Usluga <span class="ct-req">*</span></label>
         <?php if ($t1 == 1): ?>
-        <input list="usluge-list" id="zk-usluga" name="usluga"
-               value="<?= htmlspecialchars($usluga) ?>"
-               placeholder="Pretražite ili izaberite uslugu..." autocomplete="off">
-        <datalist id="usluge-list">
-          <?php while ($row = $usluge->fetch_assoc()): ?>
-          <option value="<?= htmlspecialchars($row['UslugaId']) ?>">
-          <?php endwhile; ?>
-        </datalist>
+        <div class="zk-combo" id="combo-usluga">
+          <input type="text" class="zk-combo-input" id="zk-usluga-text"
+                 value="<?= htmlspecialchars($usluga) ?>"
+                 placeholder="Pretražite ili izaberite uslugu…" autocomplete="off">
+          <input type="hidden" name="usluga" id="zk-usluga-val" value="<?= htmlspecialchars($usluga) ?>">
+          <ul class="zk-combo-list" role="listbox">
+            <?php while ($row = $usluge->fetch_assoc()): ?>
+            <li role="option" data-val="<?= htmlspecialchars($row['UslugaId']) ?>">
+              <?= htmlspecialchars($row['UslugaId']) ?>
+            </li>
+            <?php endwhile; ?>
+          </ul>
+        </div>
         <?php else: ?>
         <input type="text" name="usluga" value="<?= htmlspecialchars($usluga) ?>" readonly>
         <?php endif; ?>
@@ -238,16 +243,21 @@ $frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Niv
       </div>
 
       <div class="ct-field">
-        <label for="zk-frizer">Frizer <span class="ct-req">*</span></label>
+        <label for="zk-frizer-text">Frizer <span class="ct-req">*</span></label>
         <?php if ($t1 == 1): ?>
-        <input list="frizeri-list" id="zk-frizer" name="frizer_naziv"
-               value="<?= htmlspecialchars($frizerNaziv) ?>"
-               placeholder="Pretražite ili izaberite frizera..." autocomplete="off">
-        <datalist id="frizeri-list">
-          <?php while ($row = $frizeri->fetch_assoc()): ?>
-          <option value="<?= htmlspecialchars($row['Ime'].' '.$row['Prezime']) ?>">
-          <?php endwhile; ?>
-        </datalist>
+        <div class="zk-combo" id="combo-frizer">
+          <input type="text" class="zk-combo-input" id="zk-frizer-text"
+                 value="<?= htmlspecialchars($frizerNaziv) ?>"
+                 placeholder="Pretražite ili izaberite frizera…" autocomplete="off">
+          <input type="hidden" name="frizer_naziv" id="zk-frizer-val" value="<?= htmlspecialchars($frizerNaziv) ?>">
+          <ul class="zk-combo-list" role="listbox">
+            <?php while ($row = $frizeri->fetch_assoc()): ?>
+            <li role="option" data-val="<?= htmlspecialchars($row['Ime'].' '.$row['Prezime']) ?>">
+              <?= htmlspecialchars($row['Ime'].' '.$row['Prezime']) ?>
+            </li>
+            <?php endwhile; ?>
+          </ul>
+        </div>
         <?php else: ?>
         <input type="hidden" name="frizer" value="<?= htmlspecialchars($frizer) ?>">
         <input type="text" value="<?= htmlspecialchars($frizerNaziv ?: $frizer) ?>" readonly>
@@ -286,6 +296,102 @@ $frizeri = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Niv
 <script>
   const nav = document.querySelector('.kn-nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
+
+  (function () {
+    function initCombo(combo) {
+      const textInput = combo.querySelector('.zk-combo-input');
+      const hidden    = combo.querySelector('input[type="hidden"]');
+      const list      = combo.querySelector('.zk-combo-list');
+      const items     = Array.from(list.querySelectorAll('li'));
+
+      function open()  { list.classList.add('open'); }
+      function close() { list.classList.remove('open'); }
+
+      function filter(q) {
+        const lq = q.toLowerCase().trim();
+        let any = false;
+        items.forEach(li => {
+          const match = li.textContent.trim().toLowerCase().includes(lq);
+          li.hidden = !match;
+          if (match) any = true;
+        });
+        return any;
+      }
+
+      textInput.addEventListener('focus', () => {
+        filter(textInput.value);
+        open();
+      });
+
+      textInput.addEventListener('input', () => {
+        hidden.value = '';
+        filter(textInput.value) ? open() : open();
+      });
+
+      items.forEach(li => {
+        li.addEventListener('mousedown', e => {
+          e.preventDefault();
+          textInput.value = li.dataset.val;
+          hidden.value    = li.dataset.val;
+          close();
+        });
+      });
+
+      document.addEventListener('click', e => {
+        if (!combo.contains(e.target)) {
+          close();
+          if (!hidden.value) textInput.value = '';
+        }
+      });
+
+      textInput.addEventListener('keydown', e => {
+        const visible = items.filter(li => !li.hidden);
+        const active  = list.querySelector('.zk-active');
+        let idx = visible.indexOf(active);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (active) active.classList.remove('zk-active');
+          visible[Math.min(idx + 1, visible.length - 1)]?.classList.add('zk-active');
+          open();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (active) active.classList.remove('zk-active');
+          visible[Math.max(idx - 1, 0)]?.classList.add('zk-active');
+          open();
+        } else if (e.key === 'Enter') {
+          const sel = list.querySelector('.zk-active') || (visible.length === 1 ? visible[0] : null);
+          if (sel) {
+            e.preventDefault();
+            textInput.value = sel.dataset.val;
+            hidden.value    = sel.dataset.val;
+            close();
+          }
+        } else if (e.key === 'Escape') {
+          close();
+        }
+      });
+    }
+
+    document.querySelectorAll('.zk-combo').forEach(initCombo);
+
+    // Client-side enforce selection
+    const form = document.querySelector('form[method="post"]');
+    if (form) {
+      form.addEventListener('submit', e => {
+        const usVal = document.getElementById('zk-usluga-val');
+        const frVal = document.getElementById('zk-frizer-val');
+        if (usVal && !usVal.value) {
+          e.preventDefault();
+          document.getElementById('zk-usluga-text').focus();
+          document.getElementById('combo-usluga').querySelector('.zk-combo-list').classList.add('open');
+        } else if (frVal && !frVal.value) {
+          e.preventDefault();
+          document.getElementById('zk-frizer-text').focus();
+          document.getElementById('combo-frizer').querySelector('.zk-combo-list').classList.add('open');
+        }
+      });
+    }
+  })();
 </script>
 </body>
 </html>
