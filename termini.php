@@ -57,13 +57,14 @@ if ($view === 'zahtevi') {
     $qParam = $q !== '' ? '&q='.urlencode($q) : '';
 }
 
-// --- OTHER tabs (Svi / Zakazani / Urađeni) ---
+// --- OTHER tabs (Svi / Zakazani / Urađeni / Otkazani) ---
 if (!in_array($view, ['danas', 'zahtevi'])) {
     $perPage = 15;
     $page    = max(1, (int)($_GET['page'] ?? 1));
     $offset  = ($page-1)*$perPage;
-    if ($view === 'svi')      $wh = "WHERE $baseWh AND (t.Potvrdjeno=1 OR t.Otkazano=1)";
-    else                      $wh = "WHERE $baseWh AND t.Potvrdjeno=1";
+    if ($view === 'svi')          $wh = "WHERE $baseWh AND (t.Potvrdjeno=1 OR t.Otkazano=1)";
+    elseif ($view === 'otkazani') $wh = "WHERE $baseWh AND t.Otkazano=1";
+    else                          $wh = "WHERE $baseWh AND t.Potvrdjeno=1";
     if ($view === 'zakazani') $wh .= " AND t.Uradjeno=0 AND (t.Otkazano IS NULL OR t.Otkazano=0)";
     if ($view === 'uradjeni') $wh .= " AND t.Uradjeno=1";
     if ($q !== '') {
@@ -163,6 +164,7 @@ if ($nivo === 9) {
             <a class="ter-tab <?= $view==='svi'?'ter-tab--active':'' ?>" href="termini.php?view=svi<?= $fQ.$fFr ?>">Svi</a>
             <a class="ter-tab <?= $view==='zakazani'?'ter-tab--active':'' ?>" href="termini.php?view=zakazani<?= $fQ.$fFr ?>">Zakazani</a>
             <a class="ter-tab <?= $view==='uradjeni'?'ter-tab--active':'' ?>" href="termini.php?view=uradjeni<?= $fQ.$fFr ?>">Urađeni</a>
+            <a class="ter-tab <?= $view==='otkazani'?'ter-tab--active':'' ?>" href="termini.php?view=otkazani<?= $fQ.$fFr ?>">Otkazani</a>
         </div>
 
         <!-- ── DANAS ─────────────────────────────────── -->

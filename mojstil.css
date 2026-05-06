@@ -2716,6 +2716,58 @@ input[type="time"] {
     font-style: italic;
     line-height: 1.6;
 }
+.odmor-confirm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.odmor-confirm-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+@media (max-width: 640px) {
+    .odmor-confirm-options { grid-template-columns: 1fr; }
+}
+.odmor-confirm-option {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 1.2rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+.odmor-confirm-option--transfer {
+    border-color: rgba(212,168,40,0.15);
+    background: rgba(212,168,40,0.03);
+}
+.odmor-confirm-option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+}
+.odmor-confirm-desc {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.76rem;
+    color: rgba(255,255,255,0.28);
+    margin: 0;
+    line-height: 1.5;
+    flex: 1;
+}
+.odmor-transfer-row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
 .odmor-confirm-btns {
     display: flex;
     flex-wrap: wrap;
