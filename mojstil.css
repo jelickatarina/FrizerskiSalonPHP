@@ -2824,6 +2824,64 @@ input[type="time"] {
 }
 .ct-alert--warn svg { flex-shrink: 0; margin-top: 0.1rem; }
 
+/* booking summary (step 2 header) */
+.zk-booking-summary {
+    background: rgba(212,168,40,0.06);
+    border: 1px solid rgba(212,168,40,0.18);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.2rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    color: #c8b87a;
+}
+.zk-booking-summary strong { color: #d4a828; font-weight: 500; }
+
+/* frizer selection grid */
+.zk-frizer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.65rem;
+    margin-top: 0.3rem;
+}
+.zk-frizer-card { cursor: pointer; display: block; }
+.zk-frizer-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.zk-frizer-card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 1rem 0.6rem 0.85rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    color: #eeeae2;
+    line-height: 1.35;
+}
+.zk-frizer-card:hover .zk-frizer-card-body {
+    border-color: rgba(212,168,40,0.3);
+    background: rgba(255,255,255,0.05);
+}
+.zk-frizer-card:has(input:checked) .zk-frizer-card-body {
+    border-color: rgba(212,168,40,0.7);
+    background: rgba(212,168,40,0.1);
+    color: #d4a828;
+}
+.zk-frizer-card svg { opacity: 0.45; transition: opacity 0.15s; color: #d4a828; }
+.zk-frizer-card:has(input:checked) svg { opacity: 1; }
+
 /* odmor conflict stats */
 .odmor-conflict-stats {
     display: flex;
