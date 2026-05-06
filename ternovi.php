@@ -25,8 +25,9 @@ function getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina) {
         $sl = $conn->prepare("SELECT 1 FROM frizer_odmor WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=? LIMIT 1");
         $sl->bind_param('sss', $fr['KorisnikId'], $datum, $datum);
         $sl->execute();
-        if ($sl->get_result()->num_rows > 0) { $sl->close(); continue; }
+        $slRow = $sl->get_result()->fetch_assoc();
         $sl->close();
+        if ($slRow) continue;
 
         // Build occupied slot map
         $st = $conn->prepare(
@@ -412,28 +413,36 @@ for ($s = 18; $s <= 34; $s++) {
 const nav = document.querySelector('.kn-nav');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
 
-// Disable past time slots when today is selected
+// Hide past time slots when today is selected
 (function () {
   const dateEl = document.getElementById('zk-datum');
   const timeEl = document.getElementById('zk-vreme');
   if (!dateEl || !timeEl) return;
+
+  // Store all slots once
+  const allSlots = <?= json_encode($timeSlots) ?>;
 
   function refreshTimes() {
     const today = new Date().toISOString().slice(0, 10);
     const isToday = dateEl.value === today;
     const now = new Date();
     const curSlot = now.getHours() * 2 + Math.floor(now.getMinutes() / 30);
+    const currentVal = timeEl.value;
 
-    Array.from(timeEl.options).forEach(opt => {
-      if (!opt.value) return;
-      const [h, m] = opt.value.split(':').map(Number);
+    // Rebuild options list, skipping past slots for today
+    while (timeEl.options.length > 1) timeEl.remove(1);
+    allSlots.forEach(ts => {
+      const [h, m] = ts.split(':').map(Number);
       const slot = h * 2 + m / 30;
-      opt.disabled = isToday && slot <= curSlot;
+      if (isToday && slot <= curSlot) return;
+      const opt = document.createElement('option');
+      opt.value = ts;
+      opt.textContent = ts;
+      if (ts === currentVal) opt.selected = true;
+      timeEl.appendChild(opt);
     });
 
-    // Reset if selected option is now disabled
-    const sel = timeEl.options[timeEl.selectedIndex];
-    if (sel && sel.disabled) timeEl.selectedIndex = 0;
+    if (!timeEl.value) timeEl.selectedIndex = 0;
   }
 
   dateEl.addEventListener('change', refreshTimes);
