@@ -373,18 +373,24 @@ for ($s = 18; $s <= 34; $s++) {
 
       <div class="ct-field">
         <label>Izaberite frizera <span class="ct-req">*</span></label>
-        <div class="zk-frizer-grid">
+        <div class="zk-frizer-list">
           <?php foreach ($frizeriDostupni as $fd): ?>
-          <label class="zk-frizer-card">
+          <label class="zk-frizer-row">
             <input type="radio" name="frizer" value="<?= htmlspecialchars($fd['KorisnikId']) ?>"
                    <?= $fd['KorisnikId'] === $frizer ? 'checked' : '' ?> required>
-            <div class="zk-frizer-card-body">
+            <div class="zk-frizer-row-avatar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                   stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+                   stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
-              <span><?= htmlspecialchars($fd['Ime'].' '.$fd['Prezime']) ?></span>
+            </div>
+            <span class="zk-frizer-row-name"><?= htmlspecialchars($fd['Ime'].' '.$fd['Prezime']) ?></span>
+            <div class="zk-frizer-row-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
             </div>
           </label>
           <?php endforeach; ?>

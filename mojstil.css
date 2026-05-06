@@ -2840,47 +2840,88 @@ input[type="time"] {
 }
 .zk-booking-summary strong { color: #d4a828; font-weight: 500; }
 
-/* frizer selection grid */
-.zk-frizer-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.65rem;
+/* frizer selection list */
+.zk-frizer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
     margin-top: 0.3rem;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 2px;
 }
-.zk-frizer-card { cursor: pointer; display: block; }
-.zk-frizer-card input[type="radio"] {
+.zk-frizer-list::-webkit-scrollbar { width: 4px; }
+.zk-frizer-list::-webkit-scrollbar-track { background: transparent; }
+.zk-frizer-list::-webkit-scrollbar-thumb { background: rgba(212,168,40,0.25); border-radius: 2px; }
+
+.zk-frizer-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+}
+.zk-frizer-row input[type="radio"] {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
-.zk-frizer-card-body {
+.zk-frizer-row-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(212,168,40,0.08);
+    border: 1px solid rgba(212,168,40,0.18);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.45rem;
-    padding: 1rem 0.6rem 0.85rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.03);
-    text-align: center;
-    transition: border-color 0.15s, background 0.15s;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #d4a828;
+    opacity: 0.55;
+    transition: opacity 0.15s;
+}
+.zk-frizer-row-name {
+    flex: 1;
     font-family: 'Jost', sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.84rem;
     color: #eeeae2;
-    line-height: 1.35;
+    transition: color 0.15s;
 }
-.zk-frizer-card:hover .zk-frizer-card-body {
-    border-color: rgba(212,168,40,0.3);
-    background: rgba(255,255,255,0.05);
-}
-.zk-frizer-card:has(input:checked) .zk-frizer-card-body {
-    border-color: rgba(212,168,40,0.7);
-    background: rgba(212,168,40,0.1);
+.zk-frizer-row-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
     color: #d4a828;
 }
-.zk-frizer-card svg { opacity: 0.45; transition: opacity 0.15s; color: #d4a828; }
-.zk-frizer-card:has(input:checked) svg { opacity: 1; }
+.zk-frizer-row-check svg { opacity: 0; transition: opacity 0.15s; }
+
+.zk-frizer-row:hover {
+    border-color: rgba(212,168,40,0.28);
+    background: rgba(255,255,255,0.04);
+}
+.zk-frizer-row:has(input:checked) {
+    border-color: rgba(212,168,40,0.6);
+    background: rgba(212,168,40,0.07);
+}
+.zk-frizer-row:has(input:checked) .zk-frizer-row-avatar { opacity: 1; }
+.zk-frizer-row:has(input:checked) .zk-frizer-row-name  { color: #d4a828; }
+.zk-frizer-row:has(input:checked) .zk-frizer-row-check {
+    border-color: #d4a828;
+    background: rgba(212,168,40,0.18);
+}
+.zk-frizer-row:has(input:checked) .zk-frizer-row-check svg { opacity: 1; }
 
 /* odmor conflict stats */
 .odmor-conflict-stats {
