@@ -204,8 +204,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                             $occupied = buildOccupied($conn, $noviFrizer, $datumOd, $datumDo);
 
                             // Classify appointments
-                            $freeIds     = [];
-                            $conflictIds = [];
+                            $freeIds      = [];
+                            $conflictIds  = [];
+                            $freeTimes    = [];
+                            $conflictTimes = [];
                             foreach ($appts as $appt) {
                                 $slots = max(1, (int)ceil($appt['Trajanje'] / 30));
                                 $hasConflict = false;
@@ -215,8 +217,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                                         break;
                                     }
                                 }
-                                if ($hasConflict) $conflictIds[] = $appt['TerminId'];
-                                else              $freeIds[]     = $appt['TerminId'];
+                                $tStr = sprintf('%02d:%02d', (int)($appt['Vreme']/2), ($appt['Vreme']%2)*30);
+                                if ($hasConflict) { $conflictIds[] = $appt['TerminId']; $conflictTimes[] = $tStr; }
+                                else              { $freeIds[]     = $appt['TerminId']; $freeTimes[]     = $tStr; }
                             }
 
                             if (count($conflictIds) > 0) {
@@ -228,16 +231,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                                 $sfn->close();
 
                                 $_SESSION['odmor_pending'] = [
-                                    'frizer'              => $frizer,
-                                    'datumOd'             => $datumOd,
-                                    'datumDo'             => $datumDo,
-                                    'tip'                 => $tip,
-                                    'napomena'            => $napomena,
-                                    'brTermina'           => $brTermina,
-                                    'transfer_noviFrizer' => $noviFrizer,
-                                    'transfer_noviNaziv'  => $nfRow ? $nfRow['Ime'].' '.$nfRow['Prezime'] : $noviFrizer,
-                                    'transfer_freeIds'    => $freeIds,
-                                    'transfer_conflictIds'=> $conflictIds,
+                                    'frizer'               => $frizer,
+                                    'datumOd'              => $datumOd,
+                                    'datumDo'              => $datumDo,
+                                    'tip'                  => $tip,
+                                    'napomena'             => $napomena,
+                                    'brTermina'            => $brTermina,
+                                    'transfer_noviFrizer'  => $noviFrizer,
+                                    'transfer_noviNaziv'   => $nfRow ? $nfRow['Ime'].' '.$nfRow['Prezime'] : $noviFrizer,
+                                    'transfer_freeIds'     => $freeIds,
+                                    'transfer_conflictIds' => $conflictIds,
+                                    'transfer_freeTimes'   => $freeTimes,
+                                    'transfer_conflictTimes' => $conflictTimes,
                                 ];
                                 $poruka = '__transfer_conflict__';
                             } else {
@@ -353,20 +358,22 @@ if ($qArgs) {
             <?php if ($transferConflict): ?>
             <!-- ── STEP 3: Transfer conflict confirmation ── -->
             <?php
-                $nFree     = count($transferConflict['transfer_freeIds']);
-                $nConflict = count($transferConflict['transfer_conflictIds']);
-                $noviNaziv = htmlspecialchars($transferConflict['transfer_noviNaziv']);
+                $nFree          = count($transferConflict['transfer_freeIds']);
+                $nConflict      = count($transferConflict['transfer_conflictIds']);
+                $noviNaziv      = htmlspecialchars($transferConflict['transfer_noviNaziv']);
+                $freeTimes      = $transferConflict['transfer_freeTimes']    ?? [];
+                $conflictTimes  = $transferConflict['transfer_conflictTimes'] ?? [];
             ?>
             <h2 class="odmor-section-title">Konflikt rasporeda</h2>
             <div class="ct-alert ct-alert--warn" style="margin-bottom:1.4rem;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
                 <div>
-                    Zamenik <strong><?= $noviNaziv ?></strong> već ima
-                    <strong><?= $nConflict ?></strong> zauzet<?= $nConflict === 1 ? '' : 'ih' ?>
-                    termin<?= $nConflict === 1 ? '' : 'a' ?> u ovom periodu.
+                    Zamenik <strong><?= $noviNaziv ?></strong> već ima zauzete termine u ovom periodu.
                     <?php if ($nFree > 0): ?>
-                    Preostal<?= $nFree === 1 ? 'i' : 'ih' ?> <strong><?= $nFree ?></strong>
-                    termin<?= $nFree === 1 ? '' : 'a' ?> može biti prebačeno.
+                    <strong><?= $nFree ?></strong> termin<?= $nFree === 1 ? '' : 'a' ?> može biti prebačeno,
+                    a <strong><?= $nConflict ?></strong> <?= $nConflict === 1 ? 'mora biti otkazan' : 'moraju biti otkazani' ?>.
+                    <?php else: ?>
+                    Svih <strong><?= $nConflict ?></strong> termin<?= $nConflict === 1 ? '' : 'a' ?> mora biti otkazan<?= $nConflict === 1 ? '' : 'o' ?>.
                     <?php endif; ?>
                 </div>
             </div>
@@ -374,15 +381,32 @@ if ($qArgs) {
             <div class="odmor-conflict-stats">
                 <?php if ($nFree > 0): ?>
                 <div class="odmor-conflict-stat odmor-conflict-stat--free">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span><?= $nFree ?> termin<?= $nFree === 1 ? '' : 'a' ?> — slobodno → prebaciti kod <?= $noviNaziv ?></span>
+                    <div class="odmor-conflict-num"><?= $nFree ?></div>
+                    <div class="odmor-conflict-label">Slobodno</div>
                 </div>
                 <?php endif; ?>
                 <div class="odmor-conflict-stat odmor-conflict-stat--busy">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                    <span><?= $nConflict ?> termin<?= $nConflict === 1 ? '' : 'a' ?> — zauzeto → otkazati</span>
+                    <div class="odmor-conflict-num"><?= $nConflict ?></div>
+                    <div class="odmor-conflict-label">Zauzeto</div>
                 </div>
             </div>
+
+            <?php if ($freeTimes || $conflictTimes): ?>
+            <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.2rem;">
+                <?php foreach ($freeTimes as $t): ?>
+                <span style="padding:0.2rem 0.6rem;border-radius:4px;font-size:0.74rem;
+                    background:rgba(60,180,100,0.12);border:1px solid rgba(60,180,100,0.3);color:#6dcf95;">
+                    <?= htmlspecialchars($t) ?> ✓
+                </span>
+                <?php endforeach; ?>
+                <?php foreach ($conflictTimes as $t): ?>
+                <span style="padding:0.2rem 0.6rem;border-radius:4px;font-size:0.74rem;
+                    background:rgba(180,60,60,0.12);border:1px solid rgba(180,60,60,0.3);color:#d47070;">
+                    <?= htmlspecialchars($t) ?> ✗
+                </span>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
 
             <form method="post" class="odmor-confirm-form" style="margin-top:1.2rem;">
                 <input type="hidden" name="action"           value="add">

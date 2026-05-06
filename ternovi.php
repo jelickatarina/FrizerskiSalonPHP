@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     else {
                         $ukupnoTermina  = (int)(1 + ($data['Trajanje'] - 1) / 30);
                         $zauzetiTermini = [];
-                        $stmt = $conn->prepare("SELECT t.Vreme, t.UslugaId FROM termin t WHERE t.KorisnikFrizerId=? AND t.Datum=?");
+                        $stmt = $conn->prepare("SELECT t.Vreme, t.UslugaId FROM termin t WHERE t.KorisnikFrizerId=? AND t.Datum=? AND (t.Otkazano IS NULL OR t.Otkazano=0) AND t.Uradjeno=0");
                         $stmt->bind_param('ss', $frizer, $datum);
                         $stmt->execute();
                         $res = $stmt->get_result();
