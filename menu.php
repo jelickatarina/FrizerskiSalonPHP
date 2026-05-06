@@ -37,6 +37,7 @@ $roleLabel = $nivoLabel[$nivo] ?? '';
       <?php endif; ?>
       <?php if ($nivo >= '2'): ?>
       <li><a href="korisnici.php">Korisnici</a></li>
+      <li><a href="odmor.php">Odsustvo</a></li>
       <?php endif; ?>
       <?php if ($nivo == '0'): ?>
       <li><a href="prijava.php">Prijavi se</a></li>

@@ -53,4 +53,18 @@ if (@$conn->query("SELECT 1 FROM usluga WHERE 1=0")) {
         $conn->query("ALTER TABLE usluga ADD COLUMN PopustDo DATE NULL");
     }
 }
+
+// Auto-migrate: frizer_odmor table
+$conn->query("CREATE TABLE IF NOT EXISTS frizer_odmor (
+    OdmorId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    KorisnikFrizerId VARCHAR(50) NOT NULL,
+    DatumOd DATE NOT NULL,
+    DatumDo DATE NOT NULL,
+    Tip ENUM('odmor','slobodan_dan','bolovanje') NOT NULL DEFAULT 'odmor',
+    Napomena TEXT NULL,
+    OtkazanoTermina INT NOT NULL DEFAULT 0,
+    INDEX (KorisnikFrizerId),
+    INDEX (DatumOd),
+    INDEX (DatumDo)
+) CHARACTER SET utf8mb4");
 ?>

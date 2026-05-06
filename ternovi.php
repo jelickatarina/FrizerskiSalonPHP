@@ -43,7 +43,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             else {
                 $frizer = $fr['KorisnikId'];
 
-                if ($nivo >= 2) {
+                // Check if frizer is on leave on this date
+                $sodmor = $conn->prepare(
+                    "SELECT Tip FROM frizer_odmor
+                     WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=?
+                     LIMIT 1"
+                );
+                $sodmor->bind_param('sss', $frizer, $datum, $datum);
+                $sodmor->execute();
+                $odmorRow = $sodmor->get_result()->fetch_assoc();
+                $sodmor->close();
+                if ($odmorRow) {
+                    $tipLabels = ['odmor' => 'godišnjem odmoru', 'slobodan_dan' => 'slobodnom danu', 'bolovanje' => 'bolovanju'];
+                    $tipTxt = $tipLabels[$odmorRow['Tip']] ?? 'odsustvu';
+                    $poruka = "Izabrani frizer je na $tipTxt tog dana i nije dostupan za zakazivanje.";
+                }
+
+                if ($nivo >= 2 && !$poruka) {
                     $ck = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=? AND Nivo=1");
                     $ck->bind_param('s', $korisnik);
                     $ck->execute();
