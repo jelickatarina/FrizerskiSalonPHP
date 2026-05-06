@@ -2824,6 +2824,60 @@ input[type="time"] {
 }
 .ct-alert--warn svg { flex-shrink: 0; margin-top: 0.1rem; }
 
+/* odmor conflict stats */
+.odmor-conflict-stats {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0 1.4rem;
+}
+.odmor-conflict-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.4rem;
+    border-radius: 8px;
+    min-width: 90px;
+    text-align: center;
+}
+.odmor-conflict-stat--free {
+    background: rgba(60,180,100,0.1);
+    border: 1px solid rgba(60,180,100,0.3);
+}
+.odmor-conflict-stat--free .odmor-conflict-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #6dcf95;
+    line-height: 1.1;
+}
+.odmor-conflict-stat--free .odmor-conflict-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6dcf95;
+    opacity: 0.8;
+    margin-top: 0.2rem;
+}
+.odmor-conflict-stat--busy {
+    background: rgba(180,60,60,0.1);
+    border: 1px solid rgba(180,60,60,0.3);
+}
+.odmor-conflict-stat--busy .odmor-conflict-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #d47070;
+    line-height: 1.1;
+}
+.odmor-conflict-stat--busy .odmor-conflict-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #d47070;
+    opacity: 0.8;
+    margin-top: 0.2rem;
+}
+
 /* odmor list */
 .odmor-list {
     display: flex;

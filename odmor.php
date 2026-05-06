@@ -11,6 +11,26 @@ $success = '';
 $danas   = date('Y-m-d');
 $tipLabel = ['odmor' => 'Godišnji odmor', 'slobodan_dan' => 'Slobodan dan', 'bolovanje' => 'Bolovanje'];
 
+// Build set of occupied 30-min slots for a frizer in a period
+function buildOccupied($conn, $frizerId, $datumOd, $datumDo) {
+    $st = $conn->prepare(
+        "SELECT t.Datum, t.Vreme, COALESCE(u.Trajanje, 30) AS Trajanje
+         FROM termin t LEFT JOIN usluga u ON t.UslugaId=u.UslugaId
+         WHERE t.KorisnikFrizerId=? AND t.Datum BETWEEN ? AND ?
+           AND t.Otkazano=0 AND t.Uradjeno=0"
+    );
+    $st->bind_param('sss', $frizerId, $datumOd, $datumDo);
+    $st->execute();
+    $rows = $st->get_result()->fetch_all(MYSQLI_ASSOC);
+    $st->close();
+    $occ = [];
+    foreach ($rows as $r) {
+        $slots = max(1, (int)ceil($r['Trajanje'] / 30));
+        for ($s = 0; $s < $slots; $s++) $occ[$r['Datum']][$r['Vreme'] + $s] = true;
+    }
+    return $occ;
+}
+
 // ── Handle DELETE (admin only) ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete' && $nivo === 9) {
     $id = (int)($_POST['odmor_id'] ?? 0);
@@ -25,120 +45,241 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 
 // ── Handle ADD (admin only) ────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' && $nivo === 9) {
-    $frizer   = trim($_POST['frizer']   ?? '');
-    $datumOd  = trim($_POST['datum_od'] ?? '');
-    $datumDo  = trim($_POST['datum_do'] ?? '');
-    $tip      = trim($_POST['tip']      ?? 'odmor');
-    $napomena = trim($_POST['napomena'] ?? '');
-    $confirmed = isset($_POST['potvrda_otkazivanja']);
 
-    if ($frizer === '') {
-        $poruka = 'Izaberite frizera.';
-    } elseif ($datumOd === '' || $datumDo === '') {
-        $poruka = 'Unesite datum od i datum do.';
-    } elseif ($datumDo < $datumOd) {
-        $poruka = 'Datum do mora biti isti ili posle datuma od.';
-    } elseif (!in_array($tip, ['odmor', 'slobodan_dan', 'bolovanje'])) {
-        $poruka = 'Neispravan tip odsustva.';
-    } else {
-        $so = $conn->prepare("SELECT COUNT(*) FROM frizer_odmor WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=?");
-        $so->bind_param('sss', $frizer, $datumDo, $datumOd);
-        $so->execute();
-        $overlap = (int)$so->get_result()->fetch_row()[0];
-        $so->close();
+    // ── STEP 3: Execute from session (after conflict confirmation) ──
+    if (isset($_POST['potvrda_konflikta'])) {
+        $p = $_SESSION['odmor_pending'] ?? null;
+        if ($p && isset($p['transfer_noviFrizer'])) {
+            $frizer      = $p['frizer'];
+            $datumOd     = $p['datumOd'];
+            $datumDo     = $p['datumDo'];
+            $tip         = $p['tip'];
+            $napomena    = $p['napomena'];
+            $noviFrizer  = $p['transfer_noviFrizer'];
+            $freeIds     = $p['transfer_freeIds'];
+            $conflictIds = $p['transfer_conflictIds'];
+            $akcijaK     = trim($_POST['akcija_konflikta'] ?? 'transfer');
 
-        if ($overlap > 0) {
-            $poruka = 'Frizer već ima odsustvo koje se preklapa sa izabranim periodom.';
-        } else {
-            $sc = $conn->prepare(
-                "SELECT COUNT(*) FROM termin
-                 WHERE KorisnikFrizerId=? AND Datum BETWEEN ? AND ?
-                   AND Otkazano=0 AND Uradjeno=0"
-            );
-            $sc->bind_param('sss', $frizer, $datumOd, $datumDo);
-            $sc->execute();
-            $brTermina = (int)$sc->get_result()->fetch_row()[0];
-            $sc->close();
+            $otkazanoTermina  = 0;
+            $prebacenoTermina = 0;
 
-            if ($brTermina > 0 && !$confirmed) {
-                $_SESSION['odmor_pending'] = compact('frizer', 'datumOd', 'datumDo', 'tip', 'napomena', 'brTermina');
-                $poruka = '__confirm__';
-            } else {
-                $akcija     = trim($_POST['otkazi_termine'] ?? '');
-                $noviFrizer = trim($_POST['novi_frizer']   ?? '');
-                $otkazanoTermina  = 0;
-                $prebacenoTermina = 0;
-
-                if ($akcija === '1' && $brTermina > 0) {
-                    $su = $conn->prepare(
-                        "UPDATE termin SET Otkazano=1
-                         WHERE KorisnikFrizerId=? AND Datum BETWEEN ? AND ?
-                           AND Otkazano=0 AND Uradjeno=0"
-                    );
-                    $su->bind_param('sss', $frizer, $datumOd, $datumDo);
-                    $su->execute();
-                    $otkazanoTermina = $su->affected_rows;
-                    $su->close();
-                } elseif ($akcija === 'transfer' && $noviFrizer !== '' && $brTermina > 0) {
-                    // Validate replacement frizer exists and is not also on leave
-                    $svf = $conn->prepare("SELECT KorisnikId FROM korisnik WHERE KorisnikId=? AND Nivo=2");
-                    $svf->bind_param('s', $noviFrizer);
-                    $svf->execute();
-                    $vfRow = $svf->get_result()->fetch_assoc();
-                    $svf->close();
-
-                    $sfOdmor = $conn->prepare(
-                        "SELECT COUNT(*) FROM frizer_odmor
-                         WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=?"
-                    );
-                    $sfOdmor->bind_param('sss', $noviFrizer, $datumDo, $datumOd);
-                    $sfOdmor->execute();
-                    $zamenaNaOdmoru = (int)$sfOdmor->get_result()->fetch_row()[0];
-                    $sfOdmor->close();
-
-                    if (!$vfRow) {
-                        $poruka = 'Izabrani zamenik nije pronađen.';
-                    } elseif ($zamenaNaOdmoru > 0) {
-                        $poruka = 'Izabrani zamenik je takođe na odsustvu u tom periodu.';
-                    } else {
-                        $su = $conn->prepare(
-                            "UPDATE termin SET KorisnikFrizerId=?
-                             WHERE KorisnikFrizerId=? AND Datum BETWEEN ? AND ?
-                               AND Otkazano=0 AND Uradjeno=0"
-                        );
-                        $su->bind_param('ssss', $noviFrizer, $frizer, $datumOd, $datumDo);
-                        $su->execute();
-                        $prebacenoTermina = $su->affected_rows;
-                        $su->close();
-                    }
+            if ($akcijaK === 'cancel_all') {
+                $allIds = array_merge($freeIds, $conflictIds);
+                if ($allIds) {
+                    $ids = implode(',', array_map('intval', $allIds));
+                    $conn->query("UPDATE termin SET Otkazano=1 WHERE TerminId IN ($ids)");
+                    $otkazanoTermina = count($allIds);
                 }
+            } else {
+                if ($freeIds) {
+                    $nfe = $conn->real_escape_string($noviFrizer);
+                    $ids = implode(',', array_map('intval', $freeIds));
+                    $conn->query("UPDATE termin SET KorisnikFrizerId='$nfe' WHERE TerminId IN ($ids)");
+                    $prebacenoTermina = count($freeIds);
+                }
+                if ($conflictIds) {
+                    $ids = implode(',', array_map('intval', $conflictIds));
+                    $conn->query("UPDATE termin SET Otkazano=1 WHERE TerminId IN ($ids)");
+                    $otkazanoTermina = count($conflictIds);
+                }
+            }
 
-                if (!$poruka) {
-                    $si = $conn->prepare(
-                        "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
-                         VALUES (?, ?, ?, ?, ?, ?)"
-                    );
-                    $si->bind_param('sssssi', $frizer, $datumOd, $datumDo, $tip, $napomena, $otkazanoTermina);
-                    $si->execute();
-                    $si->close();
-                    unset($_SESSION['odmor_pending']);
+            $si = $conn->prepare(
+                "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
+                 VALUES (?, ?, ?, ?, ?, ?)"
+            );
+            $si->bind_param('sssssi', $frizer, $datumOd, $datumDo, $tip, $napomena, $otkazanoTermina);
+            $si->execute();
+            $si->close();
+            unset($_SESSION['odmor_pending']);
 
-                    $msg = 'Odsustvo (' . $tipLabel[$tip] . ') je upisano.';
-                    if ($otkazanoTermina > 0)
-                        $msg .= ' Otkazano je ' . $otkazanoTermina . ' termin' . ($otkazanoTermina === 1 ? '.' : 'a.');
-                    elseif ($prebacenoTermina > 0)
-                        $msg .= ' Prebačeno je ' . $prebacenoTermina . ' termin' . ($prebacenoTermina === 1 ? '' : 'a') . ' kod zamenika.';
-                    $success = $msg;
+            $msg = 'Odsustvo (' . $tipLabel[$tip] . ') je upisano.';
+            if ($prebacenoTermina > 0)
+                $msg .= ' Prebačeno ' . $prebacenoTermina . ' termin' . ($prebacenoTermina === 1 ? '' : 'a') . ' kod zamenika.';
+            if ($otkazanoTermina > 0)
+                $msg .= ' Otkazano ' . $otkazanoTermina . ' termin' . ($otkazanoTermina === 1 ? '.' : 'a.');
+            $success = $msg;
+        } else {
+            $poruka = 'Sesija je istekla. Pokušajte ponovo.';
+        }
+
+    } else {
+        // ── STEP 1 / STEP 2: Read from POST ──
+        $frizer   = trim($_POST['frizer']   ?? '');
+        $datumOd  = trim($_POST['datum_od'] ?? '');
+        $datumDo  = trim($_POST['datum_do'] ?? '');
+        $tip      = trim($_POST['tip']      ?? 'odmor');
+        $napomena = trim($_POST['napomena'] ?? '');
+        $confirmed = isset($_POST['potvrda_otkazivanja']);
+
+        if ($frizer === '') {
+            $poruka = 'Izaberite frizera.';
+        } elseif ($datumOd === '' || $datumDo === '') {
+            $poruka = 'Unesite datum od i datum do.';
+        } elseif ($datumDo < $datumOd) {
+            $poruka = 'Datum do mora biti isti ili posle datuma od.';
+        } elseif (!in_array($tip, ['odmor', 'slobodan_dan', 'bolovanje'])) {
+            $poruka = 'Neispravan tip odsustva.';
+        } else {
+            $so = $conn->prepare(
+                "SELECT COUNT(*) FROM frizer_odmor WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=?"
+            );
+            $so->bind_param('sss', $frizer, $datumDo, $datumOd);
+            $so->execute();
+            $overlap = (int)$so->get_result()->fetch_row()[0];
+            $so->close();
+
+            if ($overlap > 0) {
+                $poruka = 'Frizer već ima odsustvo koje se preklapa sa izabranim periodom.';
+            } else {
+                $sc = $conn->prepare(
+                    "SELECT COUNT(*) FROM termin
+                     WHERE KorisnikFrizerId=? AND Datum BETWEEN ? AND ?
+                       AND Otkazano=0 AND Uradjeno=0"
+                );
+                $sc->bind_param('sss', $frizer, $datumOd, $datumDo);
+                $sc->execute();
+                $brTermina = (int)$sc->get_result()->fetch_row()[0];
+                $sc->close();
+
+                if ($brTermina > 0 && !$confirmed) {
+                    // ── STEP 1: Show appointment confirmation ──
+                    $_SESSION['odmor_pending'] = compact('frizer','datumOd','datumDo','tip','napomena','brTermina');
+                    $poruka = '__confirm__';
+                } else {
+                    // ── STEP 2: Execute chosen action ──
+                    $akcija     = trim($_POST['otkazi_termine'] ?? '');
+                    $noviFrizer = trim($_POST['novi_frizer']    ?? '');
+                    $otkazanoTermina  = 0;
+                    $prebacenoTermina = 0;
+
+                    if ($akcija === '1') {
+                        if ($brTermina > 0) {
+                            $su = $conn->prepare(
+                                "UPDATE termin SET Otkazano=1
+                                 WHERE KorisnikFrizerId=? AND Datum BETWEEN ? AND ?
+                                   AND Otkazano=0 AND Uradjeno=0"
+                            );
+                            $su->bind_param('sss', $frizer, $datumOd, $datumDo);
+                            $su->execute();
+                            $otkazanoTermina = $su->affected_rows;
+                            $su->close();
+                        }
+                    } elseif ($akcija === 'transfer' && $noviFrizer !== '') {
+                        // Validate replacement
+                        $svf = $conn->prepare("SELECT KorisnikId FROM korisnik WHERE KorisnikId=? AND Nivo=2");
+                        $svf->bind_param('s', $noviFrizer);
+                        $svf->execute();
+                        $vfRow = $svf->get_result()->fetch_assoc();
+                        $svf->close();
+
+                        $sfO = $conn->prepare(
+                            "SELECT COUNT(*) FROM frizer_odmor
+                             WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=?"
+                        );
+                        $sfO->bind_param('sss', $noviFrizer, $datumDo, $datumOd);
+                        $sfO->execute();
+                        $zamenaNaOdmoru = (int)$sfO->get_result()->fetch_row()[0];
+                        $sfO->close();
+
+                        if (!$vfRow) {
+                            $poruka = 'Izabrani zamenik nije pronađen.';
+                        } elseif ($zamenaNaOdmoru > 0) {
+                            $poruka = 'Izabrani zamenik je takođe na odsustvu u tom periodu.';
+                        } else {
+                            // Load all appointments to check
+                            $sat = $conn->prepare(
+                                "SELECT t.TerminId, t.Datum, t.Vreme,
+                                        COALESCE(u.Trajanje, 30) AS Trajanje
+                                 FROM termin t LEFT JOIN usluga u ON t.UslugaId=u.UslugaId
+                                 WHERE t.KorisnikFrizerId=? AND t.Datum BETWEEN ? AND ?
+                                   AND t.Otkazano=0 AND t.Uradjeno=0"
+                            );
+                            $sat->bind_param('sss', $frizer, $datumOd, $datumDo);
+                            $sat->execute();
+                            $appts = $sat->get_result()->fetch_all(MYSQLI_ASSOC);
+                            $sat->close();
+
+                            // Build replacement's occupied slots
+                            $occupied = buildOccupied($conn, $noviFrizer, $datumOd, $datumDo);
+
+                            // Classify appointments
+                            $freeIds     = [];
+                            $conflictIds = [];
+                            foreach ($appts as $appt) {
+                                $slots = max(1, (int)ceil($appt['Trajanje'] / 30));
+                                $hasConflict = false;
+                                for ($s = 0; $s < $slots; $s++) {
+                                    if (!empty($occupied[$appt['Datum']][$appt['Vreme'] + $s])) {
+                                        $hasConflict = true;
+                                        break;
+                                    }
+                                }
+                                if ($hasConflict) $conflictIds[] = $appt['TerminId'];
+                                else              $freeIds[]     = $appt['TerminId'];
+                            }
+
+                            if (count($conflictIds) > 0) {
+                                // ── STEP 2b: Conflict confirmation needed ──
+                                $sfn = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=?");
+                                $sfn->bind_param('s', $noviFrizer);
+                                $sfn->execute();
+                                $nfRow = $sfn->get_result()->fetch_assoc();
+                                $sfn->close();
+
+                                $_SESSION['odmor_pending'] = [
+                                    'frizer'              => $frizer,
+                                    'datumOd'             => $datumOd,
+                                    'datumDo'             => $datumDo,
+                                    'tip'                 => $tip,
+                                    'napomena'            => $napomena,
+                                    'brTermina'           => $brTermina,
+                                    'transfer_noviFrizer' => $noviFrizer,
+                                    'transfer_noviNaziv'  => $nfRow ? $nfRow['Ime'].' '.$nfRow['Prezime'] : $noviFrizer,
+                                    'transfer_freeIds'    => $freeIds,
+                                    'transfer_conflictIds'=> $conflictIds,
+                                ];
+                                $poruka = '__transfer_conflict__';
+                            } else {
+                                // No conflicts: transfer all
+                                if ($freeIds) {
+                                    $nfe = $conn->real_escape_string($noviFrizer);
+                                    $ids = implode(',', array_map('intval', $freeIds));
+                                    $conn->query("UPDATE termin SET KorisnikFrizerId='$nfe' WHERE TerminId IN ($ids)");
+                                    $prebacenoTermina = count($freeIds);
+                                }
+                            }
+                        }
+                    }
+
+                    if (!$poruka) {
+                        $si = $conn->prepare(
+                            "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
+                             VALUES (?, ?, ?, ?, ?, ?)"
+                        );
+                        $si->bind_param('sssssi', $frizer, $datumOd, $datumDo, $tip, $napomena, $otkazanoTermina);
+                        $si->execute();
+                        $si->close();
+                        unset($_SESSION['odmor_pending']);
+
+                        $msg = 'Odsustvo (' . $tipLabel[$tip] . ') je upisano.';
+                        if ($prebacenoTermina > 0)
+                            $msg .= ' Prebačeno ' . $prebacenoTermina . ' termin' . ($prebacenoTermina === 1 ? '' : 'a') . ' kod zamenika.';
+                        if ($otkazanoTermina > 0)
+                            $msg .= ' Otkazano ' . $otkazanoTermina . ' termin' . ($otkazanoTermina === 1 ? '.' : 'a.');
+                        $success = $msg;
+                    }
                 }
             }
         }
     }
 }
 
-// Load pending confirmation
-$pending = ($poruka === '__confirm__') ? ($_SESSION['odmor_pending'] ?? null) : null;
+// Render state
+$pending          = ($poruka === '__confirm__')          ? ($_SESSION['odmor_pending'] ?? null) : null;
+$transferConflict = ($poruka === '__transfer_conflict__') ? ($_SESSION['odmor_pending'] ?? null) : null;
 
-// ── Load frizeri list (admin) ─────────────────────────
+// Load frizeri (admin)
 $frizerList = [];
 if ($nivo === 9) {
     $fr = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime, Prezime");
@@ -148,13 +289,11 @@ if ($nivo === 9) {
 // Frizer filter for listing
 $frizerFilter = ($nivo === 9) ? trim($_GET['frizer'] ?? '') : $me;
 
-// ── Load odmor records ────────────────────────────────
+// Load odmor records
 $whFrizer = ($nivo === 9 && $frizerFilter === '') ? '1=1' : 'o.KorisnikFrizerId=?';
 $qArgs    = ($nivo === 9 && $frizerFilter === '') ? [] : [$frizerFilter];
-
 $sql = "SELECT o.*, k.Ime, k.Prezime
-        FROM frizer_odmor o
-        JOIN korisnik k ON o.KorisnikFrizerId = k.KorisnikId
+        FROM frizer_odmor o JOIN korisnik k ON o.KorisnikFrizerId=k.KorisnikId
         WHERE $whFrizer ORDER BY o.DatumOd DESC";
 if ($qArgs) {
     $st = $conn->prepare($sql);
@@ -200,26 +339,77 @@ if ($qArgs) {
         </div>
         <?php endif; ?>
 
-        <?php if ($poruka && $poruka !== '__confirm__'): ?>
+        <?php if ($poruka && !in_array($poruka, ['__confirm__','__transfer_conflict__'])): ?>
         <div class="ct-alert ct-alert--err" style="margin-bottom:1.4rem;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>
             <?= htmlspecialchars($poruka) ?>
         </div>
         <?php endif; ?>
 
-        <!-- ── ADD FORM (admin only) ──────────────────── -->
+        <!-- ── ADD / CONFIRMATION CARD (admin only) ──── -->
         <?php if ($nivo === 9): ?>
         <div class="odmor-card" style="margin-bottom:2rem;">
-            <h2 class="odmor-section-title">Novo odsustvo</h2>
 
-            <?php if ($pending): ?>
-            <!-- Confirmation: appointments exist -->
+            <?php if ($transferConflict): ?>
+            <!-- ── STEP 3: Transfer conflict confirmation ── -->
+            <?php
+                $nFree     = count($transferConflict['transfer_freeIds']);
+                $nConflict = count($transferConflict['transfer_conflictIds']);
+                $noviNaziv = htmlspecialchars($transferConflict['transfer_noviNaziv']);
+            ?>
+            <h2 class="odmor-section-title">Konflikt rasporeda</h2>
+            <div class="ct-alert ct-alert--warn" style="margin-bottom:1.4rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+                <div>
+                    Zamenik <strong><?= $noviNaziv ?></strong> već ima
+                    <strong><?= $nConflict ?></strong> zauzet<?= $nConflict === 1 ? '' : 'ih' ?>
+                    termin<?= $nConflict === 1 ? '' : 'a' ?> u ovom periodu.
+                    <?php if ($nFree > 0): ?>
+                    Preostal<?= $nFree === 1 ? 'i' : 'ih' ?> <strong><?= $nFree ?></strong>
+                    termin<?= $nFree === 1 ? '' : 'a' ?> može biti prebačeno.
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="odmor-conflict-stats">
+                <?php if ($nFree > 0): ?>
+                <div class="odmor-conflict-stat odmor-conflict-stat--free">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span><?= $nFree ?> termin<?= $nFree === 1 ? '' : 'a' ?> — slobodno → prebaciti kod <?= $noviNaziv ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="odmor-conflict-stat odmor-conflict-stat--busy">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    <span><?= $nConflict ?> termin<?= $nConflict === 1 ? '' : 'a' ?> — zauzeto → otkazati</span>
+                </div>
+            </div>
+
+            <form method="post" class="odmor-confirm-form" style="margin-top:1.2rem;">
+                <input type="hidden" name="action"           value="add">
+                <input type="hidden" name="potvrda_konflikta" value="1">
+                <div class="odmor-confirm-btns">
+                    <?php if ($nFree > 0): ?>
+                    <button type="submit" name="akcija_konflikta" value="transfer" class="odmor-btn odmor-btn--secondary">
+                        Prebaci <?= $nFree ?>, otkaži <?= $nConflict ?>
+                    </button>
+                    <?php endif; ?>
+                    <button type="submit" name="akcija_konflikta" value="cancel_all" class="odmor-btn odmor-btn--danger">
+                        Otkaži sve (<?= $nFree + $nConflict ?>)
+                    </button>
+                    <a href="odmor.php" class="odmor-btn odmor-btn--ghost">Poništi</a>
+                </div>
+            </form>
+
+            <?php elseif ($pending): ?>
+            <!-- ── STEP 2: Appointment confirmation ── -->
             <?php $zameneFrizeri = array_filter($frizerList, fn($f) => $f['KorisnikId'] !== $pending['frizer']); ?>
+            <h2 class="odmor-section-title">Novo odsustvo</h2>
             <div class="ct-alert ct-alert--warn" style="margin-bottom:1.4rem;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
                 <div>
                     <strong>Pažnja!</strong> U izabranom periodu postoji
-                    <?= $pending['brTermina'] ?> zakazan<?= $pending['brTermina'] === 1 ? '' : 'ih' ?>
+                    <strong><?= $pending['brTermina'] ?></strong>
+                    zakazan<?= $pending['brTermina'] === 1 ? '' : 'ih' ?>
                     termin<?= $pending['brTermina'] === 1 ? '.' : 'a.' ?>
                     Izaberite šta uraditi s njima:
                 </div>
@@ -235,7 +425,6 @@ if ($qArgs) {
                 <input type="hidden" name="potvrda_otkazivanja" value="1">
 
                 <div class="odmor-confirm-options">
-                    <!-- Option 1: Cancel appointments -->
                     <div class="odmor-confirm-option">
                         <div class="odmor-confirm-option-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
@@ -248,15 +437,14 @@ if ($qArgs) {
                     </div>
 
                     <?php if (count($zameneFrizeri) > 0): ?>
-                    <!-- Option 2: Transfer to another frizer -->
                     <div class="odmor-confirm-option odmor-confirm-option--transfer">
                         <div class="odmor-confirm-option-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                             Prebaci termine kod zamenika
                         </div>
-                        <p class="odmor-confirm-desc">Svi termini biće prebačeni na izabranog frizera.</p>
+                        <p class="odmor-confirm-desc">Slobodni termini se prebacuju, zauzeti se otkazuju.</p>
                         <div class="odmor-transfer-row">
-                            <select name="novi_frizer" class="filter-select" style="flex:1;">
+                            <select name="novi_frizer" class="filter-select" style="flex:1;" id="sel-zamenik">
                                 <option value="">— Izaberite zamenika —</option>
                                 <?php foreach ($zameneFrizeri as $zf): ?>
                                 <option value="<?= htmlspecialchars($zf['KorisnikId']) ?>">
@@ -264,7 +452,7 @@ if ($qArgs) {
                                 </option>
                                 <?php endforeach; ?>
                             </select>
-                            <button type="submit" name="otkazi_termine" value="transfer" class="odmor-btn odmor-btn--secondary">
+                            <button type="submit" name="otkazi_termine" value="transfer" id="btn-transfer" class="odmor-btn odmor-btn--secondary">
                                 Prebaci i upiši odsustvo
                             </button>
                         </div>
@@ -272,11 +460,12 @@ if ($qArgs) {
                     <?php endif; ?>
                 </div>
 
-                <a href="odmor.php" class="odmor-btn odmor-btn--ghost" style="align-self:flex-start;margin-top:0.5rem;">Poništi</a>
+                <a href="odmor.php" class="odmor-btn odmor-btn--ghost" style="align-self:flex-start;margin-top:0.4rem;">Poništi</a>
             </form>
 
             <?php else: ?>
-            <!-- Normal add form -->
+            <!-- ── Normal add form ── -->
+            <h2 class="odmor-section-title">Novo odsustvo</h2>
             <form method="post" class="odmor-add-form">
                 <input type="hidden" name="action" value="add">
 
@@ -375,27 +564,22 @@ if ($qArgs) {
                             <?php endif; ?>
                             <?= htmlspecialchars($tipLabel[$tipKey] ?? $tipKey) ?>
                         </span>
-
                         <?php if ($nivo === 9): ?>
                         <span class="odmor-frizer"><?= htmlspecialchars($r['Ime'].' '.$r['Prezime']) ?></span>
                         <?php endif; ?>
-
                         <span class="odmor-dates">
                             <?= date('d.m.Y.', strtotime($r['DatumOd'])) ?>
                             <?= $r['DatumOd'] !== $r['DatumDo'] ? ' — ' . date('d.m.Y.', strtotime($r['DatumDo'])) : '' ?>
                         </span>
-
                         <?php if ($r['Napomena']): ?>
                         <span class="odmor-napomena"><?= htmlspecialchars($r['Napomena']) ?></span>
                         <?php endif; ?>
-
                         <?php if ($r['OtkazanoTermina'] > 0): ?>
                         <span class="odmor-cancelled-badge">
                             <?= $r['OtkazanoTermina'] ?> termin<?= $r['OtkazanoTermina'] === 1 ? '' : 'a' ?> otkazan<?= $r['OtkazanoTermina'] === 1 ? '' : 'o' ?>
                         </span>
                         <?php endif; ?>
                     </div>
-
                     <div class="odmor-entry-right">
                         <span class="odmor-status <?= $statusClass ?>"><?= $statusLabel ?></span>
                         <?php if (!$isPast && $nivo === 9): ?>
@@ -429,17 +613,14 @@ if ($qArgs) {
     });
   }
 
-  // Require frizer selection before transfer submit
-  const transferBtn = document.querySelector('button[value="transfer"]');
-  if (transferBtn) {
-    transferBtn.closest('form').addEventListener('submit', function(e) {
-      if (e.submitter === transferBtn) {
-        const sel = document.querySelector('select[name="novi_frizer"]');
-        if (!sel.value) {
-          e.preventDefault();
-          sel.focus();
-          sel.style.borderColor = 'rgba(212,168,40,0.8)';
-        }
+  const btnTransfer = document.getElementById('btn-transfer');
+  const selZamenik  = document.getElementById('sel-zamenik');
+  if (btnTransfer && selZamenik) {
+    btnTransfer.closest('form').addEventListener('submit', function(e) {
+      if (e.submitter === btnTransfer && !selZamenik.value) {
+        e.preventDefault();
+        selZamenik.focus();
+        selZamenik.style.outline = '1px solid rgba(212,168,40,0.8)';
       }
     });
   }
