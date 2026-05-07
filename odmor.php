@@ -387,7 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                         // Fetch affected appointments with client info
                         $sat = $conn->prepare(
                             "SELECT t.TerminId, t.Datum, t.Vreme,
-                                    COALESCE(u.Naziv, 'Usluga') AS UslugaNaziv,
+                                    COALESCE(t.UslugaId, 'Usluga') AS UslugaNaziv,
                                     k.Ime AS KIme, k.Prezime AS KPrezime, k.Email AS KEmail
                              FROM termin t
                              LEFT JOIN usluga u ON t.UslugaId = u.UslugaId
@@ -436,7 +436,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                         $satR = $conn->prepare(
                             "SELECT t.TerminId, t.Datum, t.Vreme,
                                     COALESCE(u.Trajanje, 30) AS Trajanje,
-                                    COALESCE(u.Naziv, 'Usluga') AS UslugaNaziv,
+                                    COALESCE(t.UslugaId, 'Usluga') AS UslugaNaziv,
                                     k.Ime AS KIme, k.Prezime AS KPrezime, k.Email AS KEmail
                              FROM termin t
                              LEFT JOIN usluga u ON t.UslugaId = u.UslugaId

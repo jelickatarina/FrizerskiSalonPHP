@@ -104,7 +104,7 @@ function _loadRec($conn, $token) {
         "SELECT tat.TokenId, tat.TerminId, tat.IsticeOd, tat.Iskoriscen,
                 t.Datum, t.Vreme, t.KorisnikId, t.KorisnikFrizerId,
                 t.Otkazano, t.Uradjeno,
-                COALESCE(u.Naziv, 'Usluga') AS UslugaNaziv,
+                COALESCE(t.UslugaId, 'Usluga') AS UslugaNaziv,
                 COALESCE(u.Trajanje, 30) AS Trajanje,
                 k.Ime  AS KIme,  k.Prezime  AS KPrezime,  k.Email AS KEmail,
                 kf.Ime AS FIme,  kf.Prezime AS FPrezime
