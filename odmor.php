@@ -104,6 +104,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
             $poruka = 'Sesija je istekla. Pokušajte ponovo.';
         }
 
+    } elseif (isset($_POST['potvrda_raspodele'])) {
+        // ── STEP 3b: Execute distribution from session ──
+        $p = $_SESSION['odmor_pending'] ?? null;
+        if (!$p || empty($p['raspodela_termini'])) {
+            $poruka = 'Sesija je istekla. Pokušajte ponovo.';
+        } else {
+            $frizer           = $p['frizer'];
+            $datumOd          = $p['datumOd'];
+            $datumDo          = $p['datumDo'];
+            $tip              = $p['tip'];
+            $napomena         = $p['napomena'];
+            $raspodelaTermini = $p['raspodela_termini'];
+
+            // Build occupied maps for all frizeri that will receive assignments
+            $assignedFrizeriIds = [];
+            foreach ($raspodelaTermini as $asgn) {
+                $a = trim($_POST['akcija_termin'][$asgn['terminId']] ?? 'cancel');
+                if (!in_array($a, ['cancel', 'notify', ''])) $assignedFrizeriIds[$a] = true;
+            }
+            $frizerOccupied = [];
+            foreach (array_keys($assignedFrizeriIds) as $fId) {
+                $frizerOccupied[$fId] = buildOccupied($conn, $fId, $datumOd, $datumDo);
+            }
+
+            // Lazy-load absent frizer name (for notify emails)
+            $frizerNazivEmailR = null;
+            $appUrl  = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+            $expiry  = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+            $prebacenoTermina = 0;
+            $otkazanoTermina  = 0;
+            $poslatoEmailR    = 0;
+
+            foreach ($raspodelaTermini as $asgn) {
+                $tid    = $asgn['terminId'];
+                $akcija = trim($_POST['akcija_termin'][$tid] ?? 'cancel');
+                $ukupno = max(1, (int)ceil((int)$asgn['trajanje'] / 30));
+
+                if ($akcija === 'notify') {
+                    if (!empty($asgn['klijentEmail'])) {
+                        if ($frizerNazivEmailR === null) {
+                            $sfnR = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=?");
+                            $sfnR->bind_param('s', $frizer);
+                            $sfnR->execute();
+                            $fnrRow = $sfnR->get_result()->fetch_assoc();
+                            $sfnR->close();
+                            $frizerNazivEmailR = $fnrRow ? $fnrRow['Ime'].' '.$fnrRow['Prezime'] : $frizer;
+                        }
+                        $tok = bin2hex(random_bytes(32));
+                        $sit = $conn->prepare("INSERT INTO termin_akcija_token (TerminId, Token, IsticeOd) VALUES (?,?,?)");
+                        $sit->bind_param('iss', $tid, $tok, $expiry);
+                        $sit->execute(); $sit->close();
+                        emailOdsustvo($asgn['klijentEmail'], $asgn['klijentIme'], $asgn['uslugaNaziv'],
+                            $asgn['datum'], $asgn['vremeStr'], $frizerNazivEmailR,
+                            $appUrl . '/termin_izmena.php?token=' . $tok);
+                        $poslatoEmailR++;
+                    } else {
+                        $upd = $conn->prepare("UPDATE termin SET Otkazano=1 WHERE TerminId=?");
+                        $upd->bind_param('i', $tid); $upd->execute(); $upd->close();
+                        $otkazanoTermina++;
+                    }
+                } elseif ($akcija === 'cancel' || $akcija === '') {
+                    $upd = $conn->prepare("UPDATE termin SET Otkazano=1 WHERE TerminId=?");
+                    $upd->bind_param('i', $tid); $upd->execute(); $upd->close();
+                    $otkazanoTermina++;
+                } else {
+                    $fId = $akcija;
+                    if (!isset($frizerOccupied[$fId])) {
+                        $frizerOccupied[$fId] = buildOccupied($conn, $fId, $datumOd, $datumDo);
+                    }
+                    $free = true;
+                    for ($i = 0; $i < $ukupno; $i++) {
+                        if (!empty($frizerOccupied[$fId][$asgn['datum']][$asgn['vremeSlot'] + $i])) {
+                            $free = false; break;
+                        }
+                    }
+                    if ($free) {
+                        $upd = $conn->prepare("UPDATE termin SET KorisnikFrizerId=? WHERE TerminId=?");
+                        $upd->bind_param('si', $fId, $tid); $upd->execute(); $upd->close();
+                        $prebacenoTermina++;
+                        for ($i = 0; $i < $ukupno; $i++) {
+                            $frizerOccupied[$fId][$asgn['datum']][$asgn['vremeSlot'] + $i] = true;
+                        }
+                    } else {
+                        // Race condition — cancel as fallback
+                        $upd = $conn->prepare("UPDATE termin SET Otkazano=1 WHERE TerminId=?");
+                        $upd->bind_param('i', $tid); $upd->execute(); $upd->close();
+                        $otkazanoTermina++;
+                    }
+                }
+            }
+
+            $siOd = $conn->prepare(
+                "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
+                 VALUES (?, ?, ?, ?, ?, ?)"
+            );
+            $siOd->bind_param('sssssi', $frizer, $datumOd, $datumDo, $tip, $napomena, $otkazanoTermina);
+            $siOd->execute(); $siOd->close();
+            unset($_SESSION['odmor_pending']);
+
+            $msg = 'Odsustvo (' . $tipLabel[$tip] . ') je upisano.';
+            if ($prebacenoTermina > 0) $msg .= ' Raspodeljeno ' . $prebacenoTermina . ' termin' . ($prebacenoTermina === 1 ? '' : 'a') . '.';
+            if ($otkazanoTermina  > 0) $msg .= ' Otkazano ' . $otkazanoTermina . ' termin' . ($otkazanoTermina === 1 ? '.' : 'a.');
+            if ($poslatoEmailR    > 0) $msg .= ' Poslato ' . $poslatoEmailR . ' email obaveštenje' . ($poslatoEmailR === 1 ? '.' : 'a.');
+            $success = $msg;
+        }
+
     } else {
         // ── STEP 1 / STEP 2: Read from POST ──
         $frizer   = trim($_POST['frizer']   ?? '');
@@ -323,6 +430,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                                 : ' Nema klijenata sa email adresom za obaveštavanje.');
                     }
 
+                    if ($akcija === 'raspodela' && !$handled) {
+                        $handled = true;
+                        // Load all affected appointments
+                        $satR = $conn->prepare(
+                            "SELECT t.TerminId, t.Datum, t.Vreme,
+                                    COALESCE(u.Trajanje, 30) AS Trajanje,
+                                    COALESCE(u.Naziv, 'Usluga') AS UslugaNaziv,
+                                    k.Ime AS KIme, k.Prezime AS KPrezime, k.Email AS KEmail
+                             FROM termin t
+                             LEFT JOIN usluga u ON t.UslugaId = u.UslugaId
+                             LEFT JOIN korisnik k ON t.KorisnikId = k.KorisnikId
+                             WHERE t.KorisnikFrizerId=? AND t.Datum BETWEEN ? AND ?
+                               AND t.Otkazano=0 AND t.Uradjeno=0
+                             ORDER BY t.Datum, t.Vreme"
+                        );
+                        $satR->bind_param('sss', $frizer, $datumOd, $datumDo);
+                        $satR->execute();
+                        $apptsR = $satR->get_result()->fetch_all(MYSQLI_ASSOC);
+                        $satR->close();
+
+                        // All frizeri not on leave in this period (excluding the absent frizer)
+                        $allFrizeriR = [];
+                        $sqfR = $conn->query(
+                            "SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2
+                             AND KorisnikId != '" . $conn->real_escape_string($frizer) . "'
+                             ORDER BY Ime, Prezime"
+                        );
+                        while ($f = $sqfR->fetch_assoc()) {
+                            $sfOR = $conn->prepare(
+                                "SELECT COUNT(*) FROM frizer_odmor
+                                 WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=?"
+                            );
+                            $sfOR->bind_param('sss', $f['KorisnikId'], $datumDo, $datumOd);
+                            $sfOR->execute();
+                            $onLeave = (int)$sfOR->get_result()->fetch_row()[0];
+                            $sfOR->close();
+                            if (!$onLeave) $allFrizeriR[] = $f;
+                        }
+
+                        // Build initial occupied maps for all available frizeri
+                        $frizerOccR = [];
+                        foreach ($allFrizeriR as $f) {
+                            $frizerOccR[$f['KorisnikId']] = buildOccupied($conn, $f['KorisnikId'], $datumOd, $datumDo);
+                        }
+
+                        // Auto-distribute: assign each appointment to least-busy available frizer
+                        $frizerLoadR      = [];
+                        $raspodelaTermini = [];
+                        foreach ($apptsR as $apptR) {
+                            $ukupno    = max(1, (int)ceil($apptR['Trajanje'] / 30));
+                            $dostupniR = [];
+                            foreach ($allFrizeriR as $f) {
+                                $fId  = $f['KorisnikId'];
+                                $free = true;
+                                for ($i = 0; $i < $ukupno; $i++) {
+                                    if (!empty($frizerOccR[$fId][$apptR['Datum']][$apptR['Vreme'] + $i])) {
+                                        $free = false; break;
+                                    }
+                                }
+                                if ($free) $dostupniR[] = $f;
+                            }
+
+                            $predlozeniId = null;
+                            if (!empty($dostupniR)) {
+                                usort($dostupniR, fn($a, $b) =>
+                                    ($frizerLoadR[$a['KorisnikId']] ?? 0) <=> ($frizerLoadR[$b['KorisnikId']] ?? 0));
+                                $predlozeniId = $dostupniR[0]['KorisnikId'];
+                                $frizerLoadR[$predlozeniId] = ($frizerLoadR[$predlozeniId] ?? 0) + 1;
+                                // Mark slots occupied so subsequent appointments see it
+                                for ($i = 0; $i < $ukupno; $i++) {
+                                    $frizerOccR[$predlozeniId][$apptR['Datum']][$apptR['Vreme'] + $i] = true;
+                                }
+                            }
+
+                            $raspodelaTermini[] = [
+                                'terminId'        => $apptR['TerminId'],
+                                'datum'           => $apptR['Datum'],
+                                'vremeSlot'       => $apptR['Vreme'],
+                                'vremeStr'        => sprintf('%02d:%02d', (int)($apptR['Vreme']/2), ($apptR['Vreme']%2)*30),
+                                'trajanje'        => $apptR['Trajanje'],
+                                'klijentIme'      => trim(($apptR['KIme'] ?? '') . ' ' . ($apptR['KPrezime'] ?? '')),
+                                'klijentEmail'    => $apptR['KEmail'] ?? '',
+                                'uslugaNaziv'     => $apptR['UslugaNaziv'],
+                                'dostupniFrizeri' => $dostupniR,
+                                'predlozeniId'    => $predlozeniId,
+                            ];
+                        }
+
+                        $_SESSION['odmor_pending'] = [
+                            'frizer'             => $frizer,
+                            'datumOd'            => $datumOd,
+                            'datumDo'            => $datumDo,
+                            'tip'                => $tip,
+                            'napomena'           => $napomena,
+                            'raspodela_termini'  => $raspodelaTermini,
+                        ];
+                        $poruka = '__raspodela__';
+                    }
+
                     if (!$poruka && !$handled) {
                         $si = $conn->prepare(
                             "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
@@ -349,6 +555,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
 // Render state
 $pending          = ($poruka === '__confirm__')          ? ($_SESSION['odmor_pending'] ?? null) : null;
 $transferConflict = ($poruka === '__transfer_conflict__') ? ($_SESSION['odmor_pending'] ?? null) : null;
+$raspodela        = ($poruka === '__raspodela__')         ? ($_SESSION['odmor_pending']['raspodela_termini'] ?? []) : null;
 
 // Load frizeri (admin)
 $frizerList = [];
@@ -490,6 +697,80 @@ if ($qArgs) {
                 </div>
             </form>
 
+            <?php elseif ($raspodela !== null): ?>
+            <!-- ── STEP 3b: Distribution confirmation ── -->
+            <?php
+                $nRasp      = count($raspodela);
+                $nNema      = count(array_filter($raspodela, fn($a) => empty($a['dostupniFrizeri'])));
+                $nDostupno  = $nRasp - $nNema;
+            ?>
+            <h2 class="odmor-section-title">Raspodela termina</h2>
+
+            <?php if ($nNema > 0): ?>
+            <div class="ct-alert ct-alert--warn" style="margin-bottom:1.2rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+                <div>
+                    <strong><?= $nDostupno ?></strong> od <strong><?= $nRasp ?></strong> termina mogu biti prebačeni.
+                    Za <strong><?= $nNema ?></strong> termin<?= $nNema === 1 ? '' : 'a' ?> nema slobodnog frizera — izaberite otkazivanje ili obaveštenje klijenta.
+                </div>
+            </div>
+            <?php else: ?>
+            <div class="ct-alert ct-alert--ok" style="margin-bottom:1.2rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Svih <strong><?= $nRasp ?></strong> termin<?= $nRasp === 1 ? '' : 'a' ?> može biti raspoređeno. Proverite i potvrdite predlog.
+            </div>
+            <?php endif; ?>
+
+            <form method="post">
+                <input type="hidden" name="action"            value="add">
+                <input type="hidden" name="potvrda_raspodele" value="1">
+
+                <div class="odmor-raspodela-list">
+                <?php foreach ($raspodela as $asgn):
+                    $hasEmail = !empty($asgn['klijentEmail']);
+                    $nemFriz  = empty($asgn['dostupniFrizeri']);
+                ?>
+                <div class="odmor-raspodela-row <?= $nemFriz ? 'odmor-raspodela-row--nema' : '' ?>">
+                    <div class="odmor-raspodela-info">
+                        <span class="odmor-raspodela-time">
+                            <?= htmlspecialchars(date('d.m.', strtotime($asgn['datum']))) ?>
+                            <strong><?= htmlspecialchars($asgn['vremeStr']) ?></strong>
+                        </span>
+                        <span class="odmor-raspodela-klijent"><?= htmlspecialchars($asgn['klijentIme']) ?></span>
+                        <span class="odmor-raspodela-usluga"><?= htmlspecialchars($asgn['uslugaNaziv']) ?></span>
+                    </div>
+                    <div class="odmor-raspodela-sel">
+                        <select name="akcija_termin[<?= (int)$asgn['terminId'] ?>]" class="filter-select odmor-raspodela-select">
+                            <?php if (!empty($asgn['dostupniFrizeri'])): ?>
+                            <optgroup label="Prebaci kod:">
+                                <?php foreach ($asgn['dostupniFrizeri'] as $df): ?>
+                                <option value="<?= htmlspecialchars($df['KorisnikId']) ?>"
+                                    <?= $df['KorisnikId'] === $asgn['predlozeniId'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($df['Ime'].' '.$df['Prezime']) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                            <?php endif; ?>
+                            <?php if ($hasEmail): ?>
+                            <option value="notify" <?= $nemFriz ? 'selected' : '' ?>>
+                                Obavesti klijenta mejlom
+                            </option>
+                            <?php endif; ?>
+                            <option value="cancel" <?= ($nemFriz && !$hasEmail) ? 'selected' : '' ?>>
+                                Otkaži termin
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+                </div>
+
+                <div class="odmor-confirm-btns" style="margin-top:1.4rem;">
+                    <button type="submit" class="odmor-btn odmor-btn--secondary">Potvrdi raspodelu</button>
+                    <a href="odmor.php" class="odmor-btn odmor-btn--ghost">Poništi</a>
+                </div>
+            </form>
+
             <?php elseif ($pending): ?>
             <!-- ── STEP 2: Appointment confirmation ── -->
             <?php $zameneFrizeri = array_filter($frizerList, fn($f) => $f['KorisnikId'] !== $pending['frizer']); ?>
@@ -548,6 +829,17 @@ if ($qArgs) {
                         </div>
                     </div>
                     <?php endif; ?>
+
+                    <div class="odmor-confirm-option odmor-confirm-option--raspodela">
+                        <div class="odmor-confirm-option-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="16" y1="3" x2="16" y2="21"/><line x1="8" y1="3" x2="8" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                            Raspodeli između dostupnih frizera
+                        </div>
+                        <p class="odmor-confirm-desc">Sistem pronalazi koji frizer može svaki termin i predlaže raspodelu. Vi potvrđujete ili menjate pre izvršavanja.</p>
+                        <button type="submit" name="otkazi_termine" value="raspodela" class="odmor-btn odmor-btn--secondary">
+                            Prikaži raspodelu
+                        </button>
+                    </div>
 
                     <div class="odmor-confirm-option odmor-confirm-option--notify">
                         <div class="odmor-confirm-option-label">

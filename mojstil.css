@@ -2743,15 +2743,84 @@ input[type="time"] {
     border-color: rgba(212,168,40,0.15);
     background: rgba(212,168,40,0.03);
 }
+.odmor-confirm-option--raspodela {
+    border-color: rgba(100,180,120,0.18);
+    background: rgba(100,180,120,0.03);
+}
 .odmor-confirm-option--notify {
     border-color: rgba(80,150,220,0.18);
     background: rgba(80,150,220,0.03);
     grid-column: 1 / -1;
 }
-@media (min-width: 641px) {
-    .odmor-confirm-options:has(.odmor-confirm-option--notify) {
-        grid-template-columns: 1fr 1fr;
-    }
+
+/* ── Raspodela list ───────────────────────────────── */
+.odmor-raspodela-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(176,164,148,0.3) transparent;
+}
+.odmor-raspodela-list::-webkit-scrollbar { width: 4px; }
+.odmor-raspodela-list::-webkit-scrollbar-thumb {
+    background: rgba(176,164,148,0.3);
+    border-radius: 4px;
+}
+.odmor-raspodela-row {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+}
+.odmor-raspodela-row--nema {
+    border-color: rgba(180,60,60,0.2);
+    background: rgba(180,60,60,0.04);
+}
+.odmor-raspodela-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+.odmor-raspodela-time {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+}
+.odmor-raspodela-time strong {
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+}
+.odmor-raspodela-klijent {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.78);
+    font-weight: 500;
+}
+.odmor-raspodela-usluga {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.35);
+}
+.odmor-raspodela-sel { flex-shrink: 0; }
+.odmor-raspodela-select {
+    font-size: 0.78rem !important;
+    padding: 0.35rem 0.65rem !important;
+    min-width: 160px;
+}
+@media (max-width: 600px) {
+    .odmor-raspodela-row { flex-direction: column; align-items: flex-start; }
+    .odmor-raspodela-sel { width: 100%; }
+    .odmor-raspodela-select { width: 100%; min-width: unset; }
 }
 .odmor-confirm-option-label {
     display: flex;
