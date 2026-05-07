@@ -143,10 +143,12 @@ $nivoLabel = ['0' => 'Neaktivan', '1' => 'Klijent', '2' => 'Frizer', '9' => 'Adm
               <label>Korisničko ime</label>
               <input type="text" value="<?= htmlspecialchars($korisnik) ?>" readonly>
             </div>
+            <?php if ($nivo >= 2): ?>
             <div class="ct-field">
               <label>Nivo pristupa</label>
               <input type="text" value="<?= htmlspecialchars($nivoLabel[(string)$nivo] ?? (string)$nivo) ?>" readonly>
             </div>
+            <?php endif; ?>
           </div>
 
           <div class="auth-grid">
