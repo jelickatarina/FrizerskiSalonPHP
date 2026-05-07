@@ -85,10 +85,10 @@ while($data=$result->fetch_assoc()) {
                         <span class="srv-badge srv-badge--sale">-<?= $popust ?>%</span>
                         <?php endif; ?>
                     </div>
-                    <?php if ($naPopustu): ?>
-                    <p class="srv-popust-do">Popust do: <?= date('d.m.Y.', strtotime($data['PopustDo'])) ?></p>
-                    <?php endif; ?>
                 </div>
+                <?php if ($naPopustu): ?>
+                <p class="srv-popust-do">Popust do: <?= date('d.m.Y.', strtotime($data['PopustDo'])) ?></p>
+                <?php endif; ?>
                 <p class="srv-card-opis"><?= htmlspecialchars($data['Opis']) ?></p>
                 <div class="srv-card-meta">
                     <div class="srv-meta-item">
