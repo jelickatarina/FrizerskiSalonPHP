@@ -54,6 +54,17 @@ if (@$conn->query("SELECT 1 FROM usluga WHERE 1=0")) {
     }
 }
 
+// Auto-migrate: termin_akcija_token (client action links for absence notifications)
+$conn->query("CREATE TABLE IF NOT EXISTS termin_akcija_token (
+    TokenId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    TerminId INT NOT NULL,
+    Token VARCHAR(64) NOT NULL UNIQUE,
+    IsticeOd DATETIME NOT NULL,
+    Iskoriscen TINYINT NOT NULL DEFAULT 0,
+    INDEX (Token),
+    INDEX (TerminId)
+) CHARACTER SET utf8mb4");
+
 // Auto-migrate: frizer_odmor table
 $conn->query("CREATE TABLE IF NOT EXISTS frizer_odmor (
     OdmorId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

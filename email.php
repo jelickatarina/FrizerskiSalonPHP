@@ -92,6 +92,24 @@ function emailPotvrdaZahteva($klijentEmail, $klijentIme, $usluga, $datum, $vreme
     posaljiEmail($klijentEmail, "Termin potvrđen – Frizerski salon", $body);
 }
 
+function emailOdsustvo($klijentEmail, $klijentIme, $usluga, $datum, $vreme, $frizerNaziv, $akcijaUrl) {
+    $tbl = _emailTerminTabela($usluga, $datum, $vreme, $frizerNaziv);
+    $btnStyle = "display:inline-block;padding:.65rem 2rem;background:#d4a828;color:#0d0c09;border-radius:6px;text-decoration:none;font-weight:600;font-family:sans-serif;letter-spacing:.04em;font-size:.95rem;";
+    $body = _emailTpl("Vaš termin zahteva izmenu",
+        "<p>Zdravo, <strong>" . htmlspecialchars($klijentIme) . "</strong>!</p>
+         <p>Vaš frizer <strong>" . htmlspecialchars($frizerNaziv) . "</strong> neće biti dostupan u vreme Vašeg termina.</p>
+         $tbl
+         <p style='margin:.5rem 0 1.5rem;'>Molimo Vas da izaberete šta raditi sa terminom:</p>
+         <p style='text-align:center;margin:1.5rem 0;'>
+           <a href='" . htmlspecialchars($akcijaUrl) . "' style='$btnStyle'>Upravljaj terminom →</a>
+         </p>
+         <p style='font-size:.75rem;color:#666;margin-top:1.5rem;'>
+           Možete otkazati termin, izabrati drugog frizera ili pomeriti na novi datum.<br>
+           Link važi 7 dana.
+         </p>");
+    posaljiEmail($klijentEmail, "Vaš termin zahteva izmenu – Frizerski salon", $body);
+}
+
 function emailPodsetnik($klijentEmail, $klijentIme, $usluga, $datum, $vreme, $frizerNaziv) {
     $tbl = _emailTerminTabela($usluga, $datum, $vreme, $frizerNaziv);
     $body = _emailTpl("Podsetnik: termin sutra 📅",

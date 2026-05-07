@@ -2,6 +2,7 @@
 require_once 'sesija.php';
 requireNivo('2');
 include 'konekcija.php';
+include_once 'email.php';
 
 $nivo = (int)$_SESSION['nivo'];
 $me   = $_SESSION['korisnik'];
@@ -153,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                     $otkazanoTermina  = 0;
                     $prebacenoTermina = 0;
 
+                    $handled = false;
                     if ($akcija === '1') {
                         if ($brTermina > 0) {
                             $su = $conn->prepare(
@@ -255,9 +257,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                                 }
                             }
                         }
+                    } elseif ($akcija === 'notify') {
+                        $handled = true;
+                        // Get frizer name for email
+                        $sfn = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=?");
+                        $sfn->bind_param('s', $frizer);
+                        $sfn->execute();
+                        $frizRow = $sfn->get_result()->fetch_assoc();
+                        $sfn->close();
+                        $frizerNazivEmail = $frizRow ? $frizRow['Ime'].' '.$frizRow['Prezime'] : $frizer;
+
+                        // Insert absence first so getFrizeriDostupni excludes this frizer
+                        $otkazanoTermina = 0;
+                        $siOd = $conn->prepare(
+                            "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
+                             VALUES (?, ?, ?, ?, ?, ?)"
+                        );
+                        $siOd->bind_param('sssssi', $frizer, $datumOd, $datumDo, $tip, $napomena, $otkazanoTermina);
+                        $siOd->execute();
+                        $siOd->close();
+
+                        // Fetch affected appointments with client info
+                        $sat = $conn->prepare(
+                            "SELECT t.TerminId, t.Datum, t.Vreme,
+                                    COALESCE(u.Naziv, 'Usluga') AS UslugaNaziv,
+                                    k.Ime AS KIme, k.Prezime AS KPrezime, k.Email AS KEmail
+                             FROM termin t
+                             LEFT JOIN usluga u ON t.UslugaId = u.UslugaId
+                             LEFT JOIN korisnik k ON t.KorisnikId = k.KorisnikId
+                             WHERE t.KorisnikFrizerId=? AND t.Datum BETWEEN ? AND ?
+                               AND t.Otkazano=0 AND t.Uradjeno=0"
+                        );
+                        $sat->bind_param('sss', $frizer, $datumOd, $datumDo);
+                        $sat->execute();
+                        $appts = $sat->get_result()->fetch_all(MYSQLI_ASSOC);
+                        $sat->close();
+
+                        $appUrl = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http')
+                                . '://' . $_SERVER['HTTP_HOST'];
+                        $expiry  = date('Y-m-d H:i:s', strtotime('+7 days'));
+                        $poslato = 0;
+
+                        foreach ($appts as $appt) {
+                            if (empty($appt['KEmail'])) continue;
+                            $tok = bin2hex(random_bytes(32));
+                            $sit = $conn->prepare(
+                                "INSERT INTO termin_akcija_token (TerminId, Token, IsticeOd) VALUES (?, ?, ?)"
+                            );
+                            $sit->bind_param('iss', $appt['TerminId'], $tok, $expiry);
+                            $sit->execute();
+                            $sit->close();
+
+                            $vremeStr   = sprintf('%02d:%02d', (int)($appt['Vreme']/2), ($appt['Vreme']%2)*30);
+                            $klijentIme = $appt['KIme'].' '.$appt['KPrezime'];
+                            $url        = $appUrl . '/termin_izmena.php?token=' . $tok;
+                            emailOdsustvo($appt['KEmail'], $klijentIme, $appt['UslugaNaziv'],
+                                $appt['Datum'], $vremeStr, $frizerNazivEmail, $url);
+                            $poslato++;
+                        }
+
+                        unset($_SESSION['odmor_pending']);
+                        $success = 'Odsustvo (' . $tipLabel[$tip] . ') je upisano.'
+                            . ($poslato > 0
+                                ? ' Poslato ' . $poslato . ' obaveštenje' . ($poslato === 1 ? ' klijentu.' : 'a klijentima.')
+                                : ' Nema klijenata sa email adresom za obaveštavanje.');
                     }
 
-                    if (!$poruka) {
+                    if (!$poruka && !$handled) {
                         $si = $conn->prepare(
                             "INSERT INTO frizer_odmor (KorisnikFrizerId, DatumOd, DatumDo, Tip, Napomena, OtkazanoTermina)
                              VALUES (?, ?, ?, ?, ?, ?)"
@@ -482,6 +548,17 @@ if ($qArgs) {
                         </div>
                     </div>
                     <?php endif; ?>
+
+                    <div class="odmor-confirm-option odmor-confirm-option--notify">
+                        <div class="odmor-confirm-option-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            Obavesti klijente mejlom
+                        </div>
+                        <p class="odmor-confirm-desc">Svaki klijent dobija mejl sa linkom. Sami biraju: otkazivanje, drugi frizer, ili novi termin. Link važi 7 dana.</p>
+                        <button type="submit" name="otkazi_termine" value="notify" class="odmor-btn odmor-btn--secondary">
+                            Pošalji obaveštenja i upiši odsustvo
+                        </button>
+                    </div>
                 </div>
 
                 <a href="odmor.php" class="odmor-btn odmor-btn--ghost" style="align-self:flex-start;margin-top:0.4rem;">Poništi</a>
