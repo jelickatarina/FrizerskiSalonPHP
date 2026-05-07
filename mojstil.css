@@ -1926,6 +1926,13 @@ select:focus, input:focus {
     gap: 0.3rem;
     flex-shrink: 0;
 }
+.srv-popust-do {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.7rem;
+    color: rgba(212,168,40,0.7);
+    margin: 0.3rem 0 0;
+    text-align: right;
+}
 .srv-meta-prices {
     display: flex;
     flex-direction: column;

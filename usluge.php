@@ -5,7 +5,7 @@ include 'konekcija.php';
 
 $q       = trim($_GET['q'] ?? '');
 $nivo    = (int)$_SESSION['nivo'];
-$aktivan = ($nivo === 1) ? '1' : ($_GET['aktivan'] ?? '');
+$aktivan = ($nivo === 1) ? '1' : ($_GET['aktivan'] ?? '1');
 $wh = "where 1=1";
 if($aktivan === '1') $wh .= " and Aktivna=1";
 if($aktivan === '0') $wh .= " and Aktivna=0";
@@ -85,6 +85,9 @@ while($data=$result->fetch_assoc()) {
                         <span class="srv-badge srv-badge--sale">-<?= $popust ?>%</span>
                         <?php endif; ?>
                     </div>
+                    <?php if ($naPopustu): ?>
+                    <p class="srv-popust-do">Popust do: <?= date('d.m.Y.', strtotime($data['PopustDo'])) ?></p>
+                    <?php endif; ?>
                 </div>
                 <p class="srv-card-opis"><?= htmlspecialchars($data['Opis']) ?></p>
                 <div class="srv-card-meta">
