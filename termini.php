@@ -204,6 +204,7 @@ if ($nivo === 9) {
                     <div class="today-card-actions">
                         <?php if ($nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $d['TerminId'] ?>">Urađeno</a><?php endif; ?>
                         <?php if ($nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $d['TerminId'] ?>">Otkaži</a><?php endif; ?>
+                        <?php if ($nivo >= 2): ?><a class="tbl-btn" href="terprebaci.php?p=<?= $d['TerminId'] ?>">Prebaci</a><?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -317,6 +318,7 @@ if ($nivo === 9) {
                         <td data-label=""><div class="tbl-actions">
                             <?php if (!$done && !$cancelled && $nivo >= 1): ?><a class="tbl-btn tbl-btn--red" href="terotkazi.php?p=<?= $data['TerminId'] ?>">Otkaži</a><?php endif; ?>
                             <?php if (!$done && !$cancelled && $nivo >= 2): ?><a class="tbl-btn tbl-btn--green" href="teruradjen.php?p=<?= $data['TerminId'] ?>">Urađeno</a><?php endif; ?>
+                            <?php if (!$done && !$cancelled && $nivo >= 2): ?><a class="tbl-btn" href="terprebaci.php?p=<?= $data['TerminId'] ?>">Prebaci</a><?php endif; ?>
                         </div></td>
                     </tr>
                 <?php endwhile; ?>
