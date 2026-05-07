@@ -3,25 +3,35 @@ require_once 'sesija.php';
 include 'konekcija.php';
 requireNivo('1');
 
-$nivo          = (int)$_SESSION['nivo'];
-$poruka        = '';
-$success       = false;
-$t1            = 1;
-$korisnik      = $nivo >= 2 ? '' : $_SESSION['korisnik'];
-$korisnikNaziv = '';
-$usluga        = '';
-$datum         = '';
-$vreme         = '';
-$frizer        = '';
-$frizeriDostupni = [];
+$nivo             = (int)$_SESSION['nivo'];
+$poruka           = '';
+$success          = false;
+$t1               = 1;
+$korisnik         = $nivo >= 2 ? '' : $_SESSION['korisnik'];
+$korisnikNaziv    = '';
+$usluga           = '';
+$datum            = '';
+$vreme            = '';
+$frizer           = '';
+$vremeMode        = true;   // true = specific time chosen, false = any time
+$frizeriDostupni  = [];     // vremeMode=true
+$frizeriSaSlotovima = [];   // vremeMode=false
 
-// Returns list of frizeri who are free at $vremeSlot for $ukupnoTermina slots on $datum
+// First valid slot for a given date
+function getTpoc($datum) {
+    if ($datum !== date('Y-m-d')) return 18;
+    $now = date('H:i');
+    $ch  = (int)substr($now, 0, 2);
+    $cm  = (int)substr($now, 3, 2);
+    return max(18, $ch * 2 + (int)($cm / 30) + 1);
+}
+
+// Frizeri free at one specific slot
 function getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina) {
     $result = [];
     $q = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime, Prezime");
     if (!$q) return $result;
     while ($fr = $q->fetch_assoc()) {
-        // Skip if on leave
         $sl = $conn->prepare("SELECT 1 FROM frizer_odmor WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=? LIMIT 1");
         $sl->bind_param('sss', $fr['KorisnikId'], $datum, $datum);
         $sl->execute();
@@ -29,7 +39,45 @@ function getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina) {
         $sl->close();
         if ($slRow) continue;
 
-        // Build occupied slot map
+        $st = $conn->prepare(
+            "SELECT t.Vreme, COALESCE(u.Trajanje, 30) AS Trajanje
+             FROM termin t LEFT JOIN usluga u ON t.UslugaId=u.UslugaId
+             WHERE t.KorisnikFrizerId=? AND t.Datum=?
+               AND (t.Otkazano IS NULL OR t.Otkazano=0) AND t.Uradjeno=0"
+        );
+        $st->bind_param('ss', $fr['KorisnikId'], $datum);
+        $st->execute();
+        $rows = $st->get_result()->fetch_all(MYSQLI_ASSOC);
+        $st->close();
+
+        $occ = [];
+        foreach ($rows as $r) {
+            $n = max(1, (int)ceil($r['Trajanje'] / 30));
+            for ($i = 0; $i < $n; $i++) $occ[$r['Vreme'] + $i] = true;
+        }
+        $free = true;
+        for ($i = 0; $i < $ukupnoTermina; $i++) {
+            if (!empty($occ[$vremeSlot + $i])) { $free = false; break; }
+        }
+        if ($free) $result[] = $fr;
+    }
+    return $result;
+}
+
+// Each frizer with all their free slots for the day
+function getFrizeriSaSlotovima($conn, $datum, $ukupnoTermina) {
+    $tpoc   = getTpoc($datum);
+    $result = [];
+    $q = $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=2 ORDER BY Ime, Prezime");
+    if (!$q) return $result;
+    while ($fr = $q->fetch_assoc()) {
+        $sl = $conn->prepare("SELECT 1 FROM frizer_odmor WHERE KorisnikFrizerId=? AND DatumOd<=? AND DatumDo>=? LIMIT 1");
+        $sl->bind_param('sss', $fr['KorisnikId'], $datum, $datum);
+        $sl->execute();
+        $slRow = $sl->get_result()->fetch_assoc();
+        $sl->close();
+        if ($slRow) continue;
+
         $st = $conn->prepare(
             "SELECT t.Vreme, COALESCE(u.Trajanje, 30) AS Trajanje
              FROM termin t LEFT JOIN usluga u ON t.UslugaId=u.UslugaId
@@ -47,11 +95,16 @@ function getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina) {
             for ($i = 0; $i < $n; $i++) $occ[$r['Vreme'] + $i] = true;
         }
 
-        $free = true;
-        for ($i = 0; $i < $ukupnoTermina; $i++) {
-            if (!empty($occ[$vremeSlot + $i])) { $free = false; break; }
+        $freeSlots = [];
+        for ($slot = $tpoc; $slot <= 34 - $ukupnoTermina; $slot++) {
+            $free = true;
+            for ($i = 0; $i < $ukupnoTermina; $i++) {
+                if (!empty($occ[$slot + $i])) { $free = false; break; }
+            }
+            if ($free) $freeSlots[] = sprintf('%02d:%02d', (int)($slot/2), ($slot%2)*30);
         }
-        if ($free) $result[] = $fr;
+
+        if (!empty($freeSlots)) $result[] = ['frizer' => $fr, 'slots' => $freeSlots];
     }
     return $result;
 }
@@ -63,26 +116,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usluga        = trim($_POST['usluga']         ?? '');
     $datum         = trim($_POST['datum']          ?? '');
     $vreme         = trim($_POST['vreme']          ?? '');
+    $vremeMode     = (bool)(int)($_POST['vreme_fiksno'] ?? ($vreme !== '' ? 1 : 0));
 
-    // Pre-compute slot info (used by both steps)
-    $vremeSlot     = 0;
+    // Always compute service duration (needed by both modes)
     $ukupnoTermina = 1;
-    if ($usluga !== '' && preg_match('/^\d{2}:\d{2}$/', $vreme)) {
+    if ($usluga !== '') {
         $sut = $conn->prepare("SELECT Trajanje FROM usluga WHERE UslugaId=?");
         $sut->bind_param('s', $usluga);
         $sut->execute();
         $sutRow = $sut->get_result()->fetch_assoc();
         $sut->close();
-        if ($sutRow) {
-            $ukupnoTermina = max(1, (int)ceil($sutRow['Trajanje'] / 30));
-            $h = (int)substr($vreme, 0, 2);
-            $m = (int)substr($vreme, 3, 2);
-            $vremeSlot = $h * 2 + (int)($m / 30);
-        }
+        if ($sutRow) $ukupnoTermina = max(1, (int)ceil($sutRow['Trajanje'] / 30));
+    }
+
+    // Compute slot number when vreme is set
+    $vremeSlot = 0;
+    if (preg_match('/^\d{2}:\d{2}$/', $vreme)) {
+        $h = (int)substr($vreme, 0, 2);
+        $m = (int)substr($vreme, 3, 2);
+        $vremeSlot = $h * 2 + (int)($m / 30);
     }
 
     if ($t1_post === 1) {
-        // ── Step 1: validate inputs, find available frizeri ──────────
+        // ── Step 1 ──────────────────────────────────────────────────
         $d1   = new DateTime(); $d1->setTime(0,0,0,0);
         $d2   = $datum ? new DateTime($datum) : null;
         $diff = $d2 ? (int)$d1->diff($d2)->format('%R%a') : -999;
@@ -90,19 +146,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($nivo >= 2 && $korisnik === '')  $poruka = "Izaberite klijenta.";
         elseif ($usluga === '')              $poruka = "Niste izabrali uslugu.";
         elseif ($datum === '')               $poruka = "Unesite datum.";
-        elseif ($vreme === '')               $poruka = "Izaberite vreme.";
         elseif ($d2 && date('w', strtotime($datum)) == 0) $poruka = "Ne radimo nedeljom.";
         elseif ($diff < 0)                   $poruka = "Datum je u prošlosti.";
         elseif ($diff > 7)                   $poruka = "Zakazivanje maksimalno 7 dana unapred.";
-        elseif ($vremeSlot < 18 || $vremeSlot + $ukupnoTermina - 1 > 34)
-                                             $poruka = "Vreme nije u radnom vremenu salona (09:00–17:00).";
         else {
-            if ($diff === 0) {
-                $now     = date("H:i");
-                $ch      = (int)substr($now, 0, 2);
-                $cm      = (int)substr($now, 3, 2);
-                $curSlot = $ch * 2 + (int)($cm / 30);
-                if ($vremeSlot <= $curSlot) $poruka = "Izabrani termin je u prošlosti.";
+            if ($vreme !== '') {
+                // Validate specific time if provided
+                if ($vremeSlot < 18 || $vremeSlot + $ukupnoTermina - 1 > 34)
+                    $poruka = "Vreme nije u radnom vremenu salona (09:00–17:00).";
+                elseif ($diff === 0 && $vremeSlot < getTpoc($datum))
+                    $poruka = "Izabrani termin je u prošlosti.";
+                $vremeMode = true;
+            } else {
+                $vremeMode = false;
             }
 
             if (!$poruka && $nivo >= 2) {
@@ -116,23 +172,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (!$poruka) {
-                $frizeriDostupni = getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina);
-                if (empty($frizeriDostupni)) {
-                    $poruka = "Nema dostupnih frizera za " . date('d.m.Y.', strtotime($datum)) . " u " . $vreme . ". Pokušajte drugi termin.";
+                if ($vremeMode) {
+                    $frizeriDostupni = getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina);
+                    if (empty($frizeriDostupni))
+                        $poruka = "Nema dostupnih frizera za " . date('d.m.Y.', strtotime($datum)) . " u " . $vreme . ".";
+                    else $t1 = 2;
                 } else {
-                    $t1 = 2;
+                    $frizeriSaSlotovima = getFrizeriSaSlotovima($conn, $datum, $ukupnoTermina);
+                    if (empty($frizeriSaSlotovima))
+                        $poruka = "Nema slobodnih termina za " . date('d.m.Y.', strtotime($datum)) . ".";
+                    else $t1 = 2;
                 }
             }
         }
 
     } else {
-        // ── Step 2: book appointment ──────────────────────────────────
+        // ── Step 2: book ─────────────────────────────────────────────
         $frizer = trim($_POST['frizer'] ?? '');
 
-        if ($frizer === '') {
-            $poruka = "Izaberite frizera.";
-        } else {
-            // Validate frizer exists
+        if ($frizer === '')     $poruka = "Izaberite frizera.";
+        elseif ($vreme === '')  $poruka = "Izaberite termin.";
+        else {
             $vfr = $conn->prepare("SELECT KorisnikId FROM korisnik WHERE KorisnikId=? AND Nivo=2");
             $vfr->bind_param('s', $frizer);
             $vfr->execute();
@@ -142,20 +202,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$vfrOK) {
                 $poruka = "Izabrani frizer nije pronađen.";
             } else {
-                // Re-check availability (race condition guard)
-                $frizeriDostupni = getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina);
+                $chk = getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina);
                 $izabraniOK = false;
-                foreach ($frizeriDostupni as $fd) {
+                foreach ($chk as $fd) {
                     if ($fd['KorisnikId'] === $frizer) { $izabraniOK = true; break; }
                 }
-                if (!$izabraniOK) {
-                    $poruka = "Izabrani frizer više nije dostupan u tom terminu. Izaberite drugog.";
-                }
+                if (!$izabraniOK) $poruka = "Izabrani frizer više nije dostupan u tom terminu.";
             }
         }
 
         if (!$poruka) {
-            // Calculate price
             $sp = $conn->prepare("SELECT Cena, Popust, PopustOd, PopustDo FROM usluga WHERE UslugaId=?");
             $sp->bind_param('s', $usluga);
             $sp->execute();
@@ -207,16 +263,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } else {
-            // Error in step 2 — re-render step 2 if frizeri still available
-            if (!empty($frizeriDostupni)) {
-                $t1 = 2;
+            // Re-render step 2 on error
+            if ($vremeMode) {
+                $frizeriDostupni = getFrizeriDostupni($conn, $datum, $vremeSlot, $ukupnoTermina);
+                if (!empty($frizeriDostupni)) $t1 = 2;
+            } else {
+                $frizeriSaSlotovima = getFrizeriSaSlotovima($conn, $datum, $ukupnoTermina);
+                if (!empty($frizeriSaSlotovima)) $t1 = 2;
             }
-            // else $t1 stays 1, user needs to pick a new slot
         }
     }
 }
 
-// Resolve client name for display
+// Resolve client name
 if ($korisnik !== '') {
     $sn = $conn->prepare("SELECT Ime, Prezime FROM korisnik WHERE KorisnikId=?");
     $sn->bind_param('s', $korisnik);
@@ -226,17 +285,13 @@ if ($korisnik !== '') {
     if ($snRow) $korisnikNaziv = $snRow['Ime'].' '.$snRow['Prezime'];
 }
 
-// Queries for step 1 combos
 $usluge   = $conn->query("SELECT UslugaId FROM usluga WHERE Aktivna=1 ORDER BY UslugaId");
 $klijenti = ($nivo >= 2)
     ? $conn->query("SELECT KorisnikId, Ime, Prezime FROM korisnik WHERE Nivo=1 ORDER BY Ime, Prezime")
     : null;
 
-// Time slot options 09:00–17:00
 $timeSlots = [];
-for ($s = 18; $s <= 34; $s++) {
-    $timeSlots[] = sprintf('%02d:%02d', (int)($s/2), ($s%2)*30);
-}
+for ($s = 18; $s <= 34; $s++) $timeSlots[] = sprintf('%02d:%02d', (int)($s/2), ($s%2)*30);
 ?>
 <!DOCTYPE html>
 <html lang="sr">
@@ -285,7 +340,7 @@ for ($s = 18; $s <= 34; $s++) {
     <?php endif; ?>
 
     <?php if ($t1 == 1): ?>
-    <!-- ── STEP 1: Pick service, date, time ── -->
+    <!-- ── STEP 1 ── -->
     <form method="post" class="auth-form">
       <input type="hidden" name="t1" value="1">
 
@@ -340,9 +395,9 @@ for ($s = 18; $s <= 34; $s++) {
       </div>
 
       <div class="ct-field">
-        <label for="zk-vreme">Vreme <span class="ct-req">*</span></label>
+        <label for="zk-vreme">Vreme <span style="font-size:0.72rem;opacity:0.55;font-weight:400;">(opcionalno)</span></label>
         <select id="zk-vreme" name="vreme">
-          <option value="">— Izaberite vreme —</option>
+          <option value="">— Prikaži sve slobodne termine —</option>
           <?php foreach ($timeSlots as $ts): ?>
           <option value="<?= $ts ?>" <?= $ts === $vreme ? 'selected' : '' ?>><?= $ts ?></option>
           <?php endforeach; ?>
@@ -353,24 +408,29 @@ for ($s = 18; $s <= 34; $s++) {
     </form>
 
     <?php else: ?>
-    <!-- ── STEP 2: Pick frizer from available list ── -->
+    <!-- ── STEP 2 ── -->
     <div class="zk-booking-summary">
       <span><strong>Usluga:</strong> <?= htmlspecialchars($usluga) ?></span>
       <span><strong>Datum:</strong> <?= date('d.m.Y.', strtotime($datum)) ?></span>
+      <?php if ($vreme && $vremeMode): ?>
       <span><strong>Vreme:</strong> <?= htmlspecialchars($vreme) ?></span>
+      <?php endif; ?>
       <?php if ($korisnikNaziv): ?>
       <span><strong>Klijent:</strong> <?= htmlspecialchars($korisnikNaziv) ?></span>
       <?php endif; ?>
     </div>
 
-    <form method="post" class="auth-form">
+    <form method="post" class="auth-form" id="form-step2">
       <input type="hidden" name="t1"            value="2">
       <input type="hidden" name="korisnik"       value="<?= htmlspecialchars($korisnik) ?>">
       <input type="hidden" name="korisnik_naziv" value="<?= htmlspecialchars($korisnikNaziv) ?>">
       <input type="hidden" name="usluga"         value="<?= htmlspecialchars($usluga) ?>">
       <input type="hidden" name="datum"          value="<?= htmlspecialchars($datum) ?>">
-      <input type="hidden" name="vreme"          value="<?= htmlspecialchars($vreme) ?>">
+      <input type="hidden" name="vreme_fiksno"   value="<?= $vremeMode ? '1' : '0' ?>">
 
+      <?php if ($vremeMode): ?>
+      <!-- Fixed time: vreme pre-set, user picks frizer via radio -->
+      <input type="hidden" name="vreme" value="<?= htmlspecialchars($vreme) ?>">
       <div class="ct-field">
         <label>Izaberite frizera <span class="ct-req">*</span></label>
         <div class="zk-frizer-list">
@@ -397,13 +457,57 @@ for ($s = 18; $s <= 34; $s++) {
         </div>
       </div>
 
+      <?php else: ?>
+      <!-- Any time: user clicks a slot to pick frizer + time -->
+      <input type="hidden" name="frizer" id="sel-frizer" value="<?= htmlspecialchars($frizer) ?>">
+      <input type="hidden" name="vreme"  id="sel-vreme"  value="<?= htmlspecialchars($vreme) ?>">
+
+      <div class="ct-field">
+        <label>Izaberite termin i frizera <span class="ct-req">*</span></label>
+        <div class="zk-slot-section" id="slot-section">
+          <?php foreach ($frizeriSaSlotovima as $entry): ?>
+          <?php
+            $fId      = $entry['frizer']['KorisnikId'];
+            $fNaziv   = $entry['frizer']['Ime'].' '.$entry['frizer']['Prezime'];
+            $isActive = ($fId === $frizer);
+          ?>
+          <div class="zk-slot-frizer <?= $isActive ? 'zk-slot-frizer--active' : '' ?>"
+               data-frizer="<?= htmlspecialchars($fId) ?>">
+            <div class="zk-slot-frizer-header">
+              <div class="zk-frizer-row-avatar" style="width:30px;height:30px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span><?= htmlspecialchars($fNaziv) ?></span>
+            </div>
+            <div class="zk-slot-times">
+              <?php foreach ($entry['slots'] as $slot): ?>
+              <button type="button" class="zk-slot-btn <?= ($isActive && $slot === $vreme) ? 'zk-slot-btn--active' : '' ?>"
+                      data-frizer="<?= htmlspecialchars($fId) ?>"
+                      data-vreme="<?= htmlspecialchars($slot) ?>">
+                <?= htmlspecialchars($slot) ?>
+              </button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <div id="slot-hint" style="margin-top:0.5rem;font-size:0.75rem;color:rgba(212,168,40,0.65);display:none;">
+          Izabrano: <span id="slot-hint-txt"></span>
+        </div>
+      </div>
+      <?php endif; ?>
+
       <div style="display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:0.4rem;">
-        <button type="submit" class="auth-btn" style="flex:1;">
+        <button type="submit" class="auth-btn" style="flex:1;" id="btn-submit">
           <?= $nivo === 1 ? 'Pošalji zahtev' : 'Potvrdi zakazivanje' ?>
         </button>
         <a href="ternovi.php" class="odmor-btn odmor-btn--ghost"
            style="display:flex;align-items:center;padding:0.6rem 1.1rem;border-radius:6px;">
-          ← Promeni termin
+          ← Promeni
         </a>
       </div>
     </form>
@@ -419,13 +523,61 @@ for ($s = 18; $s <= 34; $s++) {
 const nav = document.querySelector('.kn-nav');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
 
-// Hide past time slots when today is selected
+// ── Slot-picker (any-time mode) ──────────────────────────────────
+(function () {
+  const selFrizer = document.getElementById('sel-frizer');
+  const selVreme  = document.getElementById('sel-vreme');
+  const hint      = document.getElementById('slot-hint');
+  const hintTxt   = document.getElementById('slot-hint-txt');
+  if (!selFrizer || !selVreme) return;
+
+  // Restore visual state if frizer+vreme were pre-filled (re-render after error)
+  if (selFrizer.value && selVreme.value) updateHint();
+
+  document.querySelectorAll('.zk-slot-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.zk-slot-btn').forEach(b => b.classList.remove('zk-slot-btn--active'));
+      document.querySelectorAll('.zk-slot-frizer').forEach(s => s.classList.remove('zk-slot-frizer--active'));
+      this.classList.add('zk-slot-btn--active');
+      this.closest('.zk-slot-frizer')?.classList.add('zk-slot-frizer--active');
+      selFrizer.value = this.dataset.frizer;
+      selVreme.value  = this.dataset.vreme;
+      updateHint();
+    });
+  });
+
+  function updateHint() {
+    if (!hint || !hintTxt) return;
+    if (selFrizer.value && selVreme.value) {
+      const frizerEl = document.querySelector(`.zk-slot-frizer[data-frizer="${selFrizer.value}"] .zk-slot-frizer-header span`);
+      const frizerNaziv = frizerEl ? frizerEl.textContent : '';
+      hintTxt.textContent = selVreme.value + (frizerNaziv ? ' · ' + frizerNaziv : '');
+      hint.style.display = 'block';
+    } else {
+      hint.style.display = 'none';
+    }
+  }
+
+  // Validate on submit
+  const form = document.getElementById('form-step2');
+  if (form) {
+    form.addEventListener('submit', e => {
+      if (!selFrizer.value || !selVreme.value) {
+        e.preventDefault();
+        document.getElementById('slot-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('slot-section')?.classList.add('zk-slot-shake');
+        setTimeout(() => document.getElementById('slot-section')?.classList.remove('zk-slot-shake'), 500);
+      }
+    });
+  }
+})();
+
+// ── Hide past time slots for today ──────────────────────────────
 (function () {
   const dateEl = document.getElementById('zk-datum');
   const timeEl = document.getElementById('zk-vreme');
   if (!dateEl || !timeEl) return;
 
-  // Store all slots once
   const allSlots = <?= json_encode($timeSlots) ?>;
 
   function refreshTimes() {
@@ -435,19 +587,15 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
     const curSlot = now.getHours() * 2 + Math.floor(now.getMinutes() / 30);
     const currentVal = timeEl.value;
 
-    // Rebuild options list, skipping past slots for today
     while (timeEl.options.length > 1) timeEl.remove(1);
     allSlots.forEach(ts => {
       const [h, m] = ts.split(':').map(Number);
-      const slot = h * 2 + m / 30;
-      if (isToday && slot <= curSlot) return;
+      if (isToday && h * 2 + m / 30 <= curSlot) return;
       const opt = document.createElement('option');
-      opt.value = ts;
-      opt.textContent = ts;
+      opt.value = ts; opt.textContent = ts;
       if (ts === currentVal) opt.selected = true;
       timeEl.appendChild(opt);
     });
-
     if (!timeEl.value) timeEl.selectedIndex = 0;
   }
 
@@ -455,86 +603,48 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
   refreshTimes();
 })();
 
-// Combo box behaviour
+// ── Combo boxes ──────────────────────────────────────────────────
 (function () {
   function initCombo(combo) {
     const textInput = combo.querySelector('.zk-combo-input');
     const hidden    = combo.querySelector('input[type="hidden"]');
     const list      = combo.querySelector('.zk-combo-list');
     const items     = Array.from(list.querySelectorAll('li'));
-
-    function open()  { list.classList.add('open'); }
-    function close() { list.classList.remove('open'); }
-
-    function filter(q) {
-      const lq = q.toLowerCase().trim();
-      let any = false;
-      items.forEach(li => {
-        const match = li.textContent.trim().toLowerCase().includes(lq);
-        li.hidden = !match;
-        if (match) any = true;
-      });
-      return any;
-    }
+    const open  = () => list.classList.add('open');
+    const close = () => list.classList.remove('open');
+    const filter = q => { const lq = q.toLowerCase().trim(); let any = false; items.forEach(li => { const m = li.textContent.trim().toLowerCase().includes(lq); li.hidden = !m; if (m) any = true; }); return any; };
 
     textInput.addEventListener('focus', () => { filter(textInput.value); open(); });
     textInput.addEventListener('input', () => { hidden.value = ''; filter(textInput.value); open(); });
-
     items.forEach(li => {
       li.addEventListener('mousedown', e => {
         e.preventDefault();
         const label = li.dataset.label ?? li.dataset.val;
-        textInput.value = label;
-        hidden.value    = li.dataset.val;
-        const nazField = combo.querySelector('input[id$="-naziv"]');
-        if (nazField) nazField.value = label;
+        textInput.value = label; hidden.value = li.dataset.val;
+        const naz = combo.querySelector('input[id$="-naziv"]');
+        if (naz) naz.value = label;
         close();
       });
     });
-
-    document.addEventListener('click', e => {
-      if (!combo.contains(e.target)) { close(); if (!hidden.value) textInput.value = ''; }
-    });
-
+    document.addEventListener('click', e => { if (!combo.contains(e.target)) { close(); if (!hidden.value) textInput.value = ''; } });
     textInput.addEventListener('keydown', e => {
-      const visible = items.filter(li => !li.hidden);
-      const active  = list.querySelector('.zk-active');
-      let idx = visible.indexOf(active);
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (active) active.classList.remove('zk-active');
-        visible[Math.min(idx + 1, visible.length - 1)]?.classList.add('zk-active');
-        open();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (active) active.classList.remove('zk-active');
-        visible[Math.max(idx - 1, 0)]?.classList.add('zk-active');
-        open();
-      } else if (e.key === 'Enter') {
-        const sel = list.querySelector('.zk-active') || (visible.length === 1 ? visible[0] : null);
-        if (sel) { e.preventDefault(); textInput.value = sel.dataset.label ?? sel.dataset.val; hidden.value = sel.dataset.val; close(); }
-      } else if (e.key === 'Escape') { close(); }
+      const vis = items.filter(li => !li.hidden);
+      const act = list.querySelector('.zk-active');
+      let idx = vis.indexOf(act);
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (act) act.classList.remove('zk-active'); vis[Math.min(idx+1,vis.length-1)]?.classList.add('zk-active'); open(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (act) act.classList.remove('zk-active'); vis[Math.max(idx-1,0)]?.classList.add('zk-active'); open(); }
+      else if (e.key === 'Enter') { const sel = list.querySelector('.zk-active')||(vis.length===1?vis[0]:null); if (sel){e.preventDefault();textInput.value=sel.dataset.label??sel.dataset.val;hidden.value=sel.dataset.val;close();} }
+      else if (e.key === 'Escape') close();
     });
   }
-
   document.querySelectorAll('.zk-combo').forEach(initCombo);
 
-  // Enforce combo selection on submit
-  const form = document.querySelector('form[method="post"]');
-  if (form && form.querySelector('input[name="t1"][value="1"]')) {
+  const form = document.querySelector('form[method="post"] input[name="t1"][value="1"]')?.closest('form');
+  if (form) {
     form.addEventListener('submit', e => {
-      const checks = [
-        { val: 'zk-korisnik-val', txt: 'zk-korisnik-text', combo: 'combo-korisnik' },
-        { val: 'zk-usluga-val',   txt: 'zk-usluga-text',   combo: 'combo-usluga'   },
-      ];
-      for (const c of checks) {
-        const valEl = document.getElementById(c.val);
-        if (valEl && !valEl.value) {
-          e.preventDefault();
-          document.getElementById(c.txt)?.focus();
-          document.getElementById(c.combo)?.querySelector('.zk-combo-list')?.classList.add('open');
-          break;
-        }
+      for (const c of [{val:'zk-korisnik-val',txt:'zk-korisnik-text',combo:'combo-korisnik'},{val:'zk-usluga-val',txt:'zk-usluga-text',combo:'combo-usluga'}]) {
+        const v = document.getElementById(c.val);
+        if (v && !v.value) { e.preventDefault(); document.getElementById(c.txt)?.focus(); document.getElementById(c.combo)?.querySelector('.zk-combo-list')?.classList.add('open'); break; }
       }
     });
   }

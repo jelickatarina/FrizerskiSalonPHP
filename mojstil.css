@@ -3105,6 +3105,104 @@ input[type="time"] {
     .odmor-entry-right { width: 100%; justify-content: flex-end; }
 }
 
+/* ── Slot section (zakazivanje bez fiksnog vremena) ── */
+.zk-slot-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(176,164,148,0.35) transparent;
+}
+.zk-slot-section::-webkit-scrollbar { width: 4px; }
+.zk-slot-section::-webkit-scrollbar-thumb {
+    background: rgba(176,164,148,0.35);
+    border-radius: 4px;
+}
+
+.zk-slot-frizer {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(176,164,148,0.12);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    transition: border-color 0.2s;
+}
+.zk-slot-frizer--active {
+    border-color: rgba(196,167,108,0.55);
+    background: rgba(196,167,108,0.06);
+}
+
+.zk-slot-frizer-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.7rem;
+}
+.zk-slot-frizer-header .zk-frizer-row-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 0.75rem;
+}
+.zk-slot-frizer-header span {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.82);
+    letter-spacing: 0.04em;
+}
+
+.zk-slot-times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.zk-slot-btn {
+    padding: 0.32rem 0.72rem;
+    border-radius: 20px;
+    border: 1px solid rgba(176,164,148,0.25);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.72);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.zk-slot-btn:hover {
+    background: rgba(196,167,108,0.12);
+    border-color: rgba(196,167,108,0.4);
+    color: #c4a76c;
+}
+.zk-slot-btn--active {
+    background: rgba(196,167,108,0.18);
+    border-color: rgba(196,167,108,0.7);
+    color: #c4a76c;
+    font-weight: 500;
+}
+
+.zk-slot-hint {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(196,167,108,0.75);
+    letter-spacing: 0.05em;
+    min-height: 1.2em;
+    margin-top: 0.3rem;
+}
+
+@keyframes zk-shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+.zk-slot-shake { animation: zk-shake 0.35s ease; }
+
 /* ── Table cells ──────────────────────────────────── */
 @media (max-width: 640px) {
     .tbl-wrap table th,
