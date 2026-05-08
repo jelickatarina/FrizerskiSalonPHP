@@ -53,7 +53,7 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($uloga !== '' ? '&uloga='.urle
             <form method="get" class="search-form">
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži po imenu, emailu, telefonu...">
-                <select class="filter-select" name="uloga">
+                <select class="filter-select" name="uloga" id="kor-uloga">
                     <option value="" <?= $uloga===''?'selected':'' ?>>Sve uloge</option>
                     <option value="1" <?= $uloga==='1'?'selected':'' ?>>Klijent</option>
                     <option value="2" <?= $uloga==='2'?'selected':'' ?>>Frizer</option>
@@ -61,6 +61,7 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($uloga !== '' ? '&uloga='.urle
                     <option value="0" <?= $uloga==='0'?'selected':'' ?>>Neaktivni</option>
                 </select>
                 <button class="search-btn" type="submit">Traži</button>
+                <button class="search-btn" type="button" id="kor-clear" style="<?= ($q===''&&$uloga==='')?'display:none':'' ?>">✕</button>
             </form>
             <?php if($_SESSION['nivo']=='9') { ?>
             <a class="ct-btn" href="kornovi.php">+ Novi korisnik</a>
@@ -124,5 +125,29 @@ while($data=$result->fetch_assoc()) {
     </div>
 </div>
 <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    const form   = document.querySelector('.search-form');
+    const q      = form.querySelector('input[name="q"]');
+    const uloga  = document.getElementById('kor-uloga');
+    const clear  = document.getElementById('kor-clear');
+
+    uloga.addEventListener('change', () => form.submit());
+
+    let timer;
+    q.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => form.submit(), 400);
+    });
+
+    if (clear) {
+        clear.addEventListener('click', () => {
+            q.value = '';
+            uloga.value = '';
+            form.submit();
+        });
+    }
+})();
+</script>
 </body>
 </html>
