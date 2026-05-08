@@ -1750,6 +1750,173 @@ select:focus, input:focus {
     border-bottom-color: #d4a828;
 }
 
+/* Filter chips */
+.ter-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0 0.2rem;
+}
+.ter-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.75rem;
+    border-radius: 20px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(176,164,148,0.65);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.ter-filter-chip:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.15); }
+.ter-filter-chip--on {
+    color: rgba(212,168,40,0.9);
+    border-color: rgba(212,168,40,0.35);
+    background: rgba(212,168,40,0.07);
+}
+
+/* Status chips inside cards */
+.ter-status-chip {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+.ter-status-chip--done   { background: rgba(60,180,100,0.12); color: #6dcf95; }
+.ter-status-chip--cancel { background: rgba(180,60,60,0.12);  color: #d47070; }
+
+/* Cancelled card state */
+.today-card--cancelled { opacity: 0.5; }
+
+/* Weekly grouped view */
+.ter-week { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.2rem; }
+.ter-day-group {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.ter-day-group--today { border-color: rgba(212,168,40,0.25); }
+.ter-day-group--past  { opacity: 0.45; }
+.ter-day-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 1rem;
+    background: rgba(255,255,255,0.025);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.ter-day-group--today .ter-day-header { background: rgba(212,168,40,0.07); border-bottom-color: rgba(212,168,40,0.15); }
+.ter-day-name {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+}
+.ter-day-group--today .ter-day-name { color: rgba(212,168,40,0.85); }
+.ter-day-date {
+    font-size: 0.78rem;
+    color: rgba(176,164,148,0.5);
+}
+.ter-day-count {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: rgba(212,168,40,0.6);
+    background: rgba(212,168,40,0.1);
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    font-family: 'Jost', sans-serif;
+}
+.ter-day-empty {
+    padding: 0.55rem 1rem;
+    font-size: 0.76rem;
+    color: rgba(176,164,148,0.3);
+    font-family: 'Jost', sans-serif;
+}
+.ter-day-group .today-cards { padding: 0.6rem 0.7rem; }
+
+/* Admin stats panel */
+.stats-panel {
+    margin: 1.2rem 0;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.stats-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.1rem;
+    background: rgba(255,255,255,0.025);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(176,164,148,0.6);
+}
+.stats-panel-header svg { color: rgba(212,168,40,0.5); flex-shrink: 0; }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0;
+}
+.stats-card {
+    padding: 0.9rem 1.1rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.stats-card:last-child { border-right: none; }
+.stats-card-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: 0.6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.stats-card-metrics {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+.stats-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+}
+.stats-metric-val {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(255,255,255,0.75);
+}
+.stats-metric-lbl {
+    font-size: 0.62rem;
+    color: rgba(176,164,148,0.5);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    margin-top: 0.15rem;
+}
+.stats-metric--done   .stats-metric-val { color: #6dcf95; }
+.stats-metric--cancel .stats-metric-val { color: #d47070; }
+.stats-metric--revenue .stats-metric-val { color: rgba(212,168,40,0.9); font-size: 1.05rem; }
+
+/* Cancelled table row */
+.tr--cancelled { opacity: 0.5; }
+
 .today-count {
     font-family: 'Jost', sans-serif;
     font-size: 0.68rem;
