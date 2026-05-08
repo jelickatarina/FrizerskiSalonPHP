@@ -1,6 +1,7 @@
 <?php
   if(session_status() === PHP_SESSION_NONE) session_start();
-  $ulogovan = isset($_SESSION['korisnik']);
+  if (isset($_SESSION['korisnik'])) { header('Location: termini.php'); exit; }
+  $ulogovan = false;
 ?>
 <!DOCTYPE html>
 <html lang="sr">

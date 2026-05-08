@@ -18,7 +18,7 @@ function buildOccupied($conn, $frizerId, $datumOd, $datumDo) {
         "SELECT t.Datum, t.Vreme, COALESCE(u.Trajanje, 30) AS Trajanje
          FROM termin t LEFT JOIN usluga u ON t.UslugaId=u.UslugaId
          WHERE t.KorisnikFrizerId=? AND t.Datum BETWEEN ? AND ?
-           AND t.Otkazano=0 AND t.Uradjeno=0"
+           AND (t.Otkazano IS NULL OR t.Otkazano=0) AND t.Uradjeno=0"
     );
     $st->bind_param('sss', $frizerId, $datumOd, $datumDo);
     $st->execute();
@@ -243,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add' 
                 $sc = $conn->prepare(
                     "SELECT COUNT(*) FROM termin
                      WHERE KorisnikFrizerId=? AND Datum BETWEEN ? AND ?
-                       AND Otkazano=0 AND Uradjeno=0"
+                       AND (Otkazano IS NULL OR Otkazano=0) AND Uradjeno=0"
                 );
                 $sc->bind_param('sss', $frizer, $datumOd, $datumDo);
                 $sc->execute();
@@ -934,7 +934,11 @@ if ($qArgs) {
             ?>
 
             <?php if (count($rows) === 0): ?>
-            <p class="today-empty">Nema upisanih odsustva<?= ($nivo===9 && $frizerFilter!=='') ? ' za ovog frizera' : '' ?>.</p>
+            <div class="ter-empty">
+                <svg class="ter-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <h3 class="ter-empty-title"><?= ($nivo===9 && $frizerFilter!=='') ? 'Nema odsustva za ovog frizera' : 'Nema upisanih odsustva' ?></h3>
+                <p class="ter-empty-sub">Odsustva će se prikazati ovde kada budu upisana.</p>
+            </div>
             <?php else: ?>
             <div class="odmor-entries">
                 <?php foreach ($rows as $r):
@@ -1003,6 +1007,9 @@ if ($qArgs) {
     od.addEventListener('change', () => {
       if (_do.value && _do.value < od.value) _do.value = od.value;
       _do.min = od.value;
+    });
+    [od, _do].forEach(el => {
+      el.addEventListener('click', function () { try { this.showPicker(); } catch(e) {} });
     });
   }
 

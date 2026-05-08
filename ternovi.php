@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         elseif ($datum === '')               $poruka = "Unesite datum.";
         elseif ($d2 && date('w', strtotime($datum)) == 0) $poruka = "Ne radimo nedeljom.";
         elseif ($diff < 0)                   $poruka = "Datum je u prošlosti.";
-        elseif ($diff > 7)                   $poruka = "Zakazivanje maksimalno 7 dana unapred.";
+        elseif ($diff > 30)                  $poruka = "Zakazivanje je moguće do 30 dana unapred.";
         else {
             if ($vreme !== '') {
                 // Validate specific time if provided
@@ -394,7 +394,7 @@ for ($s = 18; $s <= 34; $s++) $timeSlots[] = sprintf('%02d:%02d', (int)($s/2), (
         <input type="date" id="zk-datum" name="datum"
                value="<?= htmlspecialchars($datum) ?>"
                min="<?= date('Y-m-d') ?>"
-               max="<?= date('Y-m-d', strtotime('+7 days')) ?>">
+               max="<?= date('Y-m-d', strtotime('+30 days')) ?>">
       </div>
 
       <div class="ct-field">

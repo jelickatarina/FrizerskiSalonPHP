@@ -603,6 +603,7 @@ $vremeStr       = $rec ? _tiStr((int)($rec['Vreme'] ?? 0)) : '';
     <div class="ti-date-field">
         <label>Datum</label>
         <input type="date" name="datum" required min="<?= date('Y-m-d') ?>"
+               max="<?= date('Y-m-d', strtotime('+30 days')) ?>"
                value="<?= htmlspecialchars($_POST['datum'] ?? '') ?>">
     </div>
     <button type="submit" class="ti-submit">Prikaži slobodne termine</button>

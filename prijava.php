@@ -26,7 +26,7 @@ require_once 'sesija.php';
         $_SESSION['nivo']     = $data['Nivo'];
         $_SESSION['ime']      = $data['Ime'];
         $_SESSION['prezime']  = $data['Prezime'];
-        header('Location: index.php');
+        header('Location: termini.php');
         exit;
       }
       $stmt->close();

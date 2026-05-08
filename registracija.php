@@ -41,7 +41,9 @@ require_once 'sesija.php';
         $stmt->close();
         $_SESSION['korisnik'] = $korisnik;
         $_SESSION['nivo']     = '1';
-        header('Location: index.php');
+        $_SESSION['ime']      = $ime;
+        $_SESSION['prezime']  = $prezime;
+        header('Location: usluge.php');
         exit;
       }
     }
