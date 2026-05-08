@@ -1783,9 +1783,16 @@ select:focus, input:focus {
 }
 .ter-filter-chip:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.15); }
 .ter-filter-chip--on {
-    color: rgba(212,168,40,0.9);
-    border-color: rgba(212,168,40,0.35);
-    background: rgba(212,168,40,0.07);
+    color: #d4a828;
+    border-color: rgba(212,168,40,0.55);
+    background: rgba(212,168,40,0.12);
+    font-weight: 600;
+}
+.ter-filter-chip--off {
+    color: rgba(176,164,148,0.35);
+    border-color: rgba(255,255,255,0.05);
+    text-decoration: line-through;
+    opacity: 0.6;
 }
 
 /* Day picker (nedeljni) */
@@ -1977,55 +1984,149 @@ select:focus, input:focus {
     color: rgba(176,164,148,0.6);
 }
 .stats-panel-header svg { color: rgba(212,168,40,0.5); flex-shrink: 0; }
-.stats-grid {
+/* Stats list (scalable to any number of hairdressers) */
+.stats-list { display: flex; flex-direction: column; }
+.stats-list-hdr {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 0;
+    grid-template-columns: 1fr repeat(4, 90px);
+    padding: 0.45rem 1.1rem;
+    background: rgba(255,255,255,0.015);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(176,164,148,0.4);
+    gap: 0.5rem;
 }
-.stats-card {
-    padding: 0.9rem 1.1rem;
-    border-right: 1px solid rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+.stats-list-hdr span:not(:first-child) { text-align: right; }
+.stats-list-row {
+    display: grid;
+    grid-template-columns: 1fr repeat(4, 90px);
+    align-items: center;
+    padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 0.5rem;
+    transition: background 0.15s;
 }
-.stats-card:last-child { border-right: none; }
-.stats-card-name {
+.stats-list-row:last-child { border-bottom: none; }
+.stats-list-row:hover { background: rgba(255,255,255,0.02); }
+.stats-list-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.82);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.stats-list-val {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    text-align: right;
+}
+.stats-list-val--done   { color: #6dcf95; }
+.stats-list-val--cancel { color: #d47070; }
+.stats-list-val--rev    { color: rgba(212,168,40,0.85); }
+.stats-list-val small   { font-size: 0.65rem; opacity: 0.7; margin-left: 0.15rem; }
+@media (max-width: 600px) {
+    .stats-list-hdr,
+    .stats-list-row { grid-template-columns: 1fr repeat(4, 60px); padding-left: 0.8rem; padding-right: 0.8rem; }
+}
+
+/* Date separator for grouped tables */
+.tbl-date-sep {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0 0.35rem;
+    margin-top: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.tbl-date-sep:first-child { margin-top: 0.4rem; }
+.tbl-date-sep-date {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 1rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.82);
-    margin-bottom: 0.6rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: rgba(255,255,255,0.75);
 }
-.stats-card-metrics {
+.tbl-date-sep-cnt {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.68rem;
+    color: rgba(176,164,148,0.45);
+    letter-spacing: 0.04em;
+}
+
+/* Svi tab: year nav + month grid */
+.svi-year-nav {
     display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    margin-bottom: 0.6rem;
 }
-.stats-metric {
+.svi-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.75rem;
+    color: rgba(176,164,148,0.6);
+    text-decoration: none;
+    margin-bottom: 0.6rem;
+    transition: color 0.2s;
+}
+.svi-back-link:hover { color: rgba(212,168,40,0.8); }
+.svi-months-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+}
+@media (max-width: 480px) { .svi-months-grid { grid-template-columns: repeat(3, 1fr); } }
+.svi-month-cell {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 40px;
+    gap: 0.3rem;
+    padding: 0.9rem 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.07);
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: pointer;
 }
-.stats-metric-val {
+.svi-month-cell--active {
+    border-color: rgba(212,168,40,0.25);
+    background: rgba(212,168,40,0.04);
+}
+.svi-month-cell--active:hover {
+    border-color: rgba(212,168,40,0.45);
+    background: rgba(212,168,40,0.08);
+}
+.svi-month-cell--dim {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+}
+.svi-month-name {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: rgba(176,164,148,0.7);
+    text-transform: uppercase;
+}
+.svi-month-cell--active .svi-month-name { color: rgba(212,168,40,0.75); }
+.svi-month-cnt {
     font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: 1.3rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 600;
     line-height: 1;
-    color: rgba(255,255,255,0.75);
+    color: rgba(255,255,255,0.6);
 }
-.stats-metric-lbl {
-    font-size: 0.62rem;
-    color: rgba(176,164,148,0.5);
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    margin-top: 0.15rem;
-}
-.stats-metric--done   .stats-metric-val { color: #6dcf95; }
-.stats-metric--cancel .stats-metric-val { color: #d47070; }
-.stats-metric--revenue .stats-metric-val { color: rgba(212,168,40,0.9); font-size: 1.05rem; }
+.svi-month-cell--active .svi-month-cnt { color: rgba(255,255,255,0.85); }
 
 /* Cancelled table row */
 .tr--cancelled { opacity: 0.5; }

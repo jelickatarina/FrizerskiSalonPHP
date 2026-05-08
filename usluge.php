@@ -1,11 +1,10 @@
 <?php
 require_once 'sesija.php';
-requireNivo('1');
 include 'konekcija.php';
 
 $q       = trim($_GET['q'] ?? '');
-$nivo    = (int)$_SESSION['nivo'];
-$aktivan = ($nivo === 1) ? '1' : ($_GET['aktivan'] ?? '1');
+$nivo    = isset($_SESSION['nivo']) ? (int)$_SESSION['nivo'] : 0;
+$aktivan = ($nivo <= 1) ? '1' : ($_GET['aktivan'] ?? '1');
 $wh = "where 1=1";
 if($aktivan === '1') $wh .= " and Aktivna=1";
 if($aktivan === '0') $wh .= " and Aktivna=0";
@@ -53,9 +52,9 @@ $result = $conn->query("select * from usluga $wh order by UslugaId");
                 <?php endif; ?>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
-            <?php if($_SESSION['nivo']>='2') { ?>
+            <?php if($nivo >= 2): ?>
             <a class="ct-btn" href="uslnova.php">+ Nova usluga</a>
-            <?php } ?>
+            <?php endif; ?>
         </div>
         <?php if($q !== '') { ?>
         <p class="search-info">Rezultati za: <strong><?= htmlspecialchars($q) ?></strong>
@@ -108,9 +107,9 @@ while($data=$result->fetch_assoc()) {
                         <span class="srv-meta-val"><?= $data['Trajanje'] ?> min</span>
                     </div>
                 </div>
-                <?php if($_SESSION['nivo']>='2') { ?>
+                <?php if($nivo >= 2): ?>
                 <a class="srv-card-edit" href="uslizmeni.php?p=<?= urlencode($data['UslugaId']) ?>">Izmeni</a>
-                <?php } ?>
+                <?php endif; ?>
             </div>
 <?php } ?>
 <?php if($rows===0) { ?>
