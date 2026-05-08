@@ -139,6 +139,19 @@ if ($nivo === 9) {
             <a class="ct-btn" href="ternovi.php">+ Zakaži termin</a>
         </div>
 
+        <?php if (!empty($_GET['err'])): ?>
+        <div class="ct-alert ct-alert--err" style="margin-bottom:1rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>
+            <?php if ($_GET['err'] === 'prebaci_notfound'): ?>
+                Termin nije pronađen (možda je već obrađen ili otkazan).
+            <?php elseif ($_GET['err'] === 'prebaci_denied'): ?>
+                Nemate dozvolu da prebacite ovaj termin.
+            <?php else: ?>
+                Došlo je do greške: <?= htmlspecialchars($_GET['err']) ?>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
         <?php if ($q !== ''): ?>
         <p class="search-info">
             <?= $view === 'danas' ? count($todayRows) : $total ?> rezultata za „<?= htmlspecialchars($q) ?>"

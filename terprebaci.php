@@ -26,11 +26,14 @@ $sel->execute();
 $data = $sel->get_result()->fetch_assoc();
 $sel->close();
 
-if (!$data) { header('Location: termini.php'); exit; }
+if (!$data) {
+    // Termin nije pronađen ili je već obrađen
+    header('Location: termini.php?err=prebaci_notfound'); exit;
+}
 
-// Frizer can only transfer their own appointment
-if ($nivo === 2 && $data['KorisnikFrizerId'] !== $me) {
-    header('Location: termini.php'); exit;
+// Frizer can only transfer their own appointment (case-insensitive)
+if ($nivo === 2 && strcasecmp($data['KorisnikFrizerId'], $me) !== 0) {
+    header('Location: termini.php?err=prebaci_denied'); exit;
 }
 
 $vremeSlot    = (int)$data['Vreme'];
