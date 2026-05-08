@@ -773,18 +773,33 @@ if ($qArgs) {
 
             <?php elseif ($pending): ?>
             <!-- ── STEP 2: Appointment confirmation ── -->
-            <?php $zameneFrizeri = array_filter($frizerList, fn($f) => $f['KorisnikId'] !== $pending['frizer']); ?>
-            <h2 class="odmor-section-title">Novo odsustvo</h2>
-            <div class="ct-alert ct-alert--warn" style="margin-bottom:1.4rem;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
-                <div>
-                    <strong>Pažnja!</strong> U izabranom periodu postoji
-                    <strong><?= $pending['brTermina'] ?></strong>
-                    zakazan<?= $pending['brTermina'] === 1 ? '' : 'ih' ?>
-                    termin<?= $pending['brTermina'] === 1 ? '.' : 'a.' ?>
-                    Izaberite šta uraditi s njima:
+            <?php
+                $zameneFrizeri  = array_filter($frizerList, fn($f) => $f['KorisnikId'] !== $pending['frizer']);
+                $frizerNazivP   = '';
+                foreach ($frizerList as $_fl) {
+                    if ($_fl['KorisnikId'] === $pending['frizer']) { $frizerNazivP = $_fl['Ime'].' '.$_fl['Prezime']; break; }
+                }
+                $br = $pending['brTermina'];
+                $periodStr = date('d.m.Y.', strtotime($pending['datumOd']));
+                if ($pending['datumOd'] !== $pending['datumDo'])
+                    $periodStr .= ' — ' . date('d.m.Y.', strtotime($pending['datumDo']));
+            ?>
+
+            <div class="odmor-pending-bar">
+                <div class="odmor-pending-bar-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+                    <div>
+                        <div class="odmor-pending-bar-name"><?= htmlspecialchars($frizerNazivP) ?></div>
+                        <div class="odmor-pending-bar-period"><?= htmlspecialchars($periodStr) ?></div>
+                    </div>
+                </div>
+                <div class="odmor-pending-bar-count">
+                    <span class="odmor-pending-bar-num"><?= $br ?></span>
+                    <span class="odmor-pending-bar-lbl">zakazan<?= $br === 1 ? '' : 'ih' ?> termin<?= $br === 1 ? '' : 'a' ?></span>
                 </div>
             </div>
+
+            <p class="odmor-pending-prompt">Izaberite šta uraditi sa zakazanim terminima:</p>
 
             <form method="post" class="odmor-confirm-form">
                 <input type="hidden" name="action"              value="add">
@@ -795,27 +810,39 @@ if ($qArgs) {
                 <input type="hidden" name="napomena"            value="<?= htmlspecialchars($pending['napomena']) ?>">
                 <input type="hidden" name="potvrda_otkazivanja" value="1">
 
-                <div class="odmor-confirm-options">
-                    <div class="odmor-confirm-option">
-                        <div class="odmor-confirm-option-label">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                            Otkaži sve termine
+                <div class="odmor-options-list">
+
+                    <!-- Raspodela -->
+                    <div class="odmor-option odmor-option--raspodela">
+                        <div class="odmor-option-head">
+                            <div class="odmor-option-icon odmor-option-icon--green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="16" y1="3" x2="16" y2="21"/><line x1="8" y1="3" x2="8" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                            </div>
+                            <div>
+                                <div class="odmor-option-title">Raspodeli između dostupnih frizera</div>
+                                <div class="odmor-option-desc">Sistem predlaže raspodelu — Vi pregledate i potvrđujete pre izvršavanja.</div>
+                            </div>
                         </div>
-                        <p class="odmor-confirm-desc">Svi termini u ovom periodu biće otkazani.</p>
-                        <button type="submit" name="otkazi_termine" value="1" class="odmor-btn odmor-btn--danger">
-                            Otkaži termine i upiši odsustvo
+                        <button type="submit" name="otkazi_termine" value="raspodela" class="odmor-option-btn odmor-option-btn--green">
+                            Prikaži predlog raspodele
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
                     </div>
 
                     <?php if (count($zameneFrizeri) > 0): ?>
-                    <div class="odmor-confirm-option odmor-confirm-option--transfer">
-                        <div class="odmor-confirm-option-label">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                            Prebaci termine kod zamenika
+                    <!-- Transfer to substitute -->
+                    <div class="odmor-option odmor-option--transfer">
+                        <div class="odmor-option-head">
+                            <div class="odmor-option-icon odmor-option-icon--gold">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                            </div>
+                            <div>
+                                <div class="odmor-option-title">Prebaci kod jednog zamenika</div>
+                                <div class="odmor-option-desc">Slobodni termini se prebacuju, zauzeti se otkazuju.</div>
+                            </div>
                         </div>
-                        <p class="odmor-confirm-desc">Slobodni termini se prebacuju, zauzeti se otkazuju.</p>
-                        <div class="odmor-transfer-row">
-                            <select name="novi_frizer" class="filter-select" style="flex:1;" id="sel-zamenik">
+                        <div class="odmor-option-transfer-row">
+                            <select name="novi_frizer" class="odmor-option-select" id="sel-zamenik">
                                 <option value="">— Izaberite zamenika —</option>
                                 <?php foreach ($zameneFrizeri as $zf): ?>
                                 <option value="<?= htmlspecialchars($zf['KorisnikId']) ?>">
@@ -823,37 +850,51 @@ if ($qArgs) {
                                 </option>
                                 <?php endforeach; ?>
                             </select>
-                            <button type="submit" name="otkazi_termine" value="transfer" id="btn-transfer" class="odmor-btn odmor-btn--secondary">
-                                Prebaci i upiši odsustvo
+                            <button type="submit" name="otkazi_termine" value="transfer" id="btn-transfer" class="odmor-option-btn odmor-option-btn--gold">
+                                Prebaci
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
                             </button>
                         </div>
                     </div>
                     <?php endif; ?>
 
-                    <div class="odmor-confirm-option odmor-confirm-option--raspodela">
-                        <div class="odmor-confirm-option-label">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="16" y1="3" x2="16" y2="21"/><line x1="8" y1="3" x2="8" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-                            Raspodeli između dostupnih frizera
+                    <!-- Notify clients -->
+                    <div class="odmor-option odmor-option--notify">
+                        <div class="odmor-option-head">
+                            <div class="odmor-option-icon odmor-option-icon--blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </div>
+                            <div>
+                                <div class="odmor-option-title">Obavesti klijente mejlom</div>
+                                <div class="odmor-option-desc">Svaki klijent dobija mejl i sam bira: otkazivanje, drugi frizer ili novi termin. Link važi 7 dana.</div>
+                            </div>
                         </div>
-                        <p class="odmor-confirm-desc">Sistem pronalazi koji frizer može svaki termin i predlaže raspodelu. Vi potvrđujete ili menjate pre izvršavanja.</p>
-                        <button type="submit" name="otkazi_termine" value="raspodela" class="odmor-btn odmor-btn--secondary">
-                            Prikaži raspodelu
+                        <button type="submit" name="otkazi_termine" value="notify" class="odmor-option-btn odmor-option-btn--blue">
+                            Pošalji obaveštenja
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
                     </div>
 
-                    <div class="odmor-confirm-option odmor-confirm-option--notify">
-                        <div class="odmor-confirm-option-label">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                            Obavesti klijente mejlom
+                    <!-- Cancel all -->
+                    <div class="odmor-option odmor-option--danger">
+                        <div class="odmor-option-head">
+                            <div class="odmor-option-icon odmor-option-icon--red">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                            </div>
+                            <div>
+                                <div class="odmor-option-title">Otkaži sve termine</div>
+                                <div class="odmor-option-desc">Svih <?= $br ?> termin<?= $br === 1 ? '' : 'a' ?> biće otkazano bez obaveštenja.</div>
+                            </div>
                         </div>
-                        <p class="odmor-confirm-desc">Svaki klijent dobija mejl sa linkom. Sami biraju: otkazivanje, drugi frizer, ili novi termin. Link važi 7 dana.</p>
-                        <button type="submit" name="otkazi_termine" value="notify" class="odmor-btn odmor-btn--secondary">
-                            Pošalji obaveštenja i upiši odsustvo
+                        <button type="submit" name="otkazi_termine" value="1" class="odmor-option-btn odmor-option-btn--red">
+                            Otkaži sve i upiši odsustvo
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
                     </div>
+
                 </div>
 
-                <a href="odmor.php" class="odmor-btn odmor-btn--ghost" style="align-self:flex-start;margin-top:0.4rem;">Poništi</a>
+                <a href="odmor.php" class="odmor-btn odmor-btn--ghost" style="margin-top:1rem;align-self:flex-start;">← Poništi i vrati se</a>
             </form>
 
             <?php else: ?>

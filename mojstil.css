@@ -3402,3 +3402,197 @@ input[type="time"] {
     /* Footer */
     .sf-bottom { text-align: center; }
 }
+
+/* ── Odmor pending bar (Step 2 conflict header) ── */
+.odmor-pending-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    background: rgba(212,168,40,0.08);
+    border: 1px solid rgba(212,168,40,0.2);
+    border-radius: 8px;
+    margin-bottom: 1.4rem;
+}
+.odmor-pending-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: rgba(212,168,40,0.7);
+    flex: 1;
+    min-width: 0;
+}
+.odmor-pending-bar-left svg { flex-shrink: 0; }
+.odmor-pending-bar-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.odmor-pending-bar-period {
+    font-size: 0.78rem;
+    color: rgba(176,164,148,0.7);
+    margin-top: 0.1rem;
+}
+.odmor-pending-bar-count {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+.odmor-pending-bar-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: rgba(212,168,40,0.85);
+    line-height: 1;
+}
+.odmor-pending-bar-lbl {
+    font-size: 0.72rem;
+    color: rgba(176,164,148,0.65);
+    text-align: right;
+}
+
+.odmor-pending-prompt {
+    font-size: 0.82rem;
+    color: rgba(176,164,148,0.7);
+    margin: 0 0 1rem;
+    letter-spacing: 0.03em;
+}
+
+/* ── Odmor options list ── */
+.odmor-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.odmor-option {
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+.odmor-option--raspodela:hover { border-color: rgba(60,180,100,0.25); background: rgba(60,180,100,0.04); }
+.odmor-option--transfer:hover  { border-color: rgba(212,168,40,0.25); background: rgba(212,168,40,0.04); }
+.odmor-option--notify:hover    { border-color: rgba(80,140,220,0.25); background: rgba(80,140,220,0.04); }
+.odmor-option--danger:hover    { border-color: rgba(180,60,60,0.25);  background: rgba(180,60,60,0.04); }
+
+.odmor-option-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.odmor-option-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.odmor-option-icon--green { background: rgba(60,180,100,0.12);  color: #6dcf95; }
+.odmor-option-icon--gold  { background: rgba(212,168,40,0.12);  color: #d4a828; }
+.odmor-option-icon--blue  { background: rgba(80,140,220,0.12);  color: #6fa8dc; }
+.odmor-option-icon--red   { background: rgba(180,60,60,0.12);   color: #d47070; }
+
+.odmor-option-title {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 0.2rem;
+}
+.odmor-option-desc {
+    font-size: 0.76rem;
+    color: rgba(176,164,148,0.65);
+    line-height: 1.45;
+}
+
+.odmor-option-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: 1px solid;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+.odmor-option-btn--green {
+    background: rgba(60,180,100,0.1);
+    border-color: rgba(60,180,100,0.3);
+    color: #6dcf95;
+}
+.odmor-option-btn--green:hover { background: rgba(60,180,100,0.2); }
+.odmor-option-btn--gold {
+    background: rgba(212,168,40,0.1);
+    border-color: rgba(212,168,40,0.35);
+    color: #d4a828;
+}
+.odmor-option-btn--gold:hover { background: rgba(212,168,40,0.2); }
+.odmor-option-btn--blue {
+    background: rgba(80,140,220,0.1);
+    border-color: rgba(80,140,220,0.3);
+    color: #6fa8dc;
+}
+.odmor-option-btn--blue:hover { background: rgba(80,140,220,0.2); }
+.odmor-option-btn--red {
+    background: rgba(180,60,60,0.1);
+    border-color: rgba(180,60,60,0.3);
+    color: #d47070;
+}
+.odmor-option-btn--red:hover { background: rgba(180,60,60,0.2); }
+
+/* Transfer row inside option card */
+.odmor-option-transfer-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+.odmor-option-select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: rgba(255,255,255,0.82);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    padding: 0.45rem 0.7rem;
+    min-width: 170px;
+    appearance: auto;
+}
+.odmor-option-select:focus {
+    outline: none;
+    border-color: rgba(212,168,40,0.4);
+}
+
+@media (max-width: 640px) {
+    .odmor-option {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .odmor-option-btn { justify-content: center; }
+    .odmor-option-transfer-row { flex-direction: column; }
+    .odmor-option-select { min-width: unset; width: 100%; }
+    .odmor-pending-bar { flex-direction: column; align-items: flex-start; }
+    .odmor-pending-bar-count { align-items: flex-start; }
+}
