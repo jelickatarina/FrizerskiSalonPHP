@@ -2036,6 +2036,69 @@ select:focus, input:focus {
     .stats-list-row { grid-template-columns: 1fr repeat(4, 60px); padding-left: 0.8rem; padding-right: 0.8rem; }
 }
 
+/* Mesečni calendar grid */
+.mes-cal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin: 0.8rem 0 1rem;
+}
+.mes-cal-dow {
+    text-align: center;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgba(176,164,148,0.35);
+    padding: 0.25rem 0 0.4rem;
+}
+.mes-cal-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+    padding: 0.45rem 0.15rem 0.35rem;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+    min-height: 48px;
+}
+.mes-cal-cell--other { pointer-events: none; }
+.mes-cal-cell--empty { opacity: 0.28; pointer-events: none; }
+.mes-cal-cell--has {
+    border-color: rgba(255,255,255,0.06);
+    cursor: pointer;
+}
+.mes-cal-cell--has:hover { border-color: rgba(212,168,40,0.25); background: rgba(212,168,40,0.04); }
+.mes-cal-cell--today { border-color: rgba(212,168,40,0.2); background: rgba(212,168,40,0.03); }
+.mes-cal-cell--active {
+    border-color: rgba(212,168,40,0.5) !important;
+    background: rgba(212,168,40,0.1) !important;
+}
+.mes-cal-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1;
+    color: rgba(255,255,255,0.45);
+}
+.mes-cal-cell--has    .mes-cal-num { color: rgba(255,255,255,0.72); }
+.mes-cal-cell--today  .mes-cal-num { color: rgba(255,255,255,0.88); }
+.mes-cal-cell--active .mes-cal-num { color: rgba(212,168,40,0.95); }
+.mes-cal-cnt {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: rgba(212,168,40,0.75);
+    background: rgba(212,168,40,0.1);
+    border-radius: 5px;
+    padding: 0.02rem 0.28rem;
+    line-height: 1.4;
+}
+.mes-cal-cell--active .mes-cal-cnt { background: rgba(212,168,40,0.2); }
+
 /* Date separator for grouped tables */
 .tbl-date-sep {
     display: flex;
