@@ -281,9 +281,8 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
             </div>
             <?php else: ?>
             <div class="today-cards">
-                <?php foreach ($cardRows as $row): ?>
-                <?php include_once ''; // reuse card block below — inlined directly ?>
-                <?php
+                <?php foreach ($cardRows as $row):
+
                     $tv   = sprintf('%02d:%02d', (int)($row['Vreme']/2), ($row['Vreme']%2)*30);
                     $done = $row['Uradjeno'] == 1;
                     $canc = $row['Otkazano'] == 1;
