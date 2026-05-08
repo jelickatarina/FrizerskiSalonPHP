@@ -19,7 +19,7 @@ $sel = $conn->prepare(
      LEFT JOIN usluga   u ON u.UslugaId   = t.UslugaId
      LEFT JOIN korisnik k ON k.KorisnikId = t.KorisnikId
      LEFT JOIN korisnik f ON f.KorisnikId = t.KorisnikFrizerId
-     WHERE t.TerminId=? AND t.Otkazano=0 AND t.Uradjeno=0"
+     WHERE t.TerminId=? AND (t.Otkazano IS NULL OR t.Otkazano=0) AND t.Uradjeno=0"
 );
 $sel->bind_param('i', $terminId);
 $sel->execute();
