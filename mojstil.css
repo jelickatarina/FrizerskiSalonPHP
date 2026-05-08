@@ -1065,6 +1065,10 @@ body.kontakt-page {
     border-bottom-color: rgba(212,168,40,0.55);
 }
 
+.prof-tab-btn--danger { color: rgba(212,112,112,0.45); }
+.prof-tab-btn--danger:hover { color: rgba(212,112,112,0.75); }
+.prof-tab-btn--danger.active { color: #d47070; border-bottom-color: rgba(180,80,80,0.45); }
+
 .prof-tab-panel {
     display: flex;
     flex-direction: column;

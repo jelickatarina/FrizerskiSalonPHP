@@ -66,6 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $upd->close();
             $success_loz = true;
         }
+    } elseif ($tip === 'deaktivacija' && (int)$_SESSION['nivo'] === 1) {
+        $upd = $conn->prepare("UPDATE korisnik SET Nivo=0 WHERE KorisnikId=? AND Nivo=1");
+        $upd->bind_param('s', $korisnik);
+        $upd->execute();
+        $upd->close();
+        session_destroy();
+        header('Location: prijava.php?deaktiviran=1');
+        exit;
     }
 }
 
@@ -116,6 +124,9 @@ $nivoLabel = ['0' => 'Neaktivan', '1' => 'Klijent', '2' => 'Frizer', '9' => 'Adm
       <div class="prof-tab-nav">
         <button class="prof-tab-btn <?= $activeTab === 'podaci'  ? 'active' : '' ?>" data-tab="podaci">Moji podaci</button>
         <button class="prof-tab-btn <?= $activeTab === 'lozinka' ? 'active' : '' ?>" data-tab="lozinka">Promena lozinke</button>
+        <?php if ($nivo === 1): ?>
+        <button class="prof-tab-btn prof-tab-btn--danger <?= $activeTab === 'deaktivacija' ? 'active' : '' ?>" data-tab="deaktivacija">Deaktivacija naloga</button>
+        <?php endif; ?>
       </div>
 
       <!-- Tab: Moji podaci -->
@@ -215,6 +226,26 @@ $nivoLabel = ['0' => 'Neaktivan', '1' => 'Klijent', '2' => 'Frizer', '9' => 'Adm
           <button type="submit" class="auth-btn">Promeni lozinku</button>
         </form>
       </div>
+
+      <?php if ($nivo === 1): ?>
+      <!-- Tab: Deaktivacija naloga -->
+      <div id="tab-deaktivacija" class="prof-tab-panel" <?= $activeTab !== 'deaktivacija' ? 'hidden' : '' ?>>
+        <div class="ct-alert ct-alert--warn" style="margin-bottom:1.2rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+          Deaktivacijom naloga izgubićete pristup svim funkcijama salona. Nalog možete aktivirati ponovnim kontaktiranjem salona.
+        </div>
+        <form method="post" class="auth-form" id="form-deaktivacija">
+          <input type="hidden" name="tip" value="deaktivacija">
+          <div style="margin-bottom:1.2rem;">
+            <label class="zk-frizer-row" style="cursor:pointer;gap:.8rem;">
+              <input type="checkbox" id="potvrda-deak" name="potvrda" value="1" style="width:16px;height:16px;accent-color:#c4a76c;flex-shrink:0;" required>
+              <span style="font-family:'Jost',sans-serif;font-size:.85rem;color:rgba(255,255,255,.65);">Razumem da će moj nalog biti deaktiviran i da neću moći da se prijavim dok me salon ponovo ne aktivira.</span>
+            </label>
+          </div>
+          <button type="submit" class="auth-btn auth-btn--danger">Deaktiviraj nalog</button>
+        </form>
+      </div>
+      <?php endif; ?>
 
     </div><!-- .prof-tabs -->
   </div>

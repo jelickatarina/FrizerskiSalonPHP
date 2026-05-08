@@ -3,13 +3,13 @@ require_once 'sesija.php';
 requireNivo('2');
 include 'konekcija.php';
 
-$nivoLabel = ['0'=>'Blokiran','1'=>'Klijent','2'=>'Frizer','9'=>'Admin'];
+$nivoLabel = ['0'=>'Neaktivan','1'=>'Klijent','2'=>'Frizer','9'=>'Admin'];
 $nivoClass  = ['0'=>'badge--blocked','1'=>'badge--client','2'=>'badge--staff','9'=>'badge--admin'];
 
 $q    = trim($_GET['q'] ?? '');
 $uloga = $_GET['uloga'] ?? '';
-$wh = "where 1=1";
-if(in_array($uloga, ['0','1','2','9'])) $wh .= " and Nivo=".(int)$uloga;
+$wh = "where Nivo>0";
+if(in_array($uloga, ['0','1','2','9'])) $wh = "where Nivo=".(int)$uloga;
 if($q !== '') {
   $esc = $conn->real_escape_string($q);
   $wh .= " and (KorisnikId like '%$esc%' or Ime like '%$esc%'
@@ -58,6 +58,7 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($uloga !== '' ? '&uloga='.urle
                     <option value="1" <?= $uloga==='1'?'selected':'' ?>>Klijent</option>
                     <option value="2" <?= $uloga==='2'?'selected':'' ?>>Frizer</option>
                     <option value="9" <?= $uloga==='9'?'selected':'' ?>>Admin</option>
+                    <option value="0" <?= $uloga==='0'?'selected':'' ?>>Neaktivni</option>
                 </select>
                 <button class="search-btn" type="submit">Traži</button>
             </form>
