@@ -184,7 +184,11 @@ if ($nivo === 9) {
         <?php if ($view === 'danas'): ?>
         <div class="today-section">
             <div class="today-header">
-                <div class="today-title"><?= date('d.m.Y.') ?> — <?= date('l') ?></div>
+                <?php
+                $daniSr = ['Nedjelja','Ponedjeljak','Utorak','Srijeda','Četvrtak','Petak','Subota'];
+                $danSr  = $daniSr[(int)date('w')];
+                ?>
+                <div class="today-title"><?= date('d.m.Y.') ?> — <?= $danSr ?></div>
                 <span class="today-count"><?= count($todayRows) ?> termin<?= count($todayRows)===1?'':'a' ?></span>
             </div>
             <?php if (count($todayRows) === 0): ?>

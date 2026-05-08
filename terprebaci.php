@@ -233,9 +233,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </label>
             <?php endif; ?>
 
-            <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;">
+            <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.4rem;">
                 <button type="submit" class="auth-btn" style="flex:1;min-width:160px;">Potvrdi prebacivanje</button>
-                <a href="termini.php" style="font-family:'Jost',sans-serif;font-size:.82rem;color:rgba(255,255,255,.38);text-decoration:none;">Otkaži</a>
+                <a href="termini.php" class="odmor-btn odmor-btn--ghost"
+                   style="display:flex;align-items:center;padding:0.6rem 1.1rem;border-radius:6px;text-decoration:none;">
+                    Otkaži
+                </a>
             </div>
         </form>
         <?php endif; ?>
