@@ -45,7 +45,7 @@ $result = $conn->query("select * from usluga $wh order by UslugaId");
                 <input class="search-input" type="search" name="q" value="<?= htmlspecialchars($q) ?>"
                        placeholder="Pretraži usluge...">
                 <?php if($nivo >= 2): ?>
-                <select class="filter-select" name="aktivan">
+                <select class="filter-select" name="aktivan" id="usl-aktivan">
                     <option value="" <?= $aktivan===''?'selected':'' ?>>Sve usluge</option>
                     <option value="1" <?= $aktivan==='1'?'selected':'' ?>>Aktivne</option>
                     <option value="0" <?= $aktivan==='0'?'selected':'' ?>>Neaktivne</option>
@@ -124,5 +124,20 @@ while($data=$result->fetch_assoc()) {
     </div>
 </div>
 <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    const form   = document.querySelector('.search-form');
+    const aktivan = document.getElementById('usl-aktivan');
+    const q       = form ? form.querySelector('input[name="q"]') : null;
+    if (aktivan) aktivan.addEventListener('change', () => form.submit());
+    if (q) {
+        let timer;
+        q.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => form.submit(), 400);
+        });
+    }
+})();
+</script>
 </body>
 </html>
