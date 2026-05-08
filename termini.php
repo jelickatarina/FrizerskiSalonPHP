@@ -11,9 +11,10 @@ $view    = $_GET['view'] ?? 'danas';
 $q       = trim($_GET['q'] ?? '');
 $frizerF = ($nivo === 9) ? trim($_GET['frizer'] ?? '') : '';
 
-$validViews = ['danas', 'nedeljni', 'mesecni', 'svi', 'zahtevi'];
+$validViews = ['danas', 'nedeljni', 'mesecni', 'svi', 'zahtevi', 'izvestaj'];
 if (!in_array($view, $validViews)) $view = 'danas';
-if ($view === 'zahtevi' && $nivo < 2) $view = 'danas';
+if ($view === 'zahtevi'  && $nivo < 2) $view = 'danas';
+if ($view === 'izvestaj' && $nivo < 9) $view = 'danas';
 
 // Week bounds (Mon–Sun)
 $dow       = (int)date('N');
@@ -91,13 +92,14 @@ $perPage  = 20;
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $offset   = ($page-1)*$perPage;
 $total    = 0; $pages = 0;
-$cardRows     = [];
-$result       = null;
-$statsRows    = [];
-$weekCounts   = [];
-$mesDayCounts = []; // mesecni: per-day counts for calendar grid
-$sviMonthCounts = []; // svi: year overview counts per month
-$sviRows        = []; // svi: month drill grouped by date
+$cardRows       = [];
+$result         = null;
+$statsRows      = [];  // mesecni/izvestaj monthly stats
+$weekStatsRows  = [];  // izvestaj weekly stats
+$weekCounts     = [];
+$mesDayCounts   = [];  // mesecni: per-day counts for calendar grid
+$sviMonthCounts = [];  // svi: year overview counts per month
+$sviRows        = [];  // svi: month drill grouped by date
 
 $cols = "SELECT t.*, k.Ime, k.Prezime, k.Email AS KEmail, k.Telefon AS KTel FROM termin t $joinK";
 
@@ -130,11 +132,6 @@ if ($view === 'danas') {
     $res = $conn->query("$cols $wh ORDER BY t.Vreme");
     while ($row = $res->fetch_assoc()) $cardRows[] = $row;
     $total = count($cardRows);
-    // Weekly stats
-    if ($nivo === 9) {
-        $sQ = $conn->query(sprintf($statsSQL, "t.Datum BETWEEN '$weekStart' AND '$weekEnd'", "uradjeno DESC"));
-        while ($s = $sQ->fetch_assoc()) $statsRows[] = $s;
-    }
 
 } elseif ($view === 'zahtevi') {
     $wh = "WHERE $baseWh AND t.Potvrdjeno=0 AND (t.Otkazano IS NULL OR t.Otkazano=0)";
@@ -155,11 +152,14 @@ if ($view === 'danas') {
     if ($q !== '') $wh_day .= searchClause($conn, $q, false);
     $res = $conn->query("$cols $wh_day ORDER BY t.Vreme ASC");
     while ($row = $res->fetch_assoc()) $cardRows[] = $row;
-    // Monthly stats (admin)
-    if ($nivo === 9) {
-        $sQ = $conn->query(sprintf($statsSQL, "t.Datum BETWEEN '$monthStart' AND '$monthEnd'", "prihod DESC"));
-        while ($s = $sQ->fetch_assoc()) $statsRows[] = $s;
-    }
+
+} elseif ($view === 'izvestaj') {
+    // Weekly stats (current week)
+    $sQ = $conn->query(sprintf($statsSQL, "t.Datum BETWEEN '$weekStart' AND '$weekEnd'", "prihod DESC"));
+    while ($s = $sQ->fetch_assoc()) $weekStatsRows[] = $s;
+    // Monthly stats for selected month
+    $sQ2 = $conn->query(sprintf($statsSQL, "t.Datum BETWEEN '$monthStart' AND '$monthEnd'", "prihod DESC"));
+    while ($s = $sQ2->fetch_assoc()) $statsRows[] = $s;
 
 } else { // svi
     if ($selMonSvi !== '') {
@@ -207,6 +207,7 @@ $fIncl = $fHA.$fHU.$fHO;
 $viewExtra = '';
 if ($view === 'nedeljni') $viewExtra = '&dan='.urlencode($selDay);
 if ($view === 'mesecni')  $viewExtra = '&mesec='.urlencode($selMesec).'&dan_mes='.urlencode($selDayMes);
+if ($view === 'izvestaj') $viewExtra = '&mesec='.urlencode($selMesec);
 if ($view === 'svi')      $viewExtra = '&godina='.$selGodina.($selMonSvi!==''?'&mesec_svi='.urlencode($selMonSvi):'');
 
 // Danas filter toggle links (exclusive)
@@ -327,46 +328,28 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
             <?php if ($nivo >= 2): ?>
             <a class="ter-tab <?= $view==='zahtevi'?'ter-tab--active':'' ?>"  href="termini.php?view=zahtevi<?= $fFr.$qParam ?>">Zahtevi</a>
             <?php endif; ?>
+            <?php if ($nivo === 9): ?>
+            <a class="ter-tab <?= $view==='izvestaj'?'ter-tab--active':'' ?>" href="termini.php?view=izvestaj<?= $fFr.$qParam ?>">Izveštaj</a>
+            <?php endif; ?>
         </div>
-
-        <!-- FILTER CHIPS -->
-        <?php if ($view === 'danas'): ?>
-        <div class="ter-filter-row">
-            <span class="ter-filter-label">Prikaži:</span>
-            <a class="ter-filter-chip <?= (!$showU&&!$showO)?'ter-filter-chip--on':'' ?>"
-               href="<?= $baseFilter_danas ?>">Aktivni</a>
-            <a class="ter-filter-chip <?= ($showU&&!$showO)?'ter-filter-chip--on':'' ?>" href="<?= $uToggle ?>">
-                <?php if ($showU && !$showO): ?><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><?php endif; ?>
-                Urađeni
-            </a>
-            <a class="ter-filter-chip <?= (!$showU&&$showO)?'ter-filter-chip--on':'' ?>" href="<?= $oToggle ?>">
-                <?php if (!$showU && $showO): ?><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><?php endif; ?>
-                Otkazani
-            </a>
-        </div>
-        <?php elseif ($view === 'nedeljni' || $view === 'mesecni'): ?>
-        <div class="ter-filter-row">
-            <span class="ter-filter-label">Prikaži:</span>
-            <a class="ter-filter-chip <?= !$hideAkt?'ter-filter-chip--on':'ter-filter-chip--off' ?>" href="<?= $aktToggle ?>">Aktivni</a>
-            <a class="ter-filter-chip <?= !$hideUrad?'ter-filter-chip--on':'ter-filter-chip--off' ?>" href="<?= $uradToggle ?>">Urađeni</a>
-            <a class="ter-filter-chip <?= !$hideOtk?'ter-filter-chip--on':'ter-filter-chip--off' ?>" href="<?= $otkToggle ?>">Otkazani</a>
-        </div>
-        <?php endif; ?>
-
-        <?php if ($q !== '' && $view !== 'svi'): ?>
-        <p class="search-info">
-            <?= $total ?> rezultata za „<?= htmlspecialchars($q) ?>"
-            — <a href="termini.php?view=<?= $view ?><?= $fFr.$viewExtra ?>">Poništi</a>
-        </p>
-        <?php endif; ?>
 
         <!-- ── DANAS ──────────────────────────────────────────── -->
         <?php if ($view === 'danas'): ?>
+        <?php if ($q !== ''): ?>
+        <p class="search-info"><?= $total ?> rezultata za „<?= htmlspecialchars($q) ?>"
+            — <a href="termini.php?view=danas<?= $fFr ?>">Poništi</a></p>
+        <?php endif; ?>
         <div class="today-section">
             <div class="today-header">
                 <?php $danSr = $daniSr[(string)$dow]; ?>
                 <div class="today-title"><?= date('d.m.Y.') ?> — <?= $danSr ?></div>
                 <span class="today-count"><?= count($cardRows) ?> termin<?= count($cardRows)===1?'':'a' ?></span>
+            </div>
+            <div class="ter-filter-row" style="padding-top:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:0.6rem;">
+                <span class="ter-filter-label">Prikaži:</span>
+                <a class="ter-filter-chip <?= (!$showU&&!$showO)?'ter-filter-chip--on':'' ?>" href="<?= $baseFilter_danas ?>">Aktivni</a>
+                <a class="ter-filter-chip <?= ($showU&&!$showO)?'ter-filter-chip--on':'' ?>" href="<?= $uToggle ?>">Urađeni</a>
+                <a class="ter-filter-chip <?= (!$showU&&$showO)?'ter-filter-chip--on':'' ?>" href="<?= $oToggle ?>">Otkazani</a>
             </div>
             <?php if (!$cardRows): ?>
             <div class="ter-empty">
@@ -419,29 +402,6 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
         <!-- ── NEDELJNI ───────────────────────────────────────── -->
         <?php elseif ($view === 'nedeljni'): ?>
 
-        <?php if ($nivo === 9 && $statsRows): ?>
-        <div class="stats-panel">
-            <div class="stats-panel-header">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Nedelja <?= date('d.m.', strtotime($weekStart)) ?> — <?= date('d.m.Y.', strtotime($weekEnd)) ?>
-            </div>
-            <div class="stats-list">
-                <div class="stats-list-hdr">
-                    <span>Frizer</span><span>Zakazano</span><span>Urađeno</span><span>Otkazano</span><span>Prihod</span>
-                </div>
-                <?php foreach ($statsRows as $s): ?>
-                <div class="stats-list-row">
-                    <span class="stats-list-name"><?= htmlspecialchars($s['Ime'].' '.$s['Prezime']) ?></span>
-                    <span class="stats-list-val"><?= (int)$s['zakazano'] ?></span>
-                    <span class="stats-list-val stats-list-val--done"><?= (int)$s['uradjeno'] ?></span>
-                    <span class="stats-list-val stats-list-val--cancel"><?= (int)$s['otkazano'] ?></span>
-                    <span class="stats-list-val stats-list-val--rev"><?= number_format((float)$s['prihod'],0,'.','.') ?> <small>RSD</small></span>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <?php endif; ?>
-
         <!-- Day picker -->
         <div class="ter-week-days">
         <?php
@@ -461,8 +421,15 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
         <?php endfor; ?>
         </div>
 
+        <div class="ter-filter-row" style="padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:0.6rem;">
+            <span class="ter-filter-label">Prikaži:</span>
+            <a class="ter-filter-chip <?= !$hideAkt?'ter-filter-chip--on':'ter-filter-chip--off' ?>"  href="<?= $aktToggle ?>">Aktivni</a>
+            <a class="ter-filter-chip <?= !$hideUrad?'ter-filter-chip--on':'ter-filter-chip--off' ?>" href="<?= $uradToggle ?>">Urađeni</a>
+            <a class="ter-filter-chip <?= !$hideOtk?'ter-filter-chip--on':'ter-filter-chip--off' ?>"  href="<?= $otkToggle ?>">Otkazani</a>
+        </div>
+
         <!-- Selected day appointments -->
-        <div class="today-section" style="margin-top:0.8rem;">
+        <div class="today-section" style="margin-top:0.4rem;">
             <div class="today-header">
                 <?php $selDayObj = new DateTime($selDay); $selDayNum = $selDayObj->format('N'); ?>
                 <div class="today-title"><?= $daniSr[$selDayNum] ?>, <?= $selDayObj->format('d.m.Y.') ?></div>
@@ -523,29 +490,6 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
             <span class="ter-month-count"><?= $total ?> termin<?= $total===1?'':'a' ?></span>
         </div>
 
-        <?php if ($nivo === 9 && $statsRows): ?>
-        <div class="stats-panel" style="margin-bottom:1rem;">
-            <div class="stats-panel-header">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Izveštaj — <?= $mesecNaziv ?>
-            </div>
-            <div class="stats-list">
-                <div class="stats-list-hdr">
-                    <span>Frizer</span><span>Zakazano</span><span>Urađeno</span><span>Otkazano</span><span>Prihod</span>
-                </div>
-                <?php foreach ($statsRows as $s): ?>
-                <div class="stats-list-row">
-                    <span class="stats-list-name"><?= htmlspecialchars($s['Ime'].' '.$s['Prezime']) ?></span>
-                    <span class="stats-list-val"><?= (int)$s['zakazano'] ?></span>
-                    <span class="stats-list-val stats-list-val--done"><?= (int)$s['uradjeno'] ?></span>
-                    <span class="stats-list-val stats-list-val--cancel"><?= (int)$s['otkazano'] ?></span>
-                    <span class="stats-list-val stats-list-val--rev"><?= number_format((float)$s['prihod'],0,'.','.') ?> <small>RSD</small></span>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <?php endif; ?>
-
         <!-- Month calendar grid -->
         <div class="mes-cal">
             <?php foreach ($daniKrat as $dow_lbl): ?>
@@ -570,8 +514,15 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
             <?php $dayIter->modify('+1 day'); endwhile; ?>
         </div>
 
+        <div class="ter-filter-row" style="padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:0.6rem;">
+            <span class="ter-filter-label">Prikaži:</span>
+            <a class="ter-filter-chip <?= !$hideAkt?'ter-filter-chip--on':'ter-filter-chip--off' ?>"  href="<?= $aktToggle ?>">Aktivni</a>
+            <a class="ter-filter-chip <?= !$hideUrad?'ter-filter-chip--on':'ter-filter-chip--off' ?>" href="<?= $uradToggle ?>">Urađeni</a>
+            <a class="ter-filter-chip <?= !$hideOtk?'ter-filter-chip--on':'ter-filter-chip--off' ?>"  href="<?= $otkToggle ?>">Otkazani</a>
+        </div>
+
         <!-- Selected day appointments -->
-        <div class="today-section" style="margin-top:0.6rem;">
+        <div class="today-section" style="margin-top:0.4rem;">
             <div class="today-header">
                 <?php $sdObj = new DateTime($selDayMes); $sdDow = (int)$sdObj->format('N'); ?>
                 <div class="today-title"><?= $daniSr[$sdDow] ?>, <?= $sdObj->format('d.m.Y.') ?></div>
@@ -805,6 +756,70 @@ $mesecNaziv = ($meseciSr[$mon] ?? $mon).' '.$yr.'.';
             <?php if ($page<$pages): ?><a class="pg-page" href="?view=<?= $view ?>&page=<?= $page+1 ?><?= $qParam.$fFr ?>">&rarr;</a><?php endif; ?>
         </div>
         <?php endif; ?>
+
+        <!-- ── IZVEŠTAJ ──────────────────────────────────────── -->
+        <?php elseif ($view === 'izvestaj'): ?>
+
+        <!-- Weekly stats -->
+        <div class="stats-panel" style="margin-bottom:1.2rem;">
+            <div class="stats-panel-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Ova nedelja &nbsp;·&nbsp; <?= date('d.m.', strtotime($weekStart)) ?> — <?= date('d.m.Y.', strtotime($weekEnd)) ?>
+            </div>
+            <?php if ($weekStatsRows): ?>
+            <div class="stats-list">
+                <div class="stats-list-hdr">
+                    <span>Frizer</span><span>Zakazano</span><span>Urađeno</span><span>Otkazano</span><span>Prihod</span>
+                </div>
+                <?php foreach ($weekStatsRows as $s): ?>
+                <div class="stats-list-row">
+                    <span class="stats-list-name"><?= htmlspecialchars($s['Ime'].' '.$s['Prezime']) ?></span>
+                    <span class="stats-list-val"><?= (int)$s['zakazano'] ?></span>
+                    <span class="stats-list-val stats-list-val--done"><?= (int)$s['uradjeno'] ?></span>
+                    <span class="stats-list-val stats-list-val--cancel"><?= (int)$s['otkazano'] ?></span>
+                    <span class="stats-list-val stats-list-val--rev"><?= number_format((float)$s['prihod'],0,'.','.') ?> <small>RSD</small></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <div class="ter-empty" style="padding:1.2rem;"><p class="ter-empty-sub">Nema podataka za ovu nedelju.</p></div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Monthly stats with navigation -->
+        <div class="ter-month-nav">
+            <a class="ter-month-nav-btn" href="termini.php?view=izvestaj&mesec=<?= urlencode($prevMesec) ?><?= $fFr ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <span class="ter-month-nav-title"><?= $mesecNaziv ?></span>
+            <a class="ter-month-nav-btn" href="termini.php?view=izvestaj&mesec=<?= urlencode($nextMesec) ?><?= $fFr ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        </div>
+        <div class="stats-panel" style="margin-top:0.6rem;">
+            <div class="stats-panel-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <?= $mesecNaziv ?>
+            </div>
+            <?php if ($statsRows): ?>
+            <div class="stats-list">
+                <div class="stats-list-hdr">
+                    <span>Frizer</span><span>Zakazano</span><span>Urađeno</span><span>Otkazano</span><span>Prihod</span>
+                </div>
+                <?php foreach ($statsRows as $s): ?>
+                <div class="stats-list-row">
+                    <span class="stats-list-name"><?= htmlspecialchars($s['Ime'].' '.$s['Prezime']) ?></span>
+                    <span class="stats-list-val"><?= (int)$s['zakazano'] ?></span>
+                    <span class="stats-list-val stats-list-val--done"><?= (int)$s['uradjeno'] ?></span>
+                    <span class="stats-list-val stats-list-val--cancel"><?= (int)$s['otkazano'] ?></span>
+                    <span class="stats-list-val stats-list-val--rev"><?= number_format((float)$s['prihod'],0,'.','.') ?> <small>RSD</small></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <div class="ter-empty" style="padding:1.2rem;"><p class="ter-empty-sub">Nema podataka za ovaj mesec.</p></div>
+            <?php endif; ?>
+        </div>
 
         <?php endif; ?>
 

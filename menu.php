@@ -31,9 +31,9 @@ $roleLabel = $nivoLabel[$nivo] ?? '';
     <ul class="kn-links">
       <li><a href="index.php">Početna</a></li>
       <li><a href="kontakt.php">Kontakt</a></li>
+      <li><a href="usluge.php">Usluge</a></li>
       <?php if ($nivo >= '1'): ?>
       <li><a href="termini.php">Termini</a></li>
-      <li><a href="usluge.php">Usluge</a></li>
       <?php endif; ?>
       <?php if ($nivo >= '2'): ?>
       <li><a href="korisnici.php">Korisnici</a></li>
