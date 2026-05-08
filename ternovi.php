@@ -564,6 +564,7 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
   const form = document.getElementById('form-step2');
   if (form) {
     form.addEventListener('submit', e => {
+      if (e.submitter?.name === 'promeni') return;
       if (!selFrizer.value || !selVreme.value) {
         e.preventDefault();
         document.getElementById('slot-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -603,6 +604,15 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
 
   dateEl.addEventListener('change', refreshTimes);
   refreshTimes();
+})();
+
+// ── Date picker — force open on click (responsive/mobile) ────────
+(function () {
+  const d = document.getElementById('zk-datum');
+  if (!d) return;
+  d.addEventListener('click', function () {
+    try { this.showPicker(); } catch (e) {}
+  });
 })();
 
 // ── Combo boxes ──────────────────────────────────────────────────

@@ -1822,8 +1822,13 @@ select:focus, input:focus {
 /* ── Date picker icon — vidljivo na tamnoj pozadini ── */
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
-    opacity: 0.45;
+    opacity: 0.55;
     cursor: pointer;
+    width: 18px;
+    height: 18px;
+    padding: 4px;
+    margin-right: 2px;
+    border-radius: 3px;
 }
 
 .today-cards {

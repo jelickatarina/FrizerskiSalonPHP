@@ -180,7 +180,7 @@ if ($nivo === 9) {
                     <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                     <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" stroke-width="2.2"/>
                 </svg>
-                <h3 class="ter-empty-title"><?= $q !== '' ? 'Nema rezultata' : 'Slobodan dan' ?></h3>
+                <h3 class="ter-empty-title"><?= $q !== '' ? 'Nema rezultata' : 'Nema termina' ?></h3>
                 <p class="ter-empty-sub"><?= $q !== '' ? 'Nema termina za ovu pretragu.' : 'Nema zakazanih termina za danas.' ?></p>
                 <?php if ($q === '' && $nivo === 1): ?>
                 <a href="ternovi.php" class="ct-btn" style="margin-top:0.6rem;">+ Zakaži termin</a>
