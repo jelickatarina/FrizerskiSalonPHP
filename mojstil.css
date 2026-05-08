@@ -1787,6 +1787,45 @@ select:focus, input:focus {
     font-style: italic;
     margin: 0;
 }
+
+/* ── Empty state (termini) ───────────────────── */
+.ter-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 3rem 1rem 2.5rem;
+    text-align: center;
+}
+.ter-empty-icon {
+    width: 52px;
+    height: 52px;
+    color: rgba(255,255,255,0.08);
+}
+.ter-empty-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.22);
+    margin: 0;
+    letter-spacing: 0.04em;
+}
+.ter-empty-sub {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.18);
+    margin: 0;
+}
+.tbl-empty:has(.ter-empty) { padding: 0 !important; }
+
+/* ── Date picker icon — vidljivo na tamnoj pozadini ── */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.45;
+    cursor: pointer;
+}
+
 .today-cards {
     display: flex;
     flex-direction: column;

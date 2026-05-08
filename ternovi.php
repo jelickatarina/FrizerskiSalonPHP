@@ -137,7 +137,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $vremeSlot = $h * 2 + (int)($m / 30);
     }
 
-    if ($t1_post === 1) {
+    if (!empty($_POST['promeni'])) {
+        $t1 = 1; // Vrati na korak 1 sa popunjenim vrednostima, bez obrade
+    } elseif ($t1_post === 1) {
         // ── Step 1 ──────────────────────────────────────────────────
         $d1   = new DateTime(); $d1->setTime(0,0,0,0);
         $d2   = $datum ? new DateTime($datum) : null;
@@ -505,10 +507,10 @@ for ($s = 18; $s <= 34; $s++) $timeSlots[] = sprintf('%02d:%02d', (int)($s/2), (
         <button type="submit" class="auth-btn" style="flex:1;" id="btn-submit">
           <?= $nivo === 1 ? 'Pošalji zahtev' : 'Potvrdi zakazivanje' ?>
         </button>
-        <a href="ternovi.php" class="odmor-btn odmor-btn--ghost"
-           style="display:flex;align-items:center;padding:0.6rem 1.1rem;border-radius:6px;">
+        <button type="submit" name="promeni" value="1" class="odmor-btn odmor-btn--ghost"
+                style="display:flex;align-items:center;padding:0.6rem 1.1rem;border-radius:6px;cursor:pointer;border:none;">
           ← Promeni
-        </a>
+        </button>
       </div>
     </form>
     <?php endif; ?>
