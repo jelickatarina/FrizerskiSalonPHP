@@ -2955,20 +2955,44 @@ input[type="time"] {
 .ct-alert--warn svg { flex-shrink: 0; margin-top: 0.1rem; }
 
 /* booking summary (step 2 header) */
-.zk-booking-summary {
-    background: rgba(212,168,40,0.06);
-    border: 1px solid rgba(212,168,40,0.18);
+.zk-summary-card {
+    background: rgba(212,168,40,0.05);
+    border: 1px solid rgba(212,168,40,0.15);
+    border-left: 3px solid rgba(212,168,40,0.38);
     border-radius: 8px;
-    padding: 0.8rem 1rem;
-    margin-bottom: 1.4rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1.2rem;
-    font-family: 'Jost', sans-serif;
-    font-size: 0.8rem;
-    color: #c8b87a;
+    padding: 1rem 1.2rem 1.1rem;
+    margin-bottom: 1.5rem;
 }
-.zk-booking-summary strong { color: #d4a828; font-weight: 500; }
+.zk-summary-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(212,168,40,0.55);
+    margin: 0 0 0.75rem;
+}
+.zk-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.7rem 1.2rem;
+}
+.zk-summary-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.zk-summary-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+.zk-summary-val {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.85);
+}
 
 /* frizer selection list */
 .zk-frizer-list {

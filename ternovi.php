@@ -411,15 +411,30 @@ for ($s = 18; $s <= 34; $s++) $timeSlots[] = sprintf('%02d:%02d', (int)($s/2), (
 
     <?php else: ?>
     <!-- ── STEP 2 ── -->
-    <div class="zk-booking-summary">
-      <span><strong>Usluga:</strong> <?= htmlspecialchars($usluga) ?></span>
-      <span><strong>Datum:</strong> <?= date('d.m.Y.', strtotime($datum)) ?></span>
-      <?php if ($vreme && $vremeMode): ?>
-      <span><strong>Vreme:</strong> <?= htmlspecialchars($vreme) ?></span>
-      <?php endif; ?>
-      <?php if ($korisnikNaziv): ?>
-      <span><strong>Klijent:</strong> <?= htmlspecialchars($korisnikNaziv) ?></span>
-      <?php endif; ?>
+    <div class="zk-summary-card">
+      <p class="zk-summary-eyebrow">Izabrani termin</p>
+      <div class="zk-summary-grid">
+        <div class="zk-summary-field">
+          <span class="zk-summary-label">Usluga</span>
+          <span class="zk-summary-val"><?= htmlspecialchars($usluga) ?></span>
+        </div>
+        <div class="zk-summary-field">
+          <span class="zk-summary-label">Datum</span>
+          <span class="zk-summary-val"><?= date('d.m.Y.', strtotime($datum)) ?></span>
+        </div>
+        <?php if ($vreme && $vremeMode): ?>
+        <div class="zk-summary-field">
+          <span class="zk-summary-label">Vreme</span>
+          <span class="zk-summary-val"><?= htmlspecialchars($vreme) ?></span>
+        </div>
+        <?php endif; ?>
+        <?php if ($korisnikNaziv): ?>
+        <div class="zk-summary-field">
+          <span class="zk-summary-label">Klijent</span>
+          <span class="zk-summary-val"><?= htmlspecialchars($korisnikNaziv) ?></span>
+        </div>
+        <?php endif; ?>
+      </div>
     </div>
 
     <form method="post" class="auth-form" id="form-step2">
