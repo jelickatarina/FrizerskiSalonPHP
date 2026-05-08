@@ -61,7 +61,6 @@ $qParam = ($q !== '' ? '&q='.urlencode($q) : '').($uloga !== '' ? '&uloga='.urle
                     <option value="0" <?= $uloga==='0'?'selected':'' ?>>Neaktivni</option>
                 </select>
                 <button class="search-btn" type="submit">Traži</button>
-                <button class="search-btn" type="button" id="kor-clear" style="<?= ($q===''&&$uloga==='')?'display:none':'' ?>">✕</button>
             </form>
             <?php if($_SESSION['nivo']=='9') { ?>
             <a class="ct-btn" href="kornovi.php">+ Novi korisnik</a>
@@ -130,8 +129,6 @@ while($data=$result->fetch_assoc()) {
     const form   = document.querySelector('.search-form');
     const q      = form.querySelector('input[name="q"]');
     const uloga  = document.getElementById('kor-uloga');
-    const clear  = document.getElementById('kor-clear');
-
     uloga.addEventListener('change', () => form.submit());
 
     let timer;
@@ -139,14 +136,6 @@ while($data=$result->fetch_assoc()) {
         clearTimeout(timer);
         timer = setTimeout(() => form.submit(), 400);
     });
-
-    if (clear) {
-        clear.addEventListener('click', () => {
-            q.value = '';
-            uloga.value = '';
-            form.submit();
-        });
-    }
 })();
 </script>
 </body>
