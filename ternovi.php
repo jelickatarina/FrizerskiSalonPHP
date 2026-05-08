@@ -507,7 +507,7 @@ for ($s = 18; $s <= 34; $s++) $timeSlots[] = sprintf('%02d:%02d', (int)($s/2), (
         <button type="submit" class="auth-btn" style="flex:1;" id="btn-submit">
           <?= $nivo === 1 ? 'Pošalji zahtev' : 'Potvrdi zakazivanje' ?>
         </button>
-        <button type="submit" name="promeni" value="1" class="odmor-btn odmor-btn--ghost"
+        <button type="submit" name="promeni" value="1" formnovalidate class="odmor-btn odmor-btn--ghost"
                 style="display:flex;align-items:center;padding:0.6rem 1.1rem;border-radius:6px;cursor:pointer;border:none;">
           ← Promeni
         </button>
