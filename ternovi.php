@@ -192,8 +192,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ── Step 2: book ─────────────────────────────────────────────
         $frizer = trim($_POST['frizer'] ?? '');
 
-        if ($frizer === '')     $poruka = "Izaberite frizera.";
-        elseif ($vreme === '')  $poruka = "Izaberite termin.";
+        if ($frizer === '')                               $poruka = "Izaberite frizera.";
+        elseif ($vreme === '')                            $poruka = "Izaberite termin.";
+        elseif (date('w', strtotime($datum)) == 0)        $poruka = "Ne radimo nedeljom.";
         else {
             $vfr = $conn->prepare("SELECT KorisnikId FROM korisnik WHERE KorisnikId=? AND Nivo=2");
             $vfr->bind_param('s', $frizer);
@@ -617,7 +618,19 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
     if (!timeEl.value) timeEl.selectedIndex = 0;
   }
 
-  dateEl.addEventListener('change', refreshTimes);
+  dateEl.addEventListener('change', function () {
+    if (this.value) {
+      const day = new Date(this.value + 'T12:00:00').getDay();
+      if (day === 0) {
+        this.setCustomValidity('Ne radimo nedeljom. Izaberite drugi datum.');
+        this.reportValidity();
+        this.value = '';
+      } else {
+        this.setCustomValidity('');
+      }
+    }
+    refreshTimes();
+  });
   refreshTimes();
 })();
 

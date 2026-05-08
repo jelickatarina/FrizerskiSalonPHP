@@ -207,6 +207,9 @@ if (!$tokenErr && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $newDatum) || $newDatum < date('Y-m-d')) {
             $poruka = 'Izaberite važeći datum (danas ili u budućnosti).';
             $view = 'datum';
+        } elseif (date('w', strtotime($newDatum)) == 0) {
+            $poruka = 'Ne radimo nedeljom. Izaberite drugi datum.';
+            $view = 'datum';
         } else {
             $slotovi = _frizeriSaSlotovima($conn, $newDatum, $ukupno);
             if (empty($slotovi)) {
@@ -227,6 +230,8 @@ if (!$tokenErr && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $newDatum) || $newDatum < date('Y-m-d')) {
             $poruka = 'Nevažeći datum. Pokušajte ponovo.'; $valid = false;
+        } elseif (date('w', strtotime($newDatum)) == 0) {
+            $poruka = 'Ne radimo nedeljom. Pokušajte ponovo.'; $valid = false;
         } elseif (!preg_match('/^\d{2}:\d{2}$/', $newVremeStr)) {
             $poruka = 'Nevažeće vreme. Pokušajte ponovo.'; $valid = false;
         }
