@@ -1754,8 +1754,17 @@ select:focus, input:focus {
 .ter-filter-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
     padding: 0.6rem 0 0.2rem;
+    flex-wrap: wrap;
+}
+.ter-filter-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(176,164,148,0.4);
+    margin-right: 0.2rem;
 }
 .ter-filter-chip {
     display: inline-flex;
@@ -1777,6 +1786,110 @@ select:focus, input:focus {
     color: rgba(212,168,40,0.9);
     border-color: rgba(212,168,40,0.35);
     background: rgba(212,168,40,0.07);
+}
+
+/* Day picker (nedeljni) */
+.ter-week-days {
+    display: flex;
+    gap: 0.4rem;
+    margin: 1rem 0 0.2rem;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+}
+.ter-week-days::-webkit-scrollbar { display: none; }
+.ter-week-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.55rem 0.3rem 0.4rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.07);
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    min-width: 44px;
+    cursor: pointer;
+}
+.ter-week-day:hover { border-color: rgba(212,168,40,0.2); }
+.ter-week-day--today { border-color: rgba(212,168,40,0.18); background: rgba(212,168,40,0.04); }
+.ter-week-day--active {
+    background: rgba(212,168,40,0.1);
+    border-color: rgba(212,168,40,0.45);
+}
+.ter-week-day-name {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(176,164,148,0.5);
+}
+.ter-week-day--active .ter-week-day-name,
+.ter-week-day--today  .ter-week-day-name { color: rgba(212,168,40,0.7); }
+.ter-week-day-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1;
+    color: rgba(255,255,255,0.5);
+}
+.ter-week-day--today  .ter-week-day-num { color: rgba(255,255,255,0.85); }
+.ter-week-day--active .ter-week-day-num { color: rgba(212,168,40,0.95); }
+.ter-week-day-cnt {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: rgba(212,168,40,0.75);
+    background: rgba(212,168,40,0.1);
+    border-radius: 8px;
+    padding: 0.05rem 0.35rem;
+    line-height: 1.4;
+    min-width: 18px;
+    text-align: center;
+}
+.ter-week-day-cnt--empty {
+    background: transparent;
+    color: rgba(176,164,148,0.25);
+    font-size: 0.8rem;
+}
+
+/* Month navigation (mesecni) */
+.ter-month-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 0 0.6rem;
+}
+.ter-month-nav-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.09);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(176,164,148,0.55);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.ter-month-nav-btn:hover {
+    border-color: rgba(212,168,40,0.35);
+    color: #d4a828;
+    background: rgba(212,168,40,0.06);
+}
+.ter-month-nav-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+}
+.ter-month-count {
+    margin-left: auto;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    color: rgba(176,164,148,0.45);
 }
 
 /* Status chips inside cards */
